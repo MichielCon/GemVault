@@ -24,8 +24,8 @@ public static class DependencyInjection
         services.AddScoped<IApplicationDbContext>(sp =>
             sp.GetRequiredService<ApplicationDbContext>());
 
-        // ASP.NET Identity
-        services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(opts =>
+        // ASP.NET Identity — use AddIdentityCore to avoid overriding JWT as the default auth scheme
+        services.AddIdentityCore<ApplicationUser>(opts =>
         {
             opts.Password.RequireDigit = true;
             opts.Password.RequiredLength = 8;
@@ -33,6 +33,7 @@ public static class DependencyInjection
             opts.Password.RequireNonAlphanumeric = false;
             opts.User.RequireUniqueEmail = true;
         })
+        .AddRoles<IdentityRole<Guid>>()
         .AddEntityFrameworkStores<ApplicationDbContext>()
         .AddDefaultTokenProviders();
 

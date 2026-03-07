@@ -4,8 +4,9 @@ using GemVault.Application;
 using GemVault.Application.Interfaces;
 using GemVault.Infrastructure;
 using GemVault.Infrastructure.Identity;
+using GemVault.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Options;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using System.Text;
@@ -53,6 +54,13 @@ builder.Services.AddAuthorization();
 builder.Services.AddHealthChecks();
 
 var app = builder.Build();
+
+// Auto-apply pending migrations on startup
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await db.Database.MigrateAsync();
+}
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
