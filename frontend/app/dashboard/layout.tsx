@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { logout } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Gem, Package, MapPin, LogOut } from "lucide-react";
+import { Gem, Package, MapPin, LogOut, Building2, ShoppingCart, TrendingUp, LayoutDashboard } from "lucide-react";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -13,6 +13,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
 
         <nav className="flex flex-1 flex-col gap-1">
+          <NavLink href="/dashboard" icon={<LayoutDashboard size={16} />}>
+            Dashboard
+          </NavLink>
           <NavLink href="/dashboard/gems" icon={<Gem size={16} />}>
             Gems
           </NavLink>
@@ -21,6 +24,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </NavLink>
           <NavLink href="/dashboard/origins" icon={<MapPin size={16} />}>
             Origins
+          </NavLink>
+          <NavLink href="/dashboard/suppliers" icon={<Building2 size={16} />}>
+            Suppliers
+          </NavLink>
+          <NavLink href="/dashboard/orders" icon={<ShoppingCart size={16} />}>
+            Orders
+          </NavLink>
+          <NavLink href="/dashboard/sales" icon={<TrendingUp size={16} />}>
+            Sales
           </NavLink>
         </nav>
 

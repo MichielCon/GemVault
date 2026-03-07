@@ -9,6 +9,12 @@ import type {
   PagedResult,
   PublicGemDto,
   VocabularyItemDto,
+  SupplierDto,
+  PurchaseOrderDto,
+  PurchaseOrderSummaryDto,
+  SaleDto,
+  SaleSummaryDto,
+  DashboardStatsDto,
 } from "./types";
 
 // Server-side: uses INTERNAL_API_URL so SSR requests go container-to-container.
@@ -84,9 +90,10 @@ export const authApi = {
 // ─── Gems ─────────────────────────────────────────────────────────────────────
 
 export const gemsApi = {
-  list: (page = 1, pageSize = 20, search?: string) => {
+  list: (page = 1, pageSize = 20, search?: string, originId?: string) => {
     const q = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
     if (search) q.set("search", search);
+    if (originId) q.set("originId", originId);
     return get<PagedResult<GemSummaryDto>>(`/api/v1/gems?${q}`);
   },
   get: (id: string) => get<GemDto>(`/api/v1/gems/${id}`),
@@ -108,17 +115,53 @@ export const originsApi = {
     const q = search ? `?search=${encodeURIComponent(search)}` : "";
     return get<OriginDto[]>(`/api/v1/origins${q}`, false);
   },
+  get: (id: string) => get<OriginDto>(`/api/v1/origins/${id}`, false),
 };
 
 // ─── GemParcels ───────────────────────────────────────────────────────────────
 
 export const parcelsApi = {
-  list: (page = 1, pageSize = 20, search?: string) => {
+  list: (page = 1, pageSize = 20, search?: string, originId?: string) => {
     const q = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
     if (search) q.set("search", search);
+    if (originId) q.set("originId", originId);
     return get<PagedResult<GemParcelSummaryDto>>(`/api/v1/gem-parcels?${q}`);
   },
   get: (id: string) => get<GemParcelDto>(`/api/v1/gem-parcels/${id}`),
+};
+
+// ─── Suppliers ────────────────────────────────────────────────────────────────
+
+export const suppliersApi = {
+  list: (search?: string) => {
+    const q = search ? `?search=${encodeURIComponent(search)}` : "";
+    return get<SupplierDto[]>(`/api/v1/suppliers${q}`);
+  },
+  get: (id: string) => get<SupplierDto>(`/api/v1/suppliers/${id}`),
+};
+
+// ─── PurchaseOrders ───────────────────────────────────────────────────────────
+
+export const purchaseOrdersApi = {
+  list: (page = 1, pageSize = 20) =>
+    get<PagedResult<PurchaseOrderSummaryDto>>(
+      `/api/v1/purchase-orders?page=${page}&pageSize=${pageSize}`
+    ),
+  get: (id: string) => get<PurchaseOrderDto>(`/api/v1/purchase-orders/${id}`),
+};
+
+// ─── Sales ────────────────────────────────────────────────────────────────────
+
+export const salesApi = {
+  list: (page = 1, pageSize = 20) =>
+    get<PagedResult<SaleSummaryDto>>(`/api/v1/sales?page=${page}&pageSize=${pageSize}`),
+  get: (id: string) => get<SaleDto>(`/api/v1/sales/${id}`),
+};
+
+// ─── Dashboard ────────────────────────────────────────────────────────────────
+
+export const dashboardApi = {
+  stats: () => get<DashboardStatsDto>(`/api/v1/dashboard/stats`),
 };
 
 // ─── Public scan ──────────────────────────────────────────────────────────────

@@ -130,6 +130,108 @@ export interface OriginDto {
   createdAt: string;
 }
 
+// ─── Suppliers ────────────────────────────────────────────────────────────────
+
+export interface SupplierDto {
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  notes: string | null;
+  orderCount: number;
+  createdAt: string;
+}
+
+// ─── PurchaseOrders ───────────────────────────────────────────────────────────
+
+export interface OrderItemDto {
+  id: string;
+  gemId: string | null;
+  gemName: string | null;
+  gemParcelId: string | null;
+  gemParcelName: string | null;
+  costPrice: number;
+  notes: string | null;
+}
+
+export interface PurchaseOrderDto {
+  id: string;
+  reference: string | null;
+  orderDate: string;
+  supplierId: string;
+  supplierName: string;
+  notes: string | null;
+  items: OrderItemDto[];
+  totalCost: number;
+  createdAt: string;
+}
+
+export interface PurchaseOrderSummaryDto {
+  id: string;
+  reference: string | null;
+  orderDate: string;
+  supplierName: string;
+  totalCost: number;
+  itemCount: number;
+  createdAt: string;
+}
+
+// ─── Sales ────────────────────────────────────────────────────────────────────
+
+export interface SaleItemDto {
+  id: string;
+  gemId: string | null;
+  gemName: string | null;
+  gemParcelId: string | null;
+  gemParcelName: string | null;
+  quantity: number;
+  salePrice: number;
+}
+
+export interface SaleDto {
+  id: string;
+  saleDate: string;
+  buyerName: string | null;
+  buyerEmail: string | null;
+  notes: string | null;
+  items: SaleItemDto[];
+  totalSaleValue: number;
+  createdAt: string;
+}
+
+export interface SaleSummaryDto {
+  id: string;
+  saleDate: string;
+  buyerName: string | null;
+  totalSaleValue: number;
+  itemCount: number;
+  createdAt: string;
+}
+
+// ─── Dashboard ────────────────────────────────────────────────────────────────
+
+export interface RecentItemDto {
+  id: string;
+  name: string;
+  type: "Gem" | "Parcel";
+  species: string | null;
+  variety: string | null;
+  createdAt: string;
+}
+
+export interface DashboardStatsDto {
+  gemCount: number;
+  parcelCount: number;
+  parcelTotalQuantity: number;
+  totalPurchaseValue: number;
+  totalSalesValue: number;
+  supplierCount: number;
+  purchaseOrderCount: number;
+  saleCount: number;
+  recentItems: RecentItemDto[];
+}
+
 // ─── Public scan ──────────────────────────────────────────────────────────────
 
 export interface PublicPhotoDto {

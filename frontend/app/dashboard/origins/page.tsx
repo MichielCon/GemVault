@@ -71,8 +71,12 @@ function OriginRow({ origin, even }: { origin: OriginDto; even: boolean }) {
   });
 
   return (
-    <tr className={even ? "bg-card" : "bg-muted/20"}>
-      <td className="px-4 py-3 font-medium">{origin.country}</td>
+    <tr className={even ? "bg-card hover:bg-muted/30" : "bg-muted/20 hover:bg-muted/40"}>
+      <td className="px-4 py-3 font-medium">
+        <Link href={`/dashboard/origins/${origin.id}`} className="hover:underline">
+          {origin.country}
+        </Link>
+      </td>
       <td className="px-4 py-3 text-muted-foreground">{origin.mine ?? "—"}</td>
       <td className="px-4 py-3 text-muted-foreground">{origin.region ?? "—"}</td>
       <td className="px-4 py-3 text-muted-foreground">{added}</td>
