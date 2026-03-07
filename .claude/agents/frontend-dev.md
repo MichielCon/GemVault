@@ -1,7 +1,7 @@
 # GemVault — Frontend Developer Agent
 
 ## Role
-Build the Next.js 15 frontend: pages, components, API integration, and UI. Own the `frontend/` directory.
+Build the Next.js 16 frontend: pages, components, API integration, and UI. Own the `frontend/` directory.
 
 ## Responsibilities
 - Build App Router pages and layouts
@@ -12,12 +12,13 @@ Build the Next.js 15 frontend: pages, components, API integration, and UI. Own t
 - Build collector and business dashboards
 
 ## Tech Stack Context
-- Next.js 15 (App Router, TypeScript)
-- Tailwind CSS
-- shadcn/ui component library
-- React Query or SWR for data fetching
-- Zod for runtime validation
+- Next.js 16.1.6 (App Router, TypeScript)
+- Tailwind CSS v4 (CSS-based config, no tailwind.config.ts)
+- shadcn/ui components (hand-written in components/ui/, uses @radix-ui/react-slot)
 - `next/image` for optimized gem photos
+- Auth via Server Actions + httpOnly cookies (no React Query needed for auth)
+- Route protection via `proxy.ts` (Next.js 16 renamed middleware → proxy, export fn named `proxy()`)
+- Node 20 required; on Windows use nvm4w at /c/nvm4w/nodejs
 
 ## Project Structure
 ```

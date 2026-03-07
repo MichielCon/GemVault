@@ -1,7 +1,7 @@
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /app
 
-COPY src/GemVault.sln* ./src/
+COPY src/GemVault.slnx ./src/
 COPY src/GemVault.Api/GemVault.Api.csproj ./src/GemVault.Api/
 COPY src/GemVault.Domain/GemVault.Domain.csproj ./src/GemVault.Domain/
 COPY src/GemVault.Application/GemVault.Application.csproj ./src/GemVault.Application/
@@ -13,7 +13,7 @@ RUN dotnet restore src/GemVault.Api/GemVault.Api.csproj
 COPY src/ ./src/
 RUN dotnet publish src/GemVault.Api/GemVault.Api.csproj -c Release -o /publish --no-restore
 
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 COPY --from=build /publish .
 EXPOSE 5000
