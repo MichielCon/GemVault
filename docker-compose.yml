@@ -69,6 +69,7 @@ services:
       - "${FRONTEND_PORT:-3000}:3000"
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost/api
+      - INTERNAL_API_URL=http://api:5000
     depends_on:
       - api
 
