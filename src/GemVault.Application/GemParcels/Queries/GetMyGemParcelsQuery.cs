@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GemVault.Application.GemParcels.Queries;
 
-public record GetMyGemParcelsQuery(int Page = 1, int PageSize = 20, string? Search = null)
+public record GetMyGemParcelsQuery(int Page = 1, int PageSize = 20, string? Search = null, Guid? OriginId = null)
     : IRequest<PagedResult<GemParcelSummaryDto>>;
 
 public class GetMyGemParcelsQueryHandler(
@@ -25,6 +25,9 @@ public class GetMyGemParcelsQueryHandler(
         var query = context.GemParcels
             .Include(p => p.Photos)
             .Where(p => p.OwnerId == currentUser.UserId && !p.IsDeleted);
+
+        if (request.OriginId.HasValue)
+            query = query.Where(p => p.OriginId == request.OriginId.Value);
 
         if (!string.IsNullOrWhiteSpace(request.Search))
         {

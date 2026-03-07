@@ -16,9 +16,10 @@ public class GemsController(IMediator mediator) : ControllerBase
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20,
         [FromQuery] string? search = null,
+        [FromQuery] Guid? originId = null,
         CancellationToken ct = default)
     {
-        var result = await mediator.Send(new GetMyGemsQuery(page, pageSize, search), ct);
+        var result = await mediator.Send(new GetMyGemsQuery(page, pageSize, search, originId), ct);
         return Ok(result);
     }
 
