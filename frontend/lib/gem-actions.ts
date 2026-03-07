@@ -62,6 +62,7 @@ export async function createGem(
       : null,
     notes: (formData.get("notes") as string) || null,
     isPublic: formData.get("isPublic") === "on",
+    originId: (formData.get("originId") as string) || null,
   };
 
   let gem: { id: string };
@@ -110,6 +111,7 @@ export async function updateGem(
       : null,
     notes: (formData.get("notes") as string) || null,
     isPublic: formData.get("isPublic") === "on",
+    originId: (formData.get("originId") as string) || null,
   };
 
   try {

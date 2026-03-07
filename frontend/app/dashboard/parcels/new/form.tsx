@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from "react";
 import Link from "next/link";
-import { updateGem } from "@/lib/gem-actions";
+import { createParcel } from "@/lib/parcel-actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,17 +16,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
-import type { GemDto, VocabularyItemDto, OriginDto } from "@/lib/types";
+import type { VocabularyItemDto, OriginDto } from "@/lib/types";
 
 interface Props {
-  gem: GemDto;
   vocabulary: {
     species: VocabularyItemDto[];
     variety: VocabularyItemDto[];
     color: VocabularyItemDto[];
-    clarity: VocabularyItemDto[];
-    cut: VocabularyItemDto[];
-    shape: VocabularyItemDto[];
     treatment: VocabularyItemDto[];
   };
   origins: OriginDto[];
@@ -34,16 +30,13 @@ interface Props {
 
 const initialState = { error: null as string | null };
 
-export function GemEditForm({ gem, vocabulary, origins }: Props) {
-  const [state, formAction, pending] = useActionState(updateGem, initialState);
-  const [species, setSpecies] = useState<string | null>(gem.species ?? null);
-  const [variety, setVariety] = useState<string | null>(gem.variety ?? null);
-  const [color, setColor] = useState<string | null>(gem.color ?? null);
-  const [clarity, setClarity] = useState<string | null>(gem.clarity ?? null);
-  const [cut, setCut] = useState<string | null>(gem.cut ?? null);
-  const [shape, setShape] = useState<string | null>(gem.shape ?? null);
-  const [treatment, setTreatment] = useState<string | null>(gem.treatment ?? null);
-  const [originId, setOriginId] = useState<string | null>(gem.originId ?? null);
+export function ParcelCreateForm({ vocabulary, origins }: Props) {
+  const [state, formAction, pending] = useActionState(createParcel, initialState);
+  const [species, setSpecies] = useState<string | null>(null);
+  const [variety, setVariety] = useState<string | null>(null);
+  const [color, setColor] = useState<string | null>(null);
+  const [treatment, setTreatment] = useState<string | null>(null);
+  const [originId, setOriginId] = useState<string | null>(null);
 
   const speciesOptions = vocabulary.species.map((v) => ({ value: v.value, label: v.value }));
 
@@ -54,9 +47,6 @@ export function GemEditForm({ gem, vocabulary, origins }: Props) {
     : vocabulary.variety.map((v) => ({ value: v.value, label: v.value }));
 
   const colorOptions = vocabulary.color.map((v) => ({ value: v.value, label: v.value }));
-  const clarityOptions = vocabulary.clarity.map((v) => ({ value: v.value, label: v.value }));
-  const cutOptions = vocabulary.cut.map((v) => ({ value: v.value, label: v.value }));
-  const shapeOptions = vocabulary.shape.map((v) => ({ value: v.value, label: v.value }));
   const treatmentOptions = vocabulary.treatment.map((v) => ({ value: v.value, label: v.value }));
 
   const originOptions = origins.map((o) => ({
@@ -73,22 +63,20 @@ export function GemEditForm({ gem, vocabulary, origins }: Props) {
     <div className="flex flex-col gap-6 max-w-2xl">
       <div className="flex items-center gap-3">
         <Button asChild variant="ghost" size="sm" className="-ml-2">
-          <Link href={`/dashboard/gems/${gem.id}`}>
+          <Link href="/dashboard/parcels">
             <ArrowLeft size={16} />
-            Back to gem
+            Back to parcels
           </Link>
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-xl">Edit gem</CardTitle>
-          <CardDescription>{gem.name}</CardDescription>
+          <CardTitle className="text-xl">Add parcel</CardTitle>
+          <CardDescription>Record a new gem parcel (bulk lot) in your inventory.</CardDescription>
         </CardHeader>
 
         <form action={formAction}>
-          <input type="hidden" name="id" value={gem.id} />
-
           <CardContent className="flex flex-col gap-5">
             {state.error && (
               <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
@@ -104,7 +92,7 @@ export function GemEditForm({ gem, vocabulary, origins }: Props) {
               <Input
                 id="name"
                 name="name"
-                defaultValue={gem.name}
+                placeholder="e.g. Burma Ruby Lot #3"
                 required
               />
             </div>
@@ -128,24 +116,43 @@ export function GemEditForm({ gem, vocabulary, origins }: Props) {
                   options={varietyOptions}
                   value={variety}
                   onChange={setVariety}
-                  placeholder="e.g. Sapphire"
+                  placeholder="e.g. Ruby"
                 />
               </div>
             </div>
 
-            {/* Weight / Color */}
+            {/* Quantity / Total weight */}
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="weightCarats">Weight (carats)</Label>
+                <Label htmlFor="quantity">
+                  Quantity <span className="text-red-500">*</span>
+                </Label>
                 <Input
-                  id="weightCarats"
-                  name="weightCarats"
+                  id="quantity"
+                  name="quantity"
+                  type="number"
+                  min="1"
+                  step="1"
+                  defaultValue="1"
+                  required
+                  placeholder="e.g. 50"
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="totalWeightCarats">Total weight (carats)</Label>
+                <Input
+                  id="totalWeightCarats"
+                  name="totalWeightCarats"
                   type="number"
                   min="0"
                   step="0.01"
-                  defaultValue={gem.weightCarats ?? ""}
+                  placeholder="e.g. 12.50"
                 />
               </div>
+            </div>
+
+            {/* Color / Treatment */}
+            <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
                 <Label>Color</Label>
                 <Combobox
@@ -153,37 +160,9 @@ export function GemEditForm({ gem, vocabulary, origins }: Props) {
                   options={colorOptions}
                   value={color}
                   onChange={setColor}
-                  placeholder="e.g. Vivid Blue"
+                  placeholder="e.g. Vivid Red"
                 />
               </div>
-            </div>
-
-            {/* Clarity / Cut */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1.5">
-                <Label>Clarity</Label>
-                <Combobox
-                  name="clarity"
-                  options={clarityOptions}
-                  value={clarity}
-                  onChange={setClarity}
-                  placeholder="e.g. Eye Clean"
-                />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <Label>Cut</Label>
-                <Combobox
-                  name="cut"
-                  options={cutOptions}
-                  value={cut}
-                  onChange={setCut}
-                  placeholder="e.g. Oval Brilliant"
-                />
-              </div>
-            </div>
-
-            {/* Treatment / Shape */}
-            <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
                 <Label>Treatment</Label>
                 <Combobox
@@ -191,17 +170,7 @@ export function GemEditForm({ gem, vocabulary, origins }: Props) {
                   options={treatmentOptions}
                   value={treatment}
                   onChange={setTreatment}
-                  placeholder="e.g. None"
-                />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <Label>Shape</Label>
-                <Combobox
-                  name="shape"
-                  options={shapeOptions}
-                  value={shape}
-                  onChange={setShape}
-                  placeholder="e.g. Oval"
+                  placeholder="e.g. Heat Treatment"
                 />
               </div>
             </div>
@@ -227,7 +196,7 @@ export function GemEditForm({ gem, vocabulary, origins }: Props) {
                 type="number"
                 min="0"
                 step="0.01"
-                defaultValue={gem.purchasePrice ?? ""}
+                placeholder="e.g. 3500.00"
               />
             </div>
 
@@ -238,7 +207,7 @@ export function GemEditForm({ gem, vocabulary, origins }: Props) {
                 id="notes"
                 name="notes"
                 rows={3}
-                defaultValue={gem.notes ?? ""}
+                placeholder="Provenance, certificate numbers, observations…"
                 className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none"
               />
             </div>
@@ -249,21 +218,20 @@ export function GemEditForm({ gem, vocabulary, origins }: Props) {
                 id="isPublic"
                 name="isPublic"
                 type="checkbox"
-                defaultChecked={gem.isPublic}
                 className="h-4 w-4 rounded border-input accent-primary"
               />
               <Label htmlFor="isPublic" className="cursor-pointer font-normal">
-                Make this gem publicly viewable via a scan link
+                Make this parcel publicly viewable via a scan link
               </Label>
             </div>
           </CardContent>
 
           <CardFooter className="gap-3">
             <Button type="submit" disabled={pending}>
-              {pending ? "Saving…" : "Save changes"}
+              {pending ? "Saving…" : "Save parcel"}
             </Button>
             <Button asChild variant="outline" disabled={pending}>
-              <Link href={`/dashboard/gems/${gem.id}`}>Cancel</Link>
+              <Link href="/dashboard/parcels">Cancel</Link>
             </Button>
           </CardFooter>
         </form>

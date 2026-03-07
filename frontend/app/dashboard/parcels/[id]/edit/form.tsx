@@ -6,7 +6,7 @@ import { updateParcel } from "@/lib/parcel-actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SuggestInput } from "@/components/ui/suggest-input";
+import { Combobox } from "@/components/ui/combobox";
 import {
   Card,
   CardContent,
@@ -16,23 +16,49 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
-import {
-  GEM_SPECIES,
-  GEM_VARIETIES,
-  ALL_VARIETIES,
-  GEM_COLORS,
-  GEM_TREATMENTS,
-} from "@/lib/gem-options";
-import type { GemParcelDto } from "@/lib/types";
+import type { GemParcelDto, VocabularyItemDto, OriginDto } from "@/lib/types";
+
+interface Props {
+  parcel: GemParcelDto;
+  vocabulary: {
+    species: VocabularyItemDto[];
+    variety: VocabularyItemDto[];
+    color: VocabularyItemDto[];
+    treatment: VocabularyItemDto[];
+  };
+  origins: OriginDto[];
+}
 
 const initialState = { error: null as string | null };
 
-export function ParcelEditForm({ parcel }: { parcel: GemParcelDto }) {
+export function ParcelEditForm({ parcel, vocabulary, origins }: Props) {
   const [state, formAction, pending] = useActionState(updateParcel, initialState);
-  const [species, setSpecies] = useState(parcel.species ?? "");
+  const [species, setSpecies] = useState<string | null>(parcel.species ?? null);
+  const [variety, setVariety] = useState<string | null>(parcel.variety ?? null);
+  const [color, setColor] = useState<string | null>(parcel.color ?? null);
+  const [treatment, setTreatment] = useState<string | null>(parcel.treatment ?? null);
+  const [originId, setOriginId] = useState<string | null>(parcel.originId ?? null);
 
-  const varietyOptions =
-    GEM_VARIETIES[species as keyof typeof GEM_VARIETIES] ?? ALL_VARIETIES;
+  const speciesOptions = vocabulary.species.map((v) => ({ value: v.value, label: v.value }));
+
+  const varietyOptions = species
+    ? vocabulary.variety
+        .filter((v) => v.parentValue === species)
+        .map((v) => ({ value: v.value, label: v.value }))
+    : vocabulary.variety.map((v) => ({ value: v.value, label: v.value }));
+
+  const colorOptions = vocabulary.color.map((v) => ({ value: v.value, label: v.value }));
+  const treatmentOptions = vocabulary.treatment.map((v) => ({ value: v.value, label: v.value }));
+
+  const originOptions = origins.map((o) => ({
+    value: o.id,
+    label: [o.country, o.mine, o.region].filter(Boolean).join(" — "),
+  }));
+
+  function handleSpeciesChange(val: string | null) {
+    setSpecies(val);
+    setVariety(null);
+  }
 
   return (
     <div className="flex flex-col gap-6 max-w-2xl">
@@ -77,26 +103,23 @@ export function ParcelEditForm({ parcel }: { parcel: GemParcelDto }) {
             {/* Species / Variety */}
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="species">Species</Label>
-                <SuggestInput
-                  id="species"
+                <Label>Species</Label>
+                <Combobox
                   name="species"
-                  listId="species-list"
-                  options={GEM_SPECIES}
-                  placeholder="e.g. Corundum"
+                  options={speciesOptions}
                   value={species}
-                  onChange={(e) => setSpecies(e.target.value)}
+                  onChange={handleSpeciesChange}
+                  placeholder="e.g. Corundum"
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="variety">Variety</Label>
-                <SuggestInput
-                  id="variety"
+                <Label>Variety</Label>
+                <Combobox
                   name="variety"
-                  listId="variety-list"
                   options={varietyOptions}
+                  value={variety}
+                  onChange={setVariety}
                   placeholder="e.g. Ruby"
-                  defaultValue={parcel.variety ?? ""}
                 />
               </div>
             </div>
@@ -133,27 +156,37 @@ export function ParcelEditForm({ parcel }: { parcel: GemParcelDto }) {
             {/* Color / Treatment */}
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="color">Color</Label>
-                <SuggestInput
-                  id="color"
+                <Label>Color</Label>
+                <Combobox
                   name="color"
-                  listId="color-list"
-                  options={GEM_COLORS}
+                  options={colorOptions}
+                  value={color}
+                  onChange={setColor}
                   placeholder="e.g. Vivid Red"
-                  defaultValue={parcel.color ?? ""}
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="treatment">Treatment</Label>
-                <SuggestInput
-                  id="treatment"
+                <Label>Treatment</Label>
+                <Combobox
                   name="treatment"
-                  listId="treatment-list"
-                  options={GEM_TREATMENTS}
+                  options={treatmentOptions}
+                  value={treatment}
+                  onChange={setTreatment}
                   placeholder="e.g. Heat Treatment"
-                  defaultValue={parcel.treatment ?? ""}
                 />
               </div>
+            </div>
+
+            {/* Origin */}
+            <div className="flex flex-col gap-1.5">
+              <Label>Origin</Label>
+              <Combobox
+                name="originId"
+                options={originOptions}
+                value={originId}
+                onChange={setOriginId}
+                placeholder="Select origin..."
+              />
             </div>
 
             {/* Purchase price */}

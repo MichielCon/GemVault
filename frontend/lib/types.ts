@@ -113,6 +113,13 @@ export interface GemParcelSummaryDto {
   createdAt: string;
 }
 
+// ─── Vocabulary ───────────────────────────────────────────────────────────────
+
+export interface VocabularyItemDto {
+  value: string;
+  parentValue: string | null;
+}
+
 // ─── Origins ──────────────────────────────────────────────────────────────────
 
 export interface OriginDto {

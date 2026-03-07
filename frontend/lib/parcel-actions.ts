@@ -59,6 +59,7 @@ export async function createParcel(
       : null,
     notes: (formData.get("notes") as string) || null,
     isPublic: formData.get("isPublic") === "on",
+    originId: (formData.get("originId") as string) || null,
   };
 
   let parcel: { id: string };
@@ -105,6 +106,7 @@ export async function updateParcel(
       : null,
     notes: (formData.get("notes") as string) || null,
     isPublic: formData.get("isPublic") === "on",
+    originId: (formData.get("originId") as string) || null,
   };
 
   try {

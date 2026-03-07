@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { gemsApi, ApiError } from "@/lib/api";
+import { gemsApi, vocabularyApi, originsApi, ApiError } from "@/lib/api";
 import type { GemDto } from "@/lib/types";
 import { GemEditForm } from "./form";
 
@@ -20,5 +20,39 @@ export default async function GemEditPage({ params }: Props) {
     throw e;
   }
 
-  return <GemEditForm gem={gem} />;
+  const [
+    speciesVocab,
+    varietyVocab,
+    colorVocab,
+    clarityVocab,
+    cutVocab,
+    shapeVocab,
+    treatmentVocab,
+    origins,
+  ] = await Promise.all([
+    vocabularyApi.getField("species"),
+    vocabularyApi.getField("variety"),
+    vocabularyApi.getField("color"),
+    vocabularyApi.getField("clarity"),
+    vocabularyApi.getField("cut"),
+    vocabularyApi.getField("shape"),
+    vocabularyApi.getField("treatment"),
+    originsApi.list(),
+  ]);
+
+  return (
+    <GemEditForm
+      gem={gem}
+      vocabulary={{
+        species: speciesVocab,
+        variety: varietyVocab,
+        color: colorVocab,
+        clarity: clarityVocab,
+        cut: cutVocab,
+        shape: shapeVocab,
+        treatment: treatmentVocab,
+      }}
+      origins={origins}
+    />
+  );
 }

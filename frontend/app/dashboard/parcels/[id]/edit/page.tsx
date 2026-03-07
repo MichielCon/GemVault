@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { parcelsApi, ApiError } from "@/lib/api";
+import { parcelsApi, vocabularyApi, originsApi, ApiError } from "@/lib/api";
 import type { GemParcelDto } from "@/lib/types";
 import { ParcelEditForm } from "./form";
 
@@ -20,5 +20,25 @@ export default async function ParcelEditPage({ params }: Props) {
     throw e;
   }
 
-  return <ParcelEditForm parcel={parcel} />;
+  const [speciesVocab, varietyVocab, colorVocab, treatmentVocab, origins] =
+    await Promise.all([
+      vocabularyApi.getField("species"),
+      vocabularyApi.getField("variety"),
+      vocabularyApi.getField("color"),
+      vocabularyApi.getField("treatment"),
+      originsApi.list(),
+    ]);
+
+  return (
+    <ParcelEditForm
+      parcel={parcel}
+      vocabulary={{
+        species: speciesVocab,
+        variety: varietyVocab,
+        color: colorVocab,
+        treatment: treatmentVocab,
+      }}
+      origins={origins}
+    />
+  );
 }
