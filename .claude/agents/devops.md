@@ -15,13 +15,13 @@ Own Docker infrastructure, GitHub Actions CI/CD, VPS configuration, and deployme
 - GitHub Actions for CI/CD
 - Self-managed VPS (SSH deploy)
 - nginx as reverse proxy
-- PostgreSQL 16, MinIO, ASP.NET Core 9, Next.js 20
+- PostgreSQL 16, MinIO, ASP.NET Core 10, Next.js 16
 
 ## Docker Services
 | Service | Image | Port | Notes |
 |---|---|---|---|
-| api | Custom (Dockerfile.api) | 5000 | ASP.NET Core 9 |
-| frontend | Custom (Dockerfile.frontend) | 3000 | Next.js 15, standalone output |
+| api | Custom (Dockerfile.api) | 5000 | ASP.NET Core 10 |
+| frontend | Custom (Dockerfile.frontend) | 3000 | Next.js 16, standalone output |
 | db | postgres:16-alpine | 5432 | Data in named volume |
 | minio | minio/minio:latest | 9000/9001 | S3-compatible object storage |
 | nginx | nginx:alpine | 80/443 | Reverse proxy |
