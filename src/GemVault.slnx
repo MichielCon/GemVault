@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="GemVault.Api/GemVault.Api.csproj" />
+  <Project Path="GemVault.Application/GemVault.Application.csproj" />
+  <Project Path="GemVault.Domain/GemVault.Domain.csproj" />
+  <Project Path="GemVault.Infrastructure/GemVault.Infrastructure.csproj" />
+  <Project Path="GemVault.Tests/GemVault.Tests.csproj" />
+</Solution>

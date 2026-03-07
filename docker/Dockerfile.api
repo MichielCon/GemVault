@@ -1,0 +1,21 @@
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+WORKDIR /app
+
+COPY src/GemVault.sln* ./src/
+COPY src/GemVault.Api/GemVault.Api.csproj ./src/GemVault.Api/
+COPY src/GemVault.Domain/GemVault.Domain.csproj ./src/GemVault.Domain/
+COPY src/GemVault.Application/GemVault.Application.csproj ./src/GemVault.Application/
+COPY src/GemVault.Infrastructure/GemVault.Infrastructure.csproj ./src/GemVault.Infrastructure/
+COPY src/GemVault.Tests/GemVault.Tests.csproj ./src/GemVault.Tests/
+
+RUN dotnet restore src/GemVault.Api/GemVault.Api.csproj
+
+COPY src/ ./src/
+RUN dotnet publish src/GemVault.Api/GemVault.Api.csproj -c Release -o /publish --no-restore
+
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
+WORKDIR /app
+COPY --from=build /publish .
+EXPOSE 5000
+ENV ASPNETCORE_URLS=http://+:5000
+ENTRYPOINT ["dotnet", "GemVault.Api.dll"]
