@@ -42,17 +42,21 @@ function parseApiError(e: unknown): string {
 }
 
 export async function createSale(
-  _prev: { error: string | null },
+  _prev: { error: string | null; id: string | null },
   formData: FormData
-): Promise<{ error: string | null }> {
-  const itemsJson = (formData.get("itemsJson") as string) || "[]";
-  type SaleItemInput = { gemId: string | null; gemParcelId: string | null; quantity: number; salePrice: number };
-  let items: SaleItemInput[];
-  try {
-    items = JSON.parse(itemsJson) as SaleItemInput[];
-  } catch {
-    return { error: "Invalid line items data." };
-  }
+): Promise<{ error: string | null; id: string | null }> {
+  // Items are serialized as parallel arrays of hidden inputs
+  const gemIds = formData.getAll("item_gemId") as string[];
+  const parcelIds = formData.getAll("item_parcelId") as string[];
+  const quantities = formData.getAll("item_qty") as string[];
+  const salePrices = formData.getAll("item_price") as string[];
+
+  const items = gemIds.map((gemId, i) => ({
+    gemId: gemId || null,
+    gemParcelId: parcelIds[i] || null,
+    quantity: Number(quantities[i]) || 1,
+    salePrice: Number(salePrices[i]) || 0,
+  }));
 
   const raw = {
     saleDate: formData.get("saleDate") as string,
@@ -62,7 +66,6 @@ export async function createSale(
     items,
   };
 
-  let sale: { id: string };
   try {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -78,12 +81,11 @@ export async function createSale(
       const text = await res.text().catch(() => "");
       throw new ApiError(res.status, text);
     }
-    sale = (await res.json()) as { id: string };
+    const sale = (await res.json()) as { id: string };
+    return { error: null, id: sale.id };
   } catch (e) {
-    return { error: parseApiError(e) };
+    return { error: parseApiError(e), id: null };
   }
-
-  redirect(`/dashboard/sales/${sale.id}`);
 }
 
 export async function deleteSale(

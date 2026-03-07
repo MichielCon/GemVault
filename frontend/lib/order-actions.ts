@@ -42,17 +42,21 @@ function parseApiError(e: unknown): string {
 }
 
 export async function createPurchaseOrder(
-  _prev: { error: string | null },
+  _prev: { error: string | null; id: string | null },
   formData: FormData
-): Promise<{ error: string | null }> {
-  const itemsJson = (formData.get("itemsJson") as string) || "[]";
-  type OrderItemInput = { gemId: string | null; gemParcelId: string | null; costPrice: number; notes: string | null };
-  let items: OrderItemInput[];
-  try {
-    items = JSON.parse(itemsJson) as OrderItemInput[];
-  } catch {
-    return { error: "Invalid line items data." };
-  }
+): Promise<{ error: string | null; id: string | null }> {
+  // Items are serialized as parallel arrays of hidden inputs
+  const gemIds = formData.getAll("item_gemId") as string[];
+  const parcelIds = formData.getAll("item_parcelId") as string[];
+  const costPrices = formData.getAll("item_costPrice") as string[];
+  const itemNotes = formData.getAll("item_notes") as string[];
+
+  const items = gemIds.map((gemId, i) => ({
+    gemId: gemId || null,
+    gemParcelId: parcelIds[i] || null,
+    costPrice: Number(costPrices[i]) || 0,
+    notes: itemNotes[i] || null,
+  }));
 
   const raw = {
     supplierId: formData.get("supplierId") as string,
@@ -62,7 +66,6 @@ export async function createPurchaseOrder(
     items,
   };
 
-  let order: { id: string };
   try {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -78,12 +81,11 @@ export async function createPurchaseOrder(
       const text = await res.text().catch(() => "");
       throw new ApiError(res.status, text);
     }
-    order = (await res.json()) as { id: string };
+    const order = (await res.json()) as { id: string };
+    return { error: null, id: order.id };
   } catch (e) {
-    return { error: parseApiError(e) };
+    return { error: parseApiError(e), id: null };
   }
-
-  redirect(`/dashboard/orders/${order.id}`);
 }
 
 export async function deletePurchaseOrder(

@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { Fragment, useActionState, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createSale } from "@/lib/sale-actions";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,7 @@ import type { GemSummaryDto, GemParcelSummaryDto } from "@/lib/types";
 
 interface LineItem {
   key: number;
-  gemOrParcel: string | null; // "gem:<id>" or "parcel:<id>"
+  gemOrParcel: string | null;
   quantity: string;
   salePrice: string;
 }
@@ -30,12 +31,13 @@ interface Props {
   parcels: GemParcelSummaryDto[];
 }
 
-const initialState = { error: null as string | null };
+const initialState = { error: null as string | null, id: null as string | null };
 
 export function SaleCreateForm({ gems, parcels }: Props) {
+  const router = useRouter();
   const [state, formAction, pending] = useActionState(createSale, initialState);
-  const [items, setItems] = useState<LineItem[]>([]);
-  const [nextKey, setNextKey] = useState(0);
+  const [items, setItems] = useState<LineItem[]>([{ key: 0, gemOrParcel: null, quantity: "1", salePrice: "" }]);
+  const [nextKey, setNextKey] = useState(1);
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -44,11 +46,15 @@ export function SaleCreateForm({ gems, parcels }: Props) {
     ...parcels.map((p) => ({ value: `parcel:${p.id}`, label: `${p.name} (Parcel)` })),
   ];
 
+  const runningTotal = items.reduce((sum, i) => sum + (Number(i.salePrice) || 0), 0);
+
+  // Navigate after successful creation
+  useEffect(() => {
+    if (state.id) router.push(`/dashboard/sales/${state.id}`);
+  }, [state.id, router]);
+
   function addItem() {
-    setItems((prev) => [
-      ...prev,
-      { key: nextKey, gemOrParcel: null, quantity: "1", salePrice: "" },
-    ]);
+    setItems((prev) => [...prev, { key: nextKey, gemOrParcel: null, quantity: "1", salePrice: "" }]);
     setNextKey((k) => k + 1);
   }
 
@@ -58,21 +64,6 @@ export function SaleCreateForm({ gems, parcels }: Props) {
 
   function updateItem(key: number, patch: Partial<Omit<LineItem, "key">>) {
     setItems((prev) => prev.map((i) => (i.key === key ? { ...i, ...patch } : i)));
-  }
-
-  function buildItemsJson() {
-    return JSON.stringify(
-      items.map((i) => {
-        const isGem = i.gemOrParcel?.startsWith("gem:");
-        const id = i.gemOrParcel?.split(":")[1] ?? null;
-        return {
-          gemId: isGem ? id : null,
-          gemParcelId: isGem ? null : id,
-          quantity: Number(i.quantity) || 1,
-          salePrice: Number(i.salePrice) || 0,
-        };
-      })
-    );
   }
 
   return (
@@ -92,15 +83,20 @@ export function SaleCreateForm({ gems, parcels }: Props) {
           <CardDescription>Record a gem sale transaction.</CardDescription>
         </CardHeader>
 
-        <form
-          action={formAction}
-          onSubmit={(e) => {
-            const form = e.currentTarget;
-            const hidden = form.querySelector<HTMLInputElement>('input[name="itemsJson"]');
-            if (hidden) hidden.value = buildItemsJson();
-          }}
-        >
-          <input type="hidden" name="itemsJson" value="" />
+        <form action={formAction}>
+          {/* Hidden inputs for each line item — React-controlled from state */}
+          {items.map((item) => {
+            const isGem = item.gemOrParcel?.startsWith("gem:");
+            const gpId = item.gemOrParcel?.split(":")[1] ?? "";
+            return (
+              <Fragment key={item.key}>
+                <input type="hidden" name="item_gemId" value={isGem ? gpId : ""} />
+                <input type="hidden" name="item_parcelId" value={isGem === false ? gpId : ""} />
+                <input type="hidden" name="item_qty" value={item.quantity} />
+                <input type="hidden" name="item_price" value={item.salePrice} />
+              </Fragment>
+            );
+          })}
 
           <CardContent className="flex flex-col gap-5">
             {state.error && (
@@ -109,19 +105,11 @@ export function SaleCreateForm({ gems, parcels }: Props) {
               </p>
             )}
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="saleDate">
-                  Sale date <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="saleDate"
-                  name="saleDate"
-                  type="date"
-                  defaultValue={today}
-                  required
-                />
-              </div>
+            <div className="flex flex-col gap-1.5 w-1/2">
+              <Label htmlFor="saleDate">
+                Sale date <span className="text-red-500">*</span>
+              </Label>
+              <Input id="saleDate" name="saleDate" type="date" defaultValue={today} required />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -131,12 +119,7 @@ export function SaleCreateForm({ gems, parcels }: Props) {
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="buyerEmail">Buyer email</Label>
-                <Input
-                  id="buyerEmail"
-                  name="buyerEmail"
-                  type="email"
-                  placeholder="jane@example.com"
-                />
+                <Input id="buyerEmail" name="buyerEmail" type="email" placeholder="jane@example.com" />
               </div>
             </div>
 
@@ -154,23 +137,17 @@ export function SaleCreateForm({ gems, parcels }: Props) {
             {/* Line items */}
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between">
-                <Label className="text-base font-semibold">Line items</Label>
+                <Label className="text-base font-semibold">Items sold</Label>
                 <Button type="button" variant="outline" size="sm" onClick={addItem}>
                   <Plus size={14} />
                   Add item
                 </Button>
               </div>
 
-              {items.length === 0 && (
-                <p className="text-sm text-muted-foreground">
-                  No items yet. Click &quot;Add item&quot; to add gems or parcels.
-                </p>
-              )}
-
               {items.map((item) => (
                 <div
                   key={item.key}
-                  className="grid grid-cols-[1fr_80px_120px_auto] gap-3 items-end rounded-lg border p-3"
+                  className="grid grid-cols-[1fr_80px_130px_auto] gap-3 items-end rounded-lg border p-3"
                 >
                   <div className="flex flex-col gap-1.5">
                     <Label className="text-xs text-muted-foreground">Gem / Parcel</Label>
@@ -178,7 +155,7 @@ export function SaleCreateForm({ gems, parcels }: Props) {
                       options={gemParcelOptions}
                       value={item.gemOrParcel}
                       onChange={(v) => updateItem(item.key, { gemOrParcel: v })}
-                      placeholder="Select…"
+                      placeholder="Search inventory…"
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
@@ -209,17 +186,29 @@ export function SaleCreateForm({ gems, parcels }: Props) {
                     size="sm"
                     className="text-muted-foreground hover:text-destructive"
                     onClick={() => removeItem(item.key)}
+                    disabled={items.length === 1}
                   >
                     <Trash2 size={15} />
                   </Button>
                 </div>
               ))}
+
+              {items.some((i) => Number(i.salePrice) > 0) && (
+                <div className="flex justify-end">
+                  <p className="text-sm font-medium">
+                    Total:{" "}
+                    <span className="font-semibold">
+                      ${runningTotal.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                  </p>
+                </div>
+              )}
             </div>
           </CardContent>
 
           <CardFooter className="gap-3">
-            <Button type="submit" disabled={pending}>
-              {pending ? "Saving…" : "Record sale"}
+            <Button type="submit" disabled={pending || !!state.id}>
+              {pending || state.id ? "Saving…" : "Record sale"}
             </Button>
             <Button asChild variant="outline" disabled={pending}>
               <Link href="/dashboard/sales">Cancel</Link>
