@@ -1,8 +1,9 @@
 using GemVault.Domain.Common;
+using GemVault.Domain.Interfaces;
 
 namespace GemVault.Domain.Entities;
 
-public class Gem : BaseEntity
+public class Gem : BaseEntity, IGemRecord
 {
     public string Name { get; set; } = string.Empty;
     public string? Species { get; set; }

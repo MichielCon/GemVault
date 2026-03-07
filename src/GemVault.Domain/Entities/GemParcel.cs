@@ -1,8 +1,9 @@
 using GemVault.Domain.Common;
+using GemVault.Domain.Interfaces;
 
 namespace GemVault.Domain.Entities;
 
-public class GemParcel : BaseEntity
+public class GemParcel : BaseEntity, IGemRecord
 {
     public string Name { get; set; } = string.Empty;
     public string? Species { get; set; }
