@@ -8,6 +8,7 @@ import type {
   OriginDto,
   PagedResult,
   PublicGemDto,
+  VocabularyItemDto,
 } from "./types";
 
 // Server-side: uses INTERNAL_API_URL so SSR requests go container-to-container.
@@ -89,6 +90,15 @@ export const gemsApi = {
     return get<PagedResult<GemSummaryDto>>(`/api/v1/gems?${q}`);
   },
   get: (id: string) => get<GemDto>(`/api/v1/gems/${id}`),
+};
+
+// ─── Vocabulary ───────────────────────────────────────────────────────────────
+
+export const vocabularyApi = {
+  getField: (field: string, parentValue?: string) => {
+    const q = parentValue ? `?parentValue=${encodeURIComponent(parentValue)}` : "";
+    return get<VocabularyItemDto[]>(`/api/v1/vocabulary/${field}${q}`);
+  },
 };
 
 // ─── Origins ──────────────────────────────────────────────────────────────────

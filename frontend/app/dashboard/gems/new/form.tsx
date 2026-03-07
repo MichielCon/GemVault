@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from "react";
 import Link from "next/link";
-import { updateGem } from "@/lib/gem-actions";
+import { createGem } from "@/lib/gem-actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,10 +16,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
-import type { GemDto, VocabularyItemDto, OriginDto } from "@/lib/types";
+import type { VocabularyItemDto, OriginDto } from "@/lib/types";
 
 interface Props {
-  gem: GemDto;
   vocabulary: {
     species: VocabularyItemDto[];
     variety: VocabularyItemDto[];
@@ -34,16 +33,16 @@ interface Props {
 
 const initialState = { error: null as string | null };
 
-export function GemEditForm({ gem, vocabulary, origins }: Props) {
-  const [state, formAction, pending] = useActionState(updateGem, initialState);
-  const [species, setSpecies] = useState<string | null>(gem.species ?? null);
-  const [variety, setVariety] = useState<string | null>(gem.variety ?? null);
-  const [color, setColor] = useState<string | null>(gem.color ?? null);
-  const [clarity, setClarity] = useState<string | null>(gem.clarity ?? null);
-  const [cut, setCut] = useState<string | null>(gem.cut ?? null);
-  const [shape, setShape] = useState<string | null>(gem.shape ?? null);
-  const [treatment, setTreatment] = useState<string | null>(gem.treatment ?? null);
-  const [originId, setOriginId] = useState<string | null>(gem.originId ?? null);
+export function GemCreateForm({ vocabulary, origins }: Props) {
+  const [state, formAction, pending] = useActionState(createGem, initialState);
+  const [species, setSpecies] = useState<string | null>(null);
+  const [variety, setVariety] = useState<string | null>(null);
+  const [color, setColor] = useState<string | null>(null);
+  const [clarity, setClarity] = useState<string | null>(null);
+  const [cut, setCut] = useState<string | null>(null);
+  const [shape, setShape] = useState<string | null>(null);
+  const [treatment, setTreatment] = useState<string | null>(null);
+  const [originId, setOriginId] = useState<string | null>(null);
 
   const speciesOptions = vocabulary.species.map((v) => ({ value: v.value, label: v.value }));
 
@@ -73,22 +72,20 @@ export function GemEditForm({ gem, vocabulary, origins }: Props) {
     <div className="flex flex-col gap-6 max-w-2xl">
       <div className="flex items-center gap-3">
         <Button asChild variant="ghost" size="sm" className="-ml-2">
-          <Link href={`/dashboard/gems/${gem.id}`}>
+          <Link href="/dashboard/gems">
             <ArrowLeft size={16} />
-            Back to gem
+            Back to gems
           </Link>
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-xl">Edit gem</CardTitle>
-          <CardDescription>{gem.name}</CardDescription>
+          <CardTitle className="text-xl">Add gem</CardTitle>
+          <CardDescription>Record a new gemstone in your inventory.</CardDescription>
         </CardHeader>
 
         <form action={formAction}>
-          <input type="hidden" name="id" value={gem.id} />
-
           <CardContent className="flex flex-col gap-5">
             {state.error && (
               <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
@@ -104,7 +101,7 @@ export function GemEditForm({ gem, vocabulary, origins }: Props) {
               <Input
                 id="name"
                 name="name"
-                defaultValue={gem.name}
+                placeholder="e.g. Ceylon Sapphire #1"
                 required
               />
             </div>
@@ -143,7 +140,7 @@ export function GemEditForm({ gem, vocabulary, origins }: Props) {
                   type="number"
                   min="0"
                   step="0.01"
-                  defaultValue={gem.weightCarats ?? ""}
+                  placeholder="e.g. 2.35"
                 />
               </div>
               <div className="flex flex-col gap-1.5">
@@ -227,7 +224,7 @@ export function GemEditForm({ gem, vocabulary, origins }: Props) {
                 type="number"
                 min="0"
                 step="0.01"
-                defaultValue={gem.purchasePrice ?? ""}
+                placeholder="e.g. 1500.00"
               />
             </div>
 
@@ -238,7 +235,7 @@ export function GemEditForm({ gem, vocabulary, origins }: Props) {
                 id="notes"
                 name="notes"
                 rows={3}
-                defaultValue={gem.notes ?? ""}
+                placeholder="Provenance, certificate numbers, observations…"
                 className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none"
               />
             </div>
@@ -249,7 +246,6 @@ export function GemEditForm({ gem, vocabulary, origins }: Props) {
                 id="isPublic"
                 name="isPublic"
                 type="checkbox"
-                defaultChecked={gem.isPublic}
                 className="h-4 w-4 rounded border-input accent-primary"
               />
               <Label htmlFor="isPublic" className="cursor-pointer font-normal">
@@ -260,10 +256,10 @@ export function GemEditForm({ gem, vocabulary, origins }: Props) {
 
           <CardFooter className="gap-3">
             <Button type="submit" disabled={pending}>
-              {pending ? "Saving…" : "Save changes"}
+              {pending ? "Saving…" : "Save gem"}
             </Button>
             <Button asChild variant="outline" disabled={pending}>
-              <Link href={`/dashboard/gems/${gem.id}`}>Cancel</Link>
+              <Link href="/dashboard/gems">Cancel</Link>
             </Button>
           </CardFooter>
         </form>
