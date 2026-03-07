@@ -11,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ArrowLeft, Globe, Lock } from "lucide-react";
+import { ArrowLeft, Globe, Lock, Pencil } from "lucide-react";
 import type { GemParcelDto } from "@/lib/types";
 
 interface Props {
@@ -54,13 +54,21 @@ export default async function ParcelDetailPage({ params }: Props) {
             </p>
           )}
         </div>
-        <Badge variant={parcel.isPublic ? "default" : "outline"} className="shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/dashboard/parcels/${parcel.id}/edit`}>
+              <Pencil size={14} />
+              Edit
+            </Link>
+          </Button>
+          <Badge variant={parcel.isPublic ? "default" : "outline"}>
           {parcel.isPublic ? (
             <><Globe size={12} className="mr-1" />Public</>
           ) : (
             <><Lock size={12} className="mr-1" />Private</>
           )}
-        </Badge>
+          </Badge>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">

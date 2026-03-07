@@ -88,6 +88,52 @@ export async function createGem(
   redirect(`/dashboard/gems/${gem.id}`);
 }
 
+export async function updateGem(
+  _prev: { error: string | null },
+  formData: FormData
+): Promise<{ error: string | null }> {
+  const id = formData.get("id") as string;
+  const raw = {
+    name: formData.get("name") as string,
+    species: (formData.get("species") as string) || null,
+    variety: (formData.get("variety") as string) || null,
+    weightCarats: formData.get("weightCarats")
+      ? Number(formData.get("weightCarats"))
+      : null,
+    color: (formData.get("color") as string) || null,
+    clarity: (formData.get("clarity") as string) || null,
+    cut: (formData.get("cut") as string) || null,
+    treatment: (formData.get("treatment") as string) || null,
+    shape: (formData.get("shape") as string) || null,
+    purchasePrice: formData.get("purchasePrice")
+      ? Number(formData.get("purchasePrice"))
+      : null,
+    notes: (formData.get("notes") as string) || null,
+    isPublic: formData.get("isPublic") === "on",
+  };
+
+  try {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...(await authHeader()),
+    };
+    const res = await fetch(`${baseUrl()}/api/v1/gems/${id}`, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify(raw),
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new ApiError(res.status, text);
+    }
+  } catch (e) {
+    return { error: parseApiError(e) };
+  }
+
+  redirect(`/dashboard/gems/${id}`);
+}
+
 export async function deleteGem(
   _prev: { error: string | null },
   formData: FormData

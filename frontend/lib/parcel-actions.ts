@@ -85,6 +85,50 @@ export async function createParcel(
   redirect(`/dashboard/parcels/${parcel.id}`);
 }
 
+export async function updateParcel(
+  _prev: { error: string | null },
+  formData: FormData
+): Promise<{ error: string | null }> {
+  const id = formData.get("id") as string;
+  const raw = {
+    name: formData.get("name") as string,
+    species: (formData.get("species") as string) || null,
+    variety: (formData.get("variety") as string) || null,
+    quantity: Number(formData.get("quantity") || 1),
+    totalWeightCarats: formData.get("totalWeightCarats")
+      ? Number(formData.get("totalWeightCarats"))
+      : null,
+    color: (formData.get("color") as string) || null,
+    treatment: (formData.get("treatment") as string) || null,
+    purchasePrice: formData.get("purchasePrice")
+      ? Number(formData.get("purchasePrice"))
+      : null,
+    notes: (formData.get("notes") as string) || null,
+    isPublic: formData.get("isPublic") === "on",
+  };
+
+  try {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...(await authHeader()),
+    };
+    const res = await fetch(`${baseUrl()}/api/v1/gem-parcels/${id}`, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify(raw),
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new ApiError(res.status, text);
+    }
+  } catch (e) {
+    return { error: parseApiError(e) };
+  }
+
+  redirect(`/dashboard/parcels/${id}`);
+}
+
 export async function deleteParcel(
   _prev: { error: string | null },
   formData: FormData
