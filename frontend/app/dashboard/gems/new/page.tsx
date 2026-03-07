@@ -1,11 +1,12 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import Link from "next/link";
 import { createGem } from "@/lib/gem-actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { SuggestInput } from "@/components/ui/suggest-input";
 import {
   Card,
   CardContent,
@@ -15,11 +16,27 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
+import {
+  GEM_SPECIES,
+  GEM_VARIETIES,
+  ALL_VARIETIES,
+  GEM_COLORS,
+  GEM_CLARITIES,
+  GEM_CUTS,
+  GEM_SHAPES,
+  GEM_TREATMENTS,
+} from "@/lib/gem-options";
 
 const initialState = { error: null as string | null };
 
 export default function NewGemPage() {
   const [state, formAction, pending] = useActionState(createGem, initialState);
+  const [species, setSpecies] = useState("");
+
+  // Show species-specific varieties when the entered species matches a known one,
+  // otherwise show the full list.
+  const varietyOptions =
+    GEM_VARIETIES[species as keyof typeof GEM_VARIETIES] ?? ALL_VARIETIES;
 
   return (
     <div className="flex flex-col gap-6 max-w-2xl">
@@ -51,18 +68,37 @@ export default function NewGemPage() {
               <Label htmlFor="name">
                 Name <span className="text-red-500">*</span>
               </Label>
-              <Input id="name" name="name" placeholder="e.g. Blue Sapphire #1" required />
+              <Input
+                id="name"
+                name="name"
+                placeholder="e.g. Ceylon Sapphire #1"
+                required
+              />
             </div>
 
-            {/* Species / Variety */}
+            {/* Species / Variety — variety list filters based on species */}
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="species">Species</Label>
-                <Input id="species" name="species" placeholder="e.g. Corundum" />
+                <SuggestInput
+                  id="species"
+                  name="species"
+                  listId="species-list"
+                  options={GEM_SPECIES}
+                  placeholder="e.g. Corundum"
+                  value={species}
+                  onChange={(e) => setSpecies(e.target.value)}
+                />
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="variety">Variety</Label>
-                <Input id="variety" name="variety" placeholder="e.g. Sapphire" />
+                <SuggestInput
+                  id="variety"
+                  name="variety"
+                  listId="variety-list"
+                  options={varietyOptions}
+                  placeholder="e.g. Sapphire"
+                />
               </div>
             </div>
 
@@ -81,7 +117,13 @@ export default function NewGemPage() {
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="color">Color</Label>
-                <Input id="color" name="color" placeholder="e.g. Vivid blue" />
+                <SuggestInput
+                  id="color"
+                  name="color"
+                  listId="color-list"
+                  options={GEM_COLORS}
+                  placeholder="e.g. Vivid Blue"
+                />
               </div>
             </div>
 
@@ -89,11 +131,23 @@ export default function NewGemPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="clarity">Clarity</Label>
-                <Input id="clarity" name="clarity" placeholder="e.g. Eye-clean" />
+                <SuggestInput
+                  id="clarity"
+                  name="clarity"
+                  listId="clarity-list"
+                  options={GEM_CLARITIES}
+                  placeholder="e.g. Eye Clean"
+                />
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="cut">Cut</Label>
-                <Input id="cut" name="cut" placeholder="e.g. Excellent" />
+                <SuggestInput
+                  id="cut"
+                  name="cut"
+                  listId="cut-list"
+                  options={GEM_CUTS}
+                  placeholder="e.g. Oval Brilliant"
+                />
               </div>
             </div>
 
@@ -101,11 +155,23 @@ export default function NewGemPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="treatment">Treatment</Label>
-                <Input id="treatment" name="treatment" placeholder="e.g. Heat treated" />
+                <SuggestInput
+                  id="treatment"
+                  name="treatment"
+                  listId="treatment-list"
+                  options={GEM_TREATMENTS}
+                  placeholder="e.g. None"
+                />
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="shape">Shape</Label>
-                <Input id="shape" name="shape" placeholder="e.g. Oval" />
+                <SuggestInput
+                  id="shape"
+                  name="shape"
+                  listId="shape-list"
+                  options={GEM_SHAPES}
+                  placeholder="e.g. Oval"
+                />
               </div>
             </div>
 
@@ -129,7 +195,7 @@ export default function NewGemPage() {
                 id="notes"
                 name="notes"
                 rows={3}
-                placeholder="Any additional notes…"
+                placeholder="Provenance, certificate numbers, observations…"
                 className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none"
               />
             </div>
