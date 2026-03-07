@@ -214,3 +214,15 @@ public class SaleItemConfiguration : IEntityTypeConfiguration<SaleItem>
             .OnDelete(DeleteBehavior.SetNull);
     }
 }
+
+public class GemVocabularyConfiguration : IEntityTypeConfiguration<GemVocabulary>
+{
+    public void Configure(EntityTypeBuilder<GemVocabulary> builder)
+    {
+        builder.HasKey(x => x.Id);
+        builder.Property(x => x.Field).HasMaxLength(50).IsRequired();
+        builder.Property(x => x.Value).HasMaxLength(200).IsRequired();
+        builder.Property(x => x.ParentValue).HasMaxLength(200);
+        builder.HasIndex(x => new { x.Field, x.Value }).IsUnique();
+    }
+}

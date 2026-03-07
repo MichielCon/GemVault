@@ -17,6 +17,7 @@ public interface IApplicationDbContext
     DbSet<OrderItem> OrderItems { get; }
     DbSet<Sale> Sales { get; }
     DbSet<SaleItem> SaleItems { get; }
+    DbSet<GemVault.Domain.Entities.GemVocabulary> GemVocabularies { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
