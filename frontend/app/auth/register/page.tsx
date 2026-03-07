@@ -21,7 +21,7 @@ export default function RegisterPage() {
   const [state, formAction, pending] = useActionState(register, initialState);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+    <div className="flex min-h-screen items-center justify-center bg-slate-100 p-4">
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-2xl">Create account</CardTitle>
@@ -30,7 +30,7 @@ export default function RegisterPage() {
         <form action={formAction}>
           <CardContent className="flex flex-col gap-4">
             {state.error && (
-              <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              <p className="rounded-md bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-700">
                 {state.error}
               </p>
             )}
@@ -54,6 +54,7 @@ export default function RegisterPage() {
                 required
                 autoComplete="new-password"
               />
+              <p className="text-xs text-muted-foreground">At least 8 characters.</p>
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="role">Account type</Label>

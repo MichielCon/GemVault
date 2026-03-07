@@ -21,7 +21,7 @@ export default function LoginPage() {
   const [state, formAction, pending] = useActionState(login, initialState);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+    <div className="flex min-h-screen items-center justify-center bg-slate-100 p-4">
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-2xl">GemVault</CardTitle>
@@ -30,7 +30,7 @@ export default function LoginPage() {
         <form action={formAction}>
           <CardContent className="flex flex-col gap-4">
             {state.error && (
-              <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              <p className="rounded-md bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-700">
                 {state.error}
               </p>
             )}

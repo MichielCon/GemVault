@@ -21,8 +21,11 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
-// Controllers
-builder.Services.AddControllers();
+// Controllers — configure JSON to accept enum names as strings
+builder.Services.AddControllers()
+    .AddJsonOptions(opts =>
+        opts.JsonSerializerOptions.Converters.Add(
+            new System.Text.Json.Serialization.JsonStringEnumConverter()));
 
 // OpenAPI
 builder.Services.AddOpenApi();
