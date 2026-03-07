@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/card";
 import { ArrowLeft, Globe, Lock, Pencil } from "lucide-react";
 import type { GemParcelDto } from "@/lib/types";
+import { PhotoUploader } from "@/components/gems/photo-uploader";
+import { DeleteParcelButton } from "@/components/parcels/delete-parcel-button";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -61,6 +63,7 @@ export default async function ParcelDetailPage({ params }: Props) {
               Edit
             </Link>
           </Button>
+          <DeleteParcelButton id={parcel.id} />
           <Badge variant={parcel.isPublic ? "default" : "outline"}>
           {parcel.isPublic ? (
             <><Globe size={12} className="mr-1" />Public</>
@@ -99,6 +102,7 @@ export default async function ParcelDetailPage({ params }: Props) {
               ))}
             </div>
           )}
+          <PhotoUploader id={parcel.id} type="parcel" />
         </div>
 
         {/* Details */}

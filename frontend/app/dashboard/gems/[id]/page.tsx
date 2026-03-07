@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/card";
 import { ArrowLeft, Globe, Lock, Pencil } from "lucide-react";
 import type { GemDto } from "@/lib/types";
+import { PhotoUploader } from "@/components/gems/photo-uploader";
+import { DeleteGemButton } from "@/components/gems/delete-gem-button";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -61,6 +63,7 @@ export default async function GemDetailPage({ params }: Props) {
               Edit
             </Link>
           </Button>
+          <DeleteGemButton id={gem.id} />
           <Badge variant={gem.isPublic ? "default" : "outline"}>
           {gem.isPublic ? (
             <><Globe size={12} className="mr-1" />Public</>
@@ -99,6 +102,7 @@ export default async function GemDetailPage({ params }: Props) {
               ))}
             </div>
           )}
+          <PhotoUploader id={gem.id} type="gem" />
         </div>
 
         {/* Details */}

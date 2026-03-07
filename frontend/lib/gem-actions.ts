@@ -134,6 +134,41 @@ export async function updateGem(
   redirect(`/dashboard/gems/${id}`);
 }
 
+export async function uploadGemPhoto(
+  id: string,
+  _prev: { error: string | null },
+  formData: FormData
+): Promise<{ error: string | null }> {
+  const file = formData.get("file") as File | null;
+  if (!file || file.size === 0) return { error: "Please select a file." };
+
+  const apiForm = new FormData();
+  apiForm.append("file", file, file.name);
+
+  try {
+    const store = await cookies();
+    const token = store.get("access_token")?.value;
+    const headers: Record<string, string> = token
+      ? { Authorization: `Bearer ${token}` }
+      : {};
+
+    const res = await fetch(`${baseUrl()}/api/v1/gems/${id}/photos`, {
+      method: "POST",
+      headers,
+      body: apiForm,
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new ApiError(res.status, text);
+    }
+  } catch (e) {
+    return { error: parseApiError(e) };
+  }
+
+  redirect(`/dashboard/gems/${id}`);
+}
+
 export async function deleteGem(
   _prev: { error: string | null },
   formData: FormData
