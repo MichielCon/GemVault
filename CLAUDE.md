@@ -6,9 +6,9 @@ GemVault is a gemstone inventory management webapp for collectors and businesses
 ## Tech Stack
 | Layer | Technology |
 |---|---|
-| Frontend | Next.js 15 (App Router, TypeScript) + Tailwind CSS + shadcn/ui |
-| Backend | ASP.NET Core 9 Web API (C#) — Clean Architecture |
-| ORM | Entity Framework Core 9 |
+| Frontend | Next.js 16 (App Router, TypeScript) + Tailwind CSS v4 + shadcn/ui |
+| Backend | ASP.NET Core 10 Web API (C#) — Clean Architecture |
+| ORM | Entity Framework Core 10 |
 | Database | PostgreSQL 16 |
 | Image Storage | MinIO (self-hosted Docker, S3-compatible) |
 | Auth | ASP.NET Identity + JWT (+ refresh tokens) |

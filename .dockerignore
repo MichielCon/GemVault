@@ -1,0 +1,10 @@
+**/.git
+**/.vs
+**/bin
+**/obj
+**/.next
+**/node_modules
+.env
+.env.local
+**/*.user
+**/TestResults
