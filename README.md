@@ -27,8 +27,16 @@ Built end-to-end using a multi-agent Claude Code setup where specialised AI agen
 - Owner view vs public view enforced server-side: purchase price and private notes are never exposed unauthenticated
 
 **Dashboard**
-- Stats at a glance: gem count, parcel count, total invested, total revenue, supplier count, order count
-- Recent acquisitions feed
+- KPI cards: gems in stock, unsold inventory value, total revenue, net profit with margin %
+- Revenue bar chart (last 6 months) and inventory composition donut chart (unsold gems by species)
+- Recent sales table and recently-added items feed side by side
+- Business counters: suppliers, purchase orders, sales
+
+**Inventory UI**
+- Grid and list view toggle with preference persisted per section (localStorage)
+- Search bar filters by name, species, or variety
+- Status filter: All / In Stock / Sold — applied server-side so pagination stays correct
+- Sold badge (amber) and Public badge on cards and list rows
 
 **Auth**
 - JWT + refresh token auth, tokens stored in httpOnly cookies (not localStorage)
@@ -50,7 +58,8 @@ Built end-to-end using a multi-agent Claude Code setup where specialised AI agen
 | Database | PostgreSQL 16 |
 | File Storage | MinIO (self-hosted, S3-compatible API) |
 | Auth | ASP.NET Identity + JWT + refresh tokens |
-| Tests | xUnit — unit tests for validators and command handlers |
+| Charts | Recharts 2 — server-data, client-rendered bar and donut charts |
+| Tests | xUnit unit tests + integration tests (WebApplicationFactory + Testcontainers PostgreSQL + Respawn) |
 | Infrastructure | Docker Compose (5 services: api, frontend, db, minio, nginx) |
 | CI/CD | GitHub Actions — build + test on PR, SSH deploy on merge to main |
 
@@ -65,7 +74,8 @@ GemVault/
 │   ├── GemVault.Domain/         # Entities, value objects, domain interfaces (no dependencies)
 │   ├── GemVault.Application/    # Use cases, DTOs, CQRS handlers, FluentValidation
 │   ├── GemVault.Infrastructure/ # EF Core DbContext, repositories, MinIO client, Identity
-│   └── GemVault.Tests/          # xUnit — validators, command handlers
+│   ├── GemVault.Tests/          # xUnit unit tests — validators, command handlers
+│   └── GemVault.Tests.Integration/ # Integration tests — real PostgreSQL via Testcontainers
 ├── frontend/
 │   ├── app/                     # Next.js App Router — pages and layouts
 │   │   ├── dashboard/           # Authenticated dashboard (gems, parcels, orders, sales, origins)
@@ -85,6 +95,8 @@ GemVault/
 - Soft delete across all entities via global EF query filters — no data is ever hard-deleted
 - Frontend Server Actions run on the server and forward the auth cookie to the API — the JWT is never exposed to client JavaScript
 - SSR for all list and detail pages; forms are client components using `useActionState`
+- Photo proxy route (`/api/photos?url=`) streams MinIO images server-side — bypasses Next.js `remotePatterns` entirely and works inside Docker without exposing MinIO ports
+- Gem/parcel list queries include SaleItems in a single EF Core filtered include; `isSold` is computed in-process, never a separate query
 
 ---
 
@@ -104,7 +116,7 @@ This project was developed using **Claude Code** with a multi-agent architecture
 
 Each agent runs in its own Claude Code session with access to its agent file (persistent memory) plus the shared `CLAUDE.md` project guide. The main session orchestrates work and cherry-picks decisions into the agent files. This keeps context focused and prevents agents from drifting outside their lane.
 
-The entire backend (Clean Architecture, 12 entities, CQRS, auth, MinIO integration, EF migrations, 18 unit tests) and frontend (App Router, server actions, full CRUD, photo upload, vocabulary system, public scan pages, dashboard stats) were built through this agent workflow.
+The entire backend (Clean Architecture, 12 entities, CQRS, auth, MinIO integration, EF migrations, unit + integration tests) and frontend (App Router, server actions, full CRUD, photo upload, vocabulary system, public scan pages, analytics dashboard) were built through this agent workflow.
 
 ---
 
@@ -133,10 +145,17 @@ The API applies EF Core migrations automatically on startup. On first run, regis
 ## Running Tests
 
 ```bash
+# Unit tests (fast, no Docker needed)
 dotnet test src/GemVault.Tests
+
+# Integration tests (requires Docker — spins up a real PostgreSQL container)
+dotnet test src/GemVault.Tests.Integration
+
+# Both
+dotnet test src/GemVault.slnx
 ```
 
-18 tests covering command validators and MediatR handler logic.
+Unit tests cover command validators and MediatR handler logic. Integration tests use `WebApplicationFactory` + Testcontainers PostgreSQL + Respawn to run the full ASP.NET Core pipeline against a real database, including regression tests for the `DateTime.Kind=Unspecified` / Npgsql UTC bug and end-to-end sold-status linking.
 
 ---
 
@@ -164,5 +183,6 @@ PublicToken     → UUID per Gem/Parcel for QR/RFID scan links
 - [x] Phase 1 — Backend foundation (Clean Architecture, auth, Gem/Parcel CRUD, photo upload, public scan)
 - [x] Phase 2 — Frontend (full dashboard, edit forms, photo uploader, public scan page)
 - [x] Phase 3 — Suppliers, purchase orders, sales, dashboard stats, vocabulary system, origin picker
-- [ ] Phase 4 — Provenance map (Leaflet), QR code generation, certificate upload (PDF → MinIO), analytics charts
+- [x] Phase 3.5 — Analytics dashboard (KPI cards, revenue chart, species donut), photo proxy, sold badge + status filter, grid/list toggle, integration test suite
+- [ ] Phase 4 — Provenance map (Leaflet), QR code generation, certificate upload (PDF → MinIO)
 - [ ] Phase 5 — .NET MAUI desktop/mobile app (offline-first, shared C# domain models), multi-tenancy, insurance valuation PDF reports
