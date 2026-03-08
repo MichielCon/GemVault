@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GemVault.Application.PurchaseOrders.Queries;
 
-public record GetPurchaseOrdersQuery(int Page = 1, int PageSize = 20) : IRequest<PagedResult<PurchaseOrderSummaryDto>>;
+public record GetPurchaseOrdersQuery(int Page = 1, int PageSize = 20, string? Search = null) : IRequest<PagedResult<PurchaseOrderSummaryDto>>;
 
 public class GetPurchaseOrdersQueryHandler(
     IApplicationDbContext context,
@@ -24,6 +24,14 @@ public class GetPurchaseOrdersQueryHandler(
             .Include(o => o.Supplier)
             .Include(o => o.Items)
             .Where(o => o.OwnerId == currentUser.UserId && !o.IsDeleted);
+
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            var search = request.Search.ToLower();
+            query = query.Where(o =>
+                (o.Reference != null && o.Reference.ToLower().Contains(search)) ||
+                o.Supplier.Name.ToLower().Contains(search));
+        }
 
         var total = await query.CountAsync(ct);
 

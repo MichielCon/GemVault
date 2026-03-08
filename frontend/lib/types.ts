@@ -272,6 +272,21 @@ export interface DashboardStatsDto {
   recentItems: RecentItemDto[];
 }
 
+// ─── Origins (map) ────────────────────────────────────────────────────────────
+
+export interface OriginMapDto {
+  id: string;
+  country: string;
+  mine: string | null;
+  region: string | null;
+  gemCount: number;
+  parcelCount: number;
+  totalCarats: number;
+  totalInvested: number;
+  species: string[];
+  createdAt: string;
+}
+
 // ─── Public scan ──────────────────────────────────────────────────────────────
 
 export interface PublicPhotoDto {

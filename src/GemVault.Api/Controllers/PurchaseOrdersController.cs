@@ -15,9 +15,10 @@ public class PurchaseOrdersController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetPurchaseOrders(
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20,
+        [FromQuery] string? search = null,
         CancellationToken ct = default)
     {
-        var result = await mediator.Send(new GetPurchaseOrdersQuery(page, pageSize), ct);
+        var result = await mediator.Send(new GetPurchaseOrdersQuery(page, pageSize, search), ct);
         return Ok(result);
     }
 

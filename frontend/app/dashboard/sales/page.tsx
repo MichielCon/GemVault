@@ -1,35 +1,41 @@
 import Link from "next/link";
 import { salesApi } from "@/lib/api";
 import { Button } from "@/components/ui/button";
+import { SearchInput } from "@/components/ui/search-input";
 import { Plus, TrendingUp } from "lucide-react";
 import type { SaleSummaryDto } from "@/lib/types";
 
 interface Props {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; search?: string }>;
 }
 
 export default async function SalesPage({ searchParams }: Props) {
-  const { page: pageStr } = await searchParams;
+  const { page: pageStr, search } = await searchParams;
   const page = Number(pageStr ?? 1);
 
   let result;
   try {
-    result = await salesApi.list(page, 20);
+    result = await salesApi.list(page, 20, search);
   } catch {
-    return (
-      <div className="flex flex-col gap-4">
-        <Header />
-        <p className="text-muted-foreground">Failed to load sales. Is the API running?</p>
-      </div>
-    );
+    return <p className="text-muted-foreground">Failed to load sales. Is the API running?</p>;
   }
 
   return (
     <div className="flex flex-col gap-6">
-      <Header />
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight">Sales</h1>
+          <p className="text-sm text-muted-foreground">Record and track gem sales</p>
+        </div>
+        <Button asChild size="sm">
+          <Link href="/dashboard/sales/new"><Plus size={16} />New sale</Link>
+        </Button>
+      </div>
+
+      <SearchInput basePath="/dashboard/sales" placeholder="Search by buyer name…" defaultValue={search} />
 
       {result.items.length === 0 ? (
-        <EmptyState />
+        <EmptyState hasSearch={!!search} />
       ) : (
         <>
           <div className="overflow-hidden rounded-lg border bg-card">
@@ -49,26 +55,9 @@ export default async function SalesPage({ searchParams }: Props) {
               </tbody>
             </table>
           </div>
-          <Pagination page={page} totalPages={result.totalPages} />
+          <Pagination page={page} totalPages={result.totalPages} search={search} />
         </>
       )}
-    </div>
-  );
-}
-
-function Header() {
-  return (
-    <div className="flex items-center justify-between">
-      <div>
-        <h1 className="text-xl font-semibold tracking-tight">Sales</h1>
-        <p className="text-sm text-muted-foreground">Record and track gem sales</p>
-      </div>
-      <Button asChild size="sm">
-        <Link href="/dashboard/sales/new">
-          <Plus size={16} />
-          New sale
-        </Link>
-      </Button>
     </div>
   );
 }
@@ -90,37 +79,38 @@ function SaleRow({ sale }: { sale: SaleSummaryDto }) {
   );
 }
 
-function EmptyState() {
+function EmptyState({ hasSearch }: { hasSearch: boolean }) {
   return (
     <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-16 text-center">
-      <TrendingUp size={48} strokeWidth={1} className="mb-4 text-muted-foreground" />
-      <p className="font-medium">No sales yet</p>
+      <TrendingUp size={40} strokeWidth={1} className="mb-3 text-muted-foreground/50" />
+      <p className="font-medium">{hasSearch ? "No results" : "No sales yet"}</p>
       <p className="mt-1 text-sm text-muted-foreground">
-        Record your first sale to track revenue.
+        {hasSearch ? "Try a different search term." : "Record your first sale to track revenue."}
       </p>
-      <Button asChild size="sm" className="mt-4">
-        <Link href="/dashboard/sales/new">
-          <Plus size={16} />
-          New sale
-        </Link>
-      </Button>
+      {!hasSearch && (
+        <Button asChild size="sm" className="mt-4">
+          <Link href="/dashboard/sales/new"><Plus size={16} />New sale</Link>
+        </Button>
+      )}
     </div>
   );
 }
 
-function Pagination({ page, totalPages }: { page: number; totalPages: number }) {
+function Pagination({ page, totalPages, search }: { page: number; totalPages: number; search?: string }) {
   if (totalPages <= 1) return null;
-
+  function url(p: number) {
+    const q = new URLSearchParams({ page: String(p) });
+    if (search) q.set("search", search);
+    return `/dashboard/sales?${q}`;
+  }
   return (
     <div className="flex items-center justify-center gap-2">
       <Button asChild variant="outline" size="sm" disabled={page <= 1}>
-        <Link href={`/dashboard/sales?page=${page - 1}`}>Previous</Link>
+        <Link href={url(page - 1)}>Previous</Link>
       </Button>
-      <span className="text-sm text-muted-foreground">
-        {page} / {totalPages}
-      </span>
+      <span className="text-sm text-muted-foreground">{page} / {totalPages}</span>
       <Button asChild variant="outline" size="sm" disabled={page >= totalPages}>
-        <Link href={`/dashboard/sales?page=${page + 1}`}>Next</Link>
+        <Link href={url(page + 1)}>Next</Link>
       </Button>
     </div>
   );

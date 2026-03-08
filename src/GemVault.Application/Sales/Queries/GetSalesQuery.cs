@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GemVault.Application.Sales.Queries;
 
-public record GetSalesQuery(int Page = 1, int PageSize = 20) : IRequest<PagedResult<SaleSummaryDto>>;
+public record GetSalesQuery(int Page = 1, int PageSize = 20, string? Search = null) : IRequest<PagedResult<SaleSummaryDto>>;
 
 public class GetSalesQueryHandler(
     IApplicationDbContext context,
@@ -23,6 +23,13 @@ public class GetSalesQueryHandler(
         var query = context.Sales
             .Include(s => s.Items)
             .Where(s => s.OwnerId == currentUser.UserId && !s.IsDeleted);
+
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            var search = request.Search.ToLower();
+            query = query.Where(s =>
+                s.BuyerName != null && s.BuyerName.ToLower().Contains(search));
+        }
 
         var total = await query.CountAsync(ct);
 

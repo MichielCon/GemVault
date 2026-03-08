@@ -19,6 +19,13 @@ public class OriginsController(IMediator mediator) : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("map-data")]
+    public async Task<IActionResult> GetMapData(CancellationToken ct)
+    {
+        var result = await mediator.Send(new GetOriginsMapDataQuery(), ct);
+        return Ok(result);
+    }
+
     [HttpGet("{id:guid}")]
     [AllowAnonymous]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct)

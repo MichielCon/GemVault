@@ -15,6 +15,7 @@ import { ArrowLeft, Globe, Lock, Pencil, ShoppingCart, Tag } from "lucide-react"
 import type { GemDto } from "@/lib/types";
 import { PhotoUploader } from "@/components/gems/photo-uploader";
 import { DeleteGemButton } from "@/components/gems/delete-gem-button";
+import { QrCodeButton } from "@/components/gems/qr-code-button";
 import { proxyPhotoUrl } from "@/lib/utils";
 
 interface Props {
@@ -80,6 +81,7 @@ export default async function GemDetailPage({ params }: Props) {
               Edit
             </Link>
           </Button>
+          {gem.publicToken && <QrCodeButton token={gem.publicToken} name={gem.name} />}
           <DeleteGemButton id={gem.id} />
           <Badge variant={gem.isPublic ? "default" : "outline"}>
           {gem.isPublic ? (

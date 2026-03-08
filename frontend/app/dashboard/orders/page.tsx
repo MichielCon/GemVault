@@ -1,35 +1,41 @@
 import Link from "next/link";
 import { purchaseOrdersApi } from "@/lib/api";
 import { Button } from "@/components/ui/button";
+import { SearchInput } from "@/components/ui/search-input";
 import { Plus, ShoppingCart } from "lucide-react";
 import type { PurchaseOrderSummaryDto } from "@/lib/types";
 
 interface Props {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; search?: string }>;
 }
 
 export default async function OrdersPage({ searchParams }: Props) {
-  const { page: pageStr } = await searchParams;
+  const { page: pageStr, search } = await searchParams;
   const page = Number(pageStr ?? 1);
 
   let result;
   try {
-    result = await purchaseOrdersApi.list(page, 20);
+    result = await purchaseOrdersApi.list(page, 20, search);
   } catch {
-    return (
-      <div className="flex flex-col gap-4">
-        <Header />
-        <p className="text-muted-foreground">Failed to load orders. Is the API running?</p>
-      </div>
-    );
+    return <p className="text-muted-foreground">Failed to load orders. Is the API running?</p>;
   }
 
   return (
     <div className="flex flex-col gap-6">
-      <Header />
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight">Purchase Orders</h1>
+          <p className="text-sm text-muted-foreground">Track gem acquisitions</p>
+        </div>
+        <Button asChild size="sm">
+          <Link href="/dashboard/orders/new"><Plus size={16} />New order</Link>
+        </Button>
+      </div>
+
+      <SearchInput basePath="/dashboard/orders" placeholder="Search by reference or supplier…" defaultValue={search} />
 
       {result.items.length === 0 ? (
-        <EmptyState />
+        <EmptyState hasSearch={!!search} />
       ) : (
         <>
           <div className="overflow-hidden rounded-lg border bg-card">
@@ -50,26 +56,9 @@ export default async function OrdersPage({ searchParams }: Props) {
               </tbody>
             </table>
           </div>
-          <Pagination page={page} totalPages={result.totalPages} />
+          <Pagination page={page} totalPages={result.totalPages} search={search} />
         </>
       )}
-    </div>
-  );
-}
-
-function Header() {
-  return (
-    <div className="flex items-center justify-between">
-      <div>
-        <h1 className="text-xl font-semibold tracking-tight">Purchase Orders</h1>
-        <p className="text-sm text-muted-foreground">Track gem acquisitions</p>
-      </div>
-      <Button asChild size="sm">
-        <Link href="/dashboard/orders/new">
-          <Plus size={16} />
-          New order
-        </Link>
-      </Button>
     </div>
   );
 }
@@ -83,9 +72,7 @@ function OrderRow({ order }: { order: PurchaseOrderSummaryDto }) {
         </Link>
       </td>
       <td className="px-4 py-3 text-muted-foreground">{order.supplierName}</td>
-      <td className="px-4 py-3 text-muted-foreground">
-        {new Date(order.orderDate).toLocaleDateString()}
-      </td>
+      <td className="px-4 py-3 text-muted-foreground">{new Date(order.orderDate).toLocaleDateString()}</td>
       <td className="px-4 py-3 text-muted-foreground">{order.itemCount}</td>
       <td className="px-4 py-3 font-medium">
         {order.totalCost.toLocaleString("en-US", { style: "currency", currency: "USD" })}
@@ -94,37 +81,38 @@ function OrderRow({ order }: { order: PurchaseOrderSummaryDto }) {
   );
 }
 
-function EmptyState() {
+function EmptyState({ hasSearch }: { hasSearch: boolean }) {
   return (
     <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-16 text-center">
-      <ShoppingCart size={48} strokeWidth={1} className="mb-4 text-muted-foreground" />
-      <p className="font-medium">No orders yet</p>
+      <ShoppingCart size={40} strokeWidth={1} className="mb-3 text-muted-foreground/50" />
+      <p className="font-medium">{hasSearch ? "No results" : "No orders yet"}</p>
       <p className="mt-1 text-sm text-muted-foreground">
-        Record your first purchase order to track acquisition costs.
+        {hasSearch ? "Try a different search term." : "Record your first purchase order to track acquisition costs."}
       </p>
-      <Button asChild size="sm" className="mt-4">
-        <Link href="/dashboard/orders/new">
-          <Plus size={16} />
-          New order
-        </Link>
-      </Button>
+      {!hasSearch && (
+        <Button asChild size="sm" className="mt-4">
+          <Link href="/dashboard/orders/new"><Plus size={16} />New order</Link>
+        </Button>
+      )}
     </div>
   );
 }
 
-function Pagination({ page, totalPages }: { page: number; totalPages: number }) {
+function Pagination({ page, totalPages, search }: { page: number; totalPages: number; search?: string }) {
   if (totalPages <= 1) return null;
-
+  function url(p: number) {
+    const q = new URLSearchParams({ page: String(p) });
+    if (search) q.set("search", search);
+    return `/dashboard/orders?${q}`;
+  }
   return (
     <div className="flex items-center justify-center gap-2">
       <Button asChild variant="outline" size="sm" disabled={page <= 1}>
-        <Link href={`/dashboard/orders?page=${page - 1}`}>Previous</Link>
+        <Link href={url(page - 1)}>Previous</Link>
       </Button>
-      <span className="text-sm text-muted-foreground">
-        {page} / {totalPages}
-      </span>
+      <span className="text-sm text-muted-foreground">{page} / {totalPages}</span>
       <Button asChild variant="outline" size="sm" disabled={page >= totalPages}>
-        <Link href={`/dashboard/orders?page=${page + 1}`}>Next</Link>
+        <Link href={url(page + 1)}>Next</Link>
       </Button>
     </div>
   );

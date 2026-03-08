@@ -15,6 +15,7 @@ import { ArrowLeft, Globe, Lock, Pencil } from "lucide-react";
 import type { GemParcelDto } from "@/lib/types";
 import { PhotoUploader } from "@/components/gems/photo-uploader";
 import { DeleteParcelButton } from "@/components/parcels/delete-parcel-button";
+import { QrCodeButton } from "@/components/gems/qr-code-button";
 import { proxyPhotoUrl } from "@/lib/utils";
 
 interface Props {
@@ -64,6 +65,7 @@ export default async function ParcelDetailPage({ params }: Props) {
               Edit
             </Link>
           </Button>
+          {parcel.publicToken && <QrCodeButton token={parcel.publicToken} name={parcel.name} />}
           <DeleteParcelButton id={parcel.id} />
           <Badge variant={parcel.isPublic ? "default" : "outline"}>
           {parcel.isPublic ? (

@@ -81,3 +81,84 @@ body {
   background: var(--background);
   color: var(--foreground);
 }
+
+/* ─── Provenance map markers ──────────────────────────────────────────────── */
+.gem-marker-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gem-marker-dot {
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.5), 0 0 0 2px rgba(139, 92, 246, 0.3);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.gem-marker-dot:hover {
+  transform: scale(1.15);
+  box-shadow: 0 6px 24px rgba(139, 92, 246, 0.7), 0 0 0 3px rgba(139, 92, 246, 0.5);
+}
+
+.gem-marker-pulse {
+  position: absolute;
+  border-radius: 50%;
+  z-index: 1;
+  animation: gem-pulse 2.5s ease-out infinite;
+  pointer-events: none;
+}
+
+.gem-marker-pulse-2 {
+  animation-delay: 0.8s;
+}
+
+@keyframes gem-pulse {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+/* Leaflet overrides */
+.leaflet-container {
+  background: #1a1a2e;
+  font-family: inherit;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+/* Map panel slide animation */
+.map-panel-enter {
+  animation: panel-slide-in 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.map-panel-exit {
+  animation: panel-slide-out 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes panel-slide-in {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes panel-slide-out {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(100%); opacity: 0; }
+}

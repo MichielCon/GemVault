@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { logout } from "@/lib/auth";
-import { Gem, Package, MapPin, LogOut, Building2, ShoppingCart, TrendingUp, LayoutDashboard } from "lucide-react";
+import { Gem, Package, MapPin, Map, LogOut, Building2, ShoppingCart, TrendingUp, LayoutDashboard } from "lucide-react";
 import { NavLink } from "@/components/dashboard/nav-link";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -30,6 +30,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </NavLink>
           <NavLink href="/dashboard/origins" icon={<MapPin size={15} />}>
             Origins
+          </NavLink>
+          <NavLink href="/dashboard/map" icon={<Map size={15} />}>
+            Provenance Map
           </NavLink>
 
           <p className="mb-1 mt-4 px-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">

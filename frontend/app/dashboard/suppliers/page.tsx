@@ -1,28 +1,43 @@
 import Link from "next/link";
 import { suppliersApi } from "@/lib/api";
 import { Button } from "@/components/ui/button";
+import { SearchInput } from "@/components/ui/search-input";
 import { Plus, Building2 } from "lucide-react";
 import type { SupplierDto } from "@/lib/types";
 
-export default async function SuppliersPage() {
+interface Props {
+  searchParams: Promise<{ search?: string }>;
+}
+
+export default async function SuppliersPage({ searchParams }: Props) {
+  const { search } = await searchParams;
+
   let suppliers: SupplierDto[];
   try {
-    suppliers = await suppliersApi.list();
+    suppliers = await suppliersApi.list(search);
   } catch {
-    return (
-      <div className="flex flex-col gap-4">
-        <Header />
-        <p className="text-muted-foreground">Failed to load suppliers. Is the API running?</p>
-      </div>
-    );
+    return <p className="text-muted-foreground">Failed to load suppliers. Is the API running?</p>;
   }
 
   return (
     <div className="flex flex-col gap-6">
-      <Header />
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight">Suppliers</h1>
+          <p className="text-sm text-muted-foreground">Manage your gem suppliers</p>
+        </div>
+        <Button asChild size="sm">
+          <Link href="/dashboard/suppliers/new">
+            <Plus size={16} />
+            Add supplier
+          </Link>
+        </Button>
+      </div>
+
+      <SearchInput basePath="/dashboard/suppliers" placeholder="Search suppliers…" defaultValue={search} />
 
       {suppliers.length === 0 ? (
-        <EmptyState />
+        <EmptyState hasSearch={!!search} />
       ) : (
         <div className="overflow-hidden rounded-lg border bg-card">
           <table className="w-full text-sm">
@@ -46,23 +61,6 @@ export default async function SuppliersPage() {
   );
 }
 
-function Header() {
-  return (
-    <div className="flex items-center justify-between">
-      <div>
-        <h1 className="text-xl font-semibold tracking-tight">Suppliers</h1>
-        <p className="text-sm text-muted-foreground">Manage your gem suppliers</p>
-      </div>
-      <Button asChild size="sm">
-        <Link href="/dashboard/suppliers/new">
-          <Plus size={16} />
-          Add supplier
-        </Link>
-      </Button>
-    </div>
-  );
-}
-
 function SupplierRow({ supplier }: { supplier: SupplierDto }) {
   return (
     <tr className="hover:bg-muted/20 transition-colors">
@@ -78,20 +76,19 @@ function SupplierRow({ supplier }: { supplier: SupplierDto }) {
   );
 }
 
-function EmptyState() {
+function EmptyState({ hasSearch }: { hasSearch: boolean }) {
   return (
     <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-16 text-center">
       <Building2 size={40} strokeWidth={1} className="mb-3 text-muted-foreground/50" />
-      <p className="font-medium">No suppliers yet</p>
+      <p className="font-medium">{hasSearch ? "No results" : "No suppliers yet"}</p>
       <p className="mt-1 text-sm text-muted-foreground">
-        Add suppliers to track where your gems come from.
+        {hasSearch ? "Try a different search term." : "Add suppliers to track where your gems come from."}
       </p>
-      <Button asChild size="sm" className="mt-4">
-        <Link href="/dashboard/suppliers/new">
-          <Plus size={16} />
-          Add supplier
-        </Link>
-      </Button>
+      {!hasSearch && (
+        <Button asChild size="sm" className="mt-4">
+          <Link href="/dashboard/suppliers/new"><Plus size={16} />Add supplier</Link>
+        </Button>
+      )}
     </div>
   );
 }

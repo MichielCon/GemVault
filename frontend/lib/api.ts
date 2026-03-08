@@ -6,6 +6,7 @@ import type {
   GemParcelDto,
   GemParcelSummaryDto,
   OriginDto,
+  OriginMapDto,
   PagedResult,
   PublicGemDto,
   VocabularyItemDto,
@@ -117,6 +118,7 @@ export const originsApi = {
     return get<OriginDto[]>(`/api/v1/origins${q}`, false);
   },
   get: (id: string) => get<OriginDto>(`/api/v1/origins/${id}`, false),
+  mapData: () => get<OriginMapDto[]>("/api/v1/origins/map-data"),
 };
 
 // ─── GemParcels ───────────────────────────────────────────────────────────────
@@ -145,18 +147,22 @@ export const suppliersApi = {
 // ─── PurchaseOrders ───────────────────────────────────────────────────────────
 
 export const purchaseOrdersApi = {
-  list: (page = 1, pageSize = 20) =>
-    get<PagedResult<PurchaseOrderSummaryDto>>(
-      `/api/v1/purchase-orders?page=${page}&pageSize=${pageSize}`
-    ),
+  list: (page = 1, pageSize = 20, search?: string) => {
+    const q = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
+    if (search) q.set("search", search);
+    return get<PagedResult<PurchaseOrderSummaryDto>>(`/api/v1/purchase-orders?${q}`);
+  },
   get: (id: string) => get<PurchaseOrderDto>(`/api/v1/purchase-orders/${id}`),
 };
 
 // ─── Sales ────────────────────────────────────────────────────────────────────
 
 export const salesApi = {
-  list: (page = 1, pageSize = 20) =>
-    get<PagedResult<SaleSummaryDto>>(`/api/v1/sales?page=${page}&pageSize=${pageSize}`),
+  list: (page = 1, pageSize = 20, search?: string) => {
+    const q = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
+    if (search) q.set("search", search);
+    return get<PagedResult<SaleSummaryDto>>(`/api/v1/sales?${q}`);
+  },
   get: (id: string) => get<SaleDto>(`/api/v1/sales/${id}`),
 };
 
