@@ -28,7 +28,7 @@ internal static class GemParcelMappingExtensions
             .Select(ph => new GemParcelPhotoDto(ph.Id, storage.GetPublicUrl(ph.ObjectKey), ph.IsCover, ph.CreatedAt))
             .ToList());
 
-    internal static GemParcelSummaryDto ToSummaryDto(this GemParcel p, IStorageService storage)
+    internal static GemParcelSummaryDto ToSummaryDto(this GemParcel p, IStorageService storage, bool isSold = false)
     {
         var cover = p.Photos.FirstOrDefault(ph => ph.IsCover && !ph.IsDeleted)?.ObjectKey;
         return new GemParcelSummaryDto(
@@ -41,6 +41,7 @@ internal static class GemParcelMappingExtensions
             p.Color,
             p.IsPublic,
             cover != null ? storage.GetPublicUrl(cover) : null,
-            p.CreatedAt);
+            p.CreatedAt,
+            isSold);
     }
 }

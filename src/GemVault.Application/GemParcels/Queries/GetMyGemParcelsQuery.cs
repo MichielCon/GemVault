@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GemVault.Application.GemParcels.Queries;
 
-public record GetMyGemParcelsQuery(int Page = 1, int PageSize = 20, string? Search = null, Guid? OriginId = null)
+public record GetMyGemParcelsQuery(int Page = 1, int PageSize = 20, string? Search = null, Guid? OriginId = null, string? Status = null)
     : IRequest<PagedResult<GemParcelSummaryDto>>;
 
 public class GetMyGemParcelsQueryHandler(
@@ -24,6 +24,7 @@ public class GetMyGemParcelsQueryHandler(
 
         var query = context.GemParcels
             .Include(p => p.Photos)
+            .Include(p => p.SaleItems.Where(si => !si.IsDeleted))
             .Where(p => p.OwnerId == currentUser.UserId && !p.IsDeleted);
 
         if (request.OriginId.HasValue)
@@ -38,6 +39,11 @@ public class GetMyGemParcelsQueryHandler(
                 (p.Variety != null && p.Variety.ToLower().Contains(search)));
         }
 
+        if (request.Status == "Sold")
+            query = query.Where(p => p.SaleItems.Any(si => !si.IsDeleted));
+        else if (request.Status == "InStock")
+            query = query.Where(p => !p.SaleItems.Any(si => !si.IsDeleted));
+
         var total = await query.CountAsync(ct);
 
         var items = await query
@@ -46,7 +52,7 @@ public class GetMyGemParcelsQueryHandler(
             .Take(request.PageSize)
             .ToListAsync(ct);
 
-        var dtos = items.Select(p => p.ToSummaryDto(storage)).ToList();
+        var dtos = items.Select(p => p.ToSummaryDto(storage, p.SaleItems.Any())).ToList();
 
         return new PagedResult<GemParcelSummaryDto>(dtos, total, request.Page, request.PageSize);
     }

@@ -32,4 +32,5 @@ public record GemParcelSummaryDto(
     string? Color,
     bool IsPublic,
     string? CoverPhotoUrl,
-    DateTime CreatedAt);
+    DateTime CreatedAt,
+    bool IsSold);

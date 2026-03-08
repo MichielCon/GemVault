@@ -65,7 +65,7 @@ export default async function OriginDetailPage({ params }: Props) {
         {gems.length === 0 ? (
           <p className="text-sm text-muted-foreground">No gems from this origin.</p>
         ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {gems.map((gem) => (
               <GemCard key={gem.id} gem={gem} />
             ))}
@@ -82,7 +82,7 @@ export default async function OriginDetailPage({ params }: Props) {
         {parcels.length === 0 ? (
           <p className="text-sm text-muted-foreground">No parcels from this origin.</p>
         ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {parcels.map((parcel) => (
               <ParcelCard key={parcel.id} parcel={parcel} />
             ))}
@@ -98,34 +98,34 @@ function GemCard({ gem }: { gem: GemSummaryDto }) {
   return (
     <Link
       href={`/dashboard/gems/${gem.id}`}
-      className="group flex flex-col overflow-hidden rounded-xl border bg-card shadow-sm transition-shadow hover:shadow-md"
+      className="group flex flex-col overflow-hidden rounded-lg border bg-card shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5"
     >
-      <div className="relative aspect-square w-full bg-muted">
+      <div className="relative aspect-[4/3] w-full bg-muted">
         {gem.coverPhotoUrl ? (
           <Image
             src={proxyPhotoUrl(gem.coverPhotoUrl) ?? ""}
             alt={gem.name}
             fill
             unoptimized
-            className="object-cover transition-transform group-hover:scale-105"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-muted-foreground">
-            <Gem size={40} strokeWidth={1} />
+          <div className="flex h-full items-center justify-center text-muted-foreground/40">
+            <Gem size={32} strokeWidth={1} />
           </div>
         )}
         {gem.isPublic && (
-          <Badge variant="secondary" className="absolute right-2 top-2 text-xs">
+          <Badge className="absolute right-1.5 top-1.5 text-[10px] px-1.5 py-0 bg-white/90 text-slate-700 border-0 shadow-sm">
             Public
           </Badge>
         )}
       </div>
-      <div className="flex flex-col gap-1 p-3">
-        <p className="font-medium leading-none">{gem.name}</p>
-        <p className="text-xs text-muted-foreground">{label}</p>
+      <div className="flex flex-col gap-0.5 p-2.5">
+        <p className="truncate text-sm font-medium leading-snug">{gem.name}</p>
+        <p className="truncate text-[11px] text-muted-foreground">{label}</p>
         {gem.weightCarats && (
-          <p className="text-xs text-muted-foreground">{gem.weightCarats} ct</p>
+          <p className="text-[11px] text-muted-foreground">{gem.weightCarats} ct</p>
         )}
       </div>
     </Link>
@@ -137,33 +137,33 @@ function ParcelCard({ parcel }: { parcel: GemParcelSummaryDto }) {
   return (
     <Link
       href={`/dashboard/parcels/${parcel.id}`}
-      className="group flex flex-col overflow-hidden rounded-xl border bg-card shadow-sm transition-shadow hover:shadow-md"
+      className="group flex flex-col overflow-hidden rounded-lg border bg-card shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5"
     >
-      <div className="relative aspect-square w-full bg-muted">
+      <div className="relative aspect-[4/3] w-full bg-muted">
         {parcel.coverPhotoUrl ? (
           <Image
             src={proxyPhotoUrl(parcel.coverPhotoUrl) ?? ""}
             alt={parcel.name}
             fill
             unoptimized
-            className="object-cover transition-transform group-hover:scale-105"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-muted-foreground">
-            <Package size={40} strokeWidth={1} />
+          <div className="flex h-full items-center justify-center text-muted-foreground/40">
+            <Package size={32} strokeWidth={1} />
           </div>
         )}
         {parcel.isPublic && (
-          <Badge variant="secondary" className="absolute right-2 top-2 text-xs">
+          <Badge className="absolute right-1.5 top-1.5 text-[10px] px-1.5 py-0 bg-white/90 text-slate-700 border-0 shadow-sm">
             Public
           </Badge>
         )}
       </div>
-      <div className="flex flex-col gap-1 p-3">
-        <p className="font-medium leading-none">{parcel.name}</p>
-        <p className="text-xs text-muted-foreground">{label}</p>
-        <p className="text-xs text-muted-foreground">{parcel.quantity} stones</p>
+      <div className="flex flex-col gap-0.5 p-2.5">
+        <p className="truncate text-sm font-medium leading-snug">{parcel.name}</p>
+        <p className="truncate text-[11px] text-muted-foreground">{label}</p>
+        <p className="text-[11px] text-muted-foreground">{parcel.quantity} stones</p>
       </div>
     </Link>
   );

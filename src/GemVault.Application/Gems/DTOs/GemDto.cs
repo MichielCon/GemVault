@@ -45,4 +45,5 @@ public record GemSummaryDto(
     string? Color,
     bool IsPublic,
     string? CoverPhotoUrl,
-    DateTime CreatedAt);
+    DateTime CreatedAt,
+    bool IsSold);

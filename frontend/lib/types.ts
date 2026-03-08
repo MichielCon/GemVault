@@ -75,6 +75,7 @@ export interface GemSummaryDto {
   isPublic: boolean;
   coverPhotoUrl: string | null;
   createdAt: string;
+  isSold: boolean;
 }
 
 // ─── GemParcels ───────────────────────────────────────────────────────────────
@@ -118,6 +119,7 @@ export interface GemParcelSummaryDto {
   isPublic: boolean;
   coverPhotoUrl: string | null;
   createdAt: string;
+  isSold: boolean;
 }
 
 // ─── Vocabulary ───────────────────────────────────────────────────────────────
@@ -227,15 +229,46 @@ export interface RecentItemDto {
   createdAt: string;
 }
 
+export interface MonthlyRevenueDto {
+  year: number;
+  month: number;
+  revenue: number;
+}
+
+export interface SpeciesBreakdownDto {
+  species: string;
+  count: number;
+}
+
+export interface RecentSaleDto {
+  saleId: string;
+  saleDate: string;
+  buyerName: string | null;
+  totalValue: number;
+  itemCount: number;
+}
+
 export interface DashboardStatsDto {
+  // Inventory counts
   gemCount: number;
   parcelCount: number;
   parcelTotalQuantity: number;
+  unsoldGemCount: number;
+  unsoldParcelCount: number;
+  // Financial
   totalPurchaseValue: number;
   totalSalesValue: number;
+  unsoldInventoryValue: number;
+  netProfit: number;
+  profitMarginPct: number;
+  // Business counters
   supplierCount: number;
   purchaseOrderCount: number;
   saleCount: number;
+  // Charts & activity
+  monthlyRevenue: MonthlyRevenueDto[];
+  inventoryBySpecies: SpeciesBreakdownDto[];
+  recentSales: RecentSaleDto[];
   recentItems: RecentItemDto[];
 }
 

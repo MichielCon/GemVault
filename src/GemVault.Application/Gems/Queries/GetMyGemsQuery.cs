@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GemVault.Application.Gems.Queries;
 
-public record GetMyGemsQuery(int Page = 1, int PageSize = 20, string? Search = null, Guid? OriginId = null)
+public record GetMyGemsQuery(int Page = 1, int PageSize = 20, string? Search = null, Guid? OriginId = null, string? Status = null)
     : IRequest<PagedResult<GemSummaryDto>>;
 
 public class GetMyGemsQueryHandler(
@@ -24,6 +24,7 @@ public class GetMyGemsQueryHandler(
 
         var query = context.Gems
             .Include(g => g.Photos)
+            .Include(g => g.SaleItems.Where(si => !si.IsDeleted))
             .Where(g => g.OwnerId == currentUser.UserId && !g.IsDeleted);
 
         if (request.OriginId.HasValue)
@@ -38,6 +39,11 @@ public class GetMyGemsQueryHandler(
                 (g.Variety != null && g.Variety.ToLower().Contains(search)));
         }
 
+        if (request.Status == "Sold")
+            query = query.Where(g => g.SaleItems.Any(si => !si.IsDeleted));
+        else if (request.Status == "InStock")
+            query = query.Where(g => !g.SaleItems.Any(si => !si.IsDeleted));
+
         var total = await query.CountAsync(ct);
 
         var items = await query
@@ -49,10 +55,11 @@ public class GetMyGemsQueryHandler(
         var dtos = items.Select(g =>
         {
             var cover = g.Photos.FirstOrDefault(p => p.IsCover) ?? g.Photos.FirstOrDefault();
+            var isSold = g.SaleItems.Any();
             return new GemSummaryDto(
                 g.Id, g.Name, g.Species, g.Variety, g.WeightCarats, g.Color, g.IsPublic,
                 cover != null ? storage.GetPublicUrl(cover.ObjectKey) : null,
-                g.CreatedAt);
+                g.CreatedAt, isSold);
         }).ToList();
 
         return new PagedResult<GemSummaryDto>(dtos, total, request.Page, request.PageSize);

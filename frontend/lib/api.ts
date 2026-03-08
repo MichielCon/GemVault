@@ -90,10 +90,11 @@ export const authApi = {
 // ─── Gems ─────────────────────────────────────────────────────────────────────
 
 export const gemsApi = {
-  list: (page = 1, pageSize = 20, search?: string, originId?: string) => {
+  list: (page = 1, pageSize = 20, search?: string, originId?: string, status?: string) => {
     const q = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
     if (search) q.set("search", search);
     if (originId) q.set("originId", originId);
+    if (status && status !== "All") q.set("status", status);
     return get<PagedResult<GemSummaryDto>>(`/api/v1/gems?${q}`);
   },
   get: (id: string) => get<GemDto>(`/api/v1/gems/${id}`),
@@ -121,10 +122,11 @@ export const originsApi = {
 // ─── GemParcels ───────────────────────────────────────────────────────────────
 
 export const parcelsApi = {
-  list: (page = 1, pageSize = 20, search?: string, originId?: string) => {
+  list: (page = 1, pageSize = 20, search?: string, originId?: string, status?: string) => {
     const q = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
     if (search) q.set("search", search);
     if (originId) q.set("originId", originId);
+    if (status && status !== "All") q.set("status", status);
     return get<PagedResult<GemParcelSummaryDto>>(`/api/v1/gem-parcels?${q}`);
   },
   get: (id: string) => get<GemParcelDto>(`/api/v1/gem-parcels/${id}`),

@@ -32,20 +32,20 @@ export default async function OrdersPage({ searchParams }: Props) {
         <EmptyState />
       ) : (
         <>
-          <div className="overflow-hidden rounded-xl border">
+          <div className="overflow-hidden rounded-lg border bg-card">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b bg-muted/50 text-left text-muted-foreground">
-                  <th className="px-4 py-3 font-medium">Reference</th>
-                  <th className="px-4 py-3 font-medium">Supplier</th>
-                  <th className="px-4 py-3 font-medium">Date</th>
-                  <th className="px-4 py-3 font-medium">Items</th>
-                  <th className="px-4 py-3 font-medium">Total</th>
+                <tr className="border-b bg-muted/30 text-left">
+                  <th className="px-4 py-2.5 text-xs font-medium text-muted-foreground">Reference</th>
+                  <th className="px-4 py-2.5 text-xs font-medium text-muted-foreground">Supplier</th>
+                  <th className="px-4 py-2.5 text-xs font-medium text-muted-foreground">Date</th>
+                  <th className="px-4 py-2.5 text-xs font-medium text-muted-foreground">Items</th>
+                  <th className="px-4 py-2.5 text-xs font-medium text-muted-foreground">Total</th>
                 </tr>
               </thead>
-              <tbody>
-                {result.items.map((order, i) => (
-                  <OrderRow key={order.id} order={order} even={i % 2 === 0} />
+              <tbody className="divide-y divide-border">
+                {result.items.map((order) => (
+                  <OrderRow key={order.id} order={order} />
                 ))}
               </tbody>
             </table>
@@ -61,7 +61,7 @@ function Header() {
   return (
     <div className="flex items-center justify-between">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Purchase Orders</h1>
+        <h1 className="text-xl font-semibold tracking-tight">Purchase Orders</h1>
         <p className="text-sm text-muted-foreground">Track gem acquisitions</p>
       </div>
       <Button asChild size="sm">
@@ -74,9 +74,9 @@ function Header() {
   );
 }
 
-function OrderRow({ order, even }: { order: PurchaseOrderSummaryDto; even: boolean }) {
+function OrderRow({ order }: { order: PurchaseOrderSummaryDto }) {
   return (
-    <tr className={even ? "bg-card hover:bg-muted/30" : "bg-muted/20 hover:bg-muted/40"}>
+    <tr className="hover:bg-muted/20 transition-colors">
       <td className="px-4 py-3 font-medium">
         <Link href={`/dashboard/orders/${order.id}`} className="hover:underline">
           {order.reference ?? <span className="text-muted-foreground">—</span>}
