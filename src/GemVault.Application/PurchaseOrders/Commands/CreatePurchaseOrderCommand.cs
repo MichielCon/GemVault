@@ -52,7 +52,7 @@ public class CreatePurchaseOrderCommandHandler(
         {
             SupplierId = request.SupplierId,
             Reference = request.Reference,
-            OrderDate = request.OrderDate,
+            OrderDate = DateTime.SpecifyKind(request.OrderDate, DateTimeKind.Utc),
             Notes = request.Notes,
             OwnerId = currentUser.UserId.Value,
         };

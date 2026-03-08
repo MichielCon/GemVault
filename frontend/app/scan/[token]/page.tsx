@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { publicApi, ApiError } from "@/lib/api";
+import { proxyPhotoUrl } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import type { PublicGemDto } from "@/lib/types";
 
@@ -50,9 +51,10 @@ export default async function PublicScanPage({ params }: Props) {
         {coverPhoto ? (
           <div className="relative mb-6 aspect-square w-full overflow-hidden rounded-2xl bg-muted">
             <Image
-              src={coverPhoto.url}
+              src={proxyPhotoUrl(coverPhoto.url) ?? ""}
               alt={gem.name}
               fill
+              unoptimized
               className="object-cover"
               priority
               sizes="(max-width: 672px) 100vw, 672px"
@@ -69,7 +71,7 @@ export default async function PublicScanPage({ params }: Props) {
           <div className="mb-6 grid grid-cols-4 gap-2">
             {otherPhotos.slice(0, 4).map((p) => (
               <div key={p.id} className="relative aspect-square overflow-hidden rounded-lg bg-muted">
-                <Image src={p.url} alt="" fill className="object-cover" sizes="25vw" />
+                <Image src={proxyPhotoUrl(p.url) ?? ""} alt="" fill unoptimized className="object-cover" sizes="25vw" />
               </div>
             ))}
           </div>

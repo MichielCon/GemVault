@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Gem, Package, MapPin } from "lucide-react";
 import type { GemSummaryDto, GemParcelSummaryDto } from "@/lib/types";
+import { proxyPhotoUrl } from "@/lib/utils";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -102,9 +103,10 @@ function GemCard({ gem }: { gem: GemSummaryDto }) {
       <div className="relative aspect-square w-full bg-muted">
         {gem.coverPhotoUrl ? (
           <Image
-            src={gem.coverPhotoUrl}
+            src={proxyPhotoUrl(gem.coverPhotoUrl) ?? ""}
             alt={gem.name}
             fill
+            unoptimized
             className="object-cover transition-transform group-hover:scale-105"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           />
@@ -140,9 +142,10 @@ function ParcelCard({ parcel }: { parcel: GemParcelSummaryDto }) {
       <div className="relative aspect-square w-full bg-muted">
         {parcel.coverPhotoUrl ? (
           <Image
-            src={parcel.coverPhotoUrl}
+            src={proxyPhotoUrl(parcel.coverPhotoUrl) ?? ""}
             alt={parcel.name}
             fill
+            unoptimized
             className="object-cover transition-transform group-hover:scale-105"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           />

@@ -11,10 +11,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ArrowLeft, Globe, Lock, Pencil } from "lucide-react";
+import { ArrowLeft, Globe, Lock, Pencil, ShoppingCart, Tag } from "lucide-react";
 import type { GemDto } from "@/lib/types";
 import { PhotoUploader } from "@/components/gems/photo-uploader";
 import { DeleteGemButton } from "@/components/gems/delete-gem-button";
+import { proxyPhotoUrl } from "@/lib/utils";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -49,14 +50,30 @@ export default async function GemDetailPage({ params }: Props) {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">{gem.name}</h1>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1 className="text-3xl font-bold tracking-tight">{gem.name}</h1>
+            {gem.soldInfo && (
+              <Badge className="bg-amber-100 text-amber-800 border-amber-200 border text-sm">
+                <Tag size={12} className="mr-1" />
+                Sold
+              </Badge>
+            )}
+          </div>
           {(gem.species || gem.variety) && (
             <p className="mt-1 text-muted-foreground">
               {[gem.species, gem.variety].filter(Boolean).join(" — ")}
             </p>
           )}
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
+          {!gem.soldInfo && (
+            <Button asChild variant="outline" size="sm">
+              <Link href={`/dashboard/sales/new?gemId=${gem.id}`}>
+                <ShoppingCart size={14} />
+                Record sale
+              </Link>
+            </Button>
+          )}
           <Button asChild variant="outline" size="sm">
             <Link href={`/dashboard/gems/${gem.id}/edit`}>
               <Pencil size={14} />
@@ -80,9 +97,10 @@ export default async function GemDetailPage({ params }: Props) {
           {coverPhoto ? (
             <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-muted">
               <Image
-                src={coverPhoto.url}
+                src={proxyPhotoUrl(coverPhoto.url) ?? ""}
                 alt={gem.name}
                 fill
+                unoptimized
                 className="object-cover"
                 priority
                 sizes="(max-width: 768px) 100vw, 50vw"
@@ -97,7 +115,7 @@ export default async function GemDetailPage({ params }: Props) {
             <div className="grid grid-cols-4 gap-2">
               {otherPhotos.slice(0, 4).map((p) => (
                 <div key={p.id} className="relative aspect-square overflow-hidden rounded-lg bg-muted">
-                  <Image src={p.url} alt="" fill className="object-cover" sizes="15vw" />
+                  <Image src={proxyPhotoUrl(p.url) ?? ""} alt="" fill unoptimized className="object-cover" sizes="15vw" />
                 </div>
               ))}
             </div>
@@ -146,6 +164,43 @@ export default async function GemDetailPage({ params }: Props) {
               )}
             </CardContent>
           </Card>
+
+          {gem.soldInfo && (
+            <Card className="border-amber-200 bg-amber-50">
+              <CardHeader>
+                <CardTitle className="text-base text-amber-800 flex items-center gap-2">
+                  <Tag size={15} />
+                  Sale record
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                  <dt className="text-amber-700">Sale date</dt>
+                  <dd className="font-medium">{new Date(gem.soldInfo.saleDate).toLocaleDateString()}</dd>
+                  <dt className="text-amber-700">Sale price</dt>
+                  <dd className="font-medium font-semibold">
+                    {gem.soldInfo.salePrice.toLocaleString("en-US", { style: "currency", currency: "USD" })}
+                  </dd>
+                  {gem.purchasePrice != null && gem.soldInfo.salePrice > 0 && (
+                    <>
+                      <dt className="text-amber-700">Profit</dt>
+                      <dd className={`font-medium font-semibold ${gem.soldInfo.salePrice - gem.purchasePrice >= 0 ? "text-green-700" : "text-red-700"}`}>
+                        {(gem.soldInfo.salePrice - gem.purchasePrice).toLocaleString("en-US", { style: "currency", currency: "USD" })}
+                      </dd>
+                    </>
+                  )}
+                </dl>
+                <div className="mt-3">
+                  <Link
+                    href={`/dashboard/sales/${gem.soldInfo.saleId}`}
+                    className="text-xs text-amber-700 hover:underline"
+                  >
+                    View full sale record →
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {gem.publicToken && (
             <Card>

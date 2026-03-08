@@ -64,6 +64,23 @@ frontend/
 - Prod: `https://gemvault.app/api`
 - Set via `NEXT_PUBLIC_API_URL` env var
 
+## Known Patterns & Pitfalls
+
+### Server Action / Form Patterns
+- **Line item hidden inputs**: Use React-controlled `<Fragment>` hidden inputs per item, NOT a single JSON blob.
+  React snapshots FormData before `onSubmit` fires, so DOM mutations in `onSubmit` don't work.
+- **Navigation after create**: Return `{ id, error }` from server actions (no `redirect()` inside `useActionState`).
+  Navigate client-side via `useRouter` + `useEffect`.
+- **Combobox form submission**: Combobox renders `<input type="hidden" name={name} value={value ?? ""} />`.
+  The `name` prop must be set for the value to appear in FormData.
+- **Date fields**: `<input type="date">` sends strings like `"2026-03-08"`. The backend normalizes to UTC.
+  Don't pass timestamps from the frontend — date-only strings are fine.
+
+### MANDATORY: Verify After Frontend Changes
+- `export PATH="/c/nvm4w/nodejs:$PATH" && npm run build` — must succeed with no TypeScript errors
+- Check browser console for runtime errors
+- For new forms: submit the form and verify the API call succeeds (check Network tab)
+
 ## How to Invoke This Agent
 Include in your prompt:
 - The page or component to build

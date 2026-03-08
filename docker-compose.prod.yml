@@ -6,6 +6,7 @@ services:
 
   minio:
     restart: always
+    ports: []  # Remove dev ports — MinIO is only reachable inside Docker network
     volumes:
       - /opt/gemvault/data/minio:/data
 

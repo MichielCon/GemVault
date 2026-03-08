@@ -24,8 +24,11 @@ jobs:
       - name: Build
         run: dotnet build src/GemVault.slnx --no-restore -c Release
 
-      - name: Run tests
-        run: dotnet test src/GemVault.Tests/GemVault.Tests.csproj --no-build -c Release --logger trx --results-directory TestResults
+      - name: Run unit tests
+        run: dotnet test src/GemVault.Tests/GemVault.Tests.csproj --no-build -c Release --logger trx --results-directory TestResults/Unit
+
+      - name: Run integration tests
+        run: dotnet test src/GemVault.Tests.Integration/GemVault.Tests.Integration.csproj --no-build -c Release --logger trx --results-directory TestResults/Integration
 
       - name: Upload test results
         uses: actions/upload-artifact@v4

@@ -50,7 +50,7 @@ public class UpdatePurchaseOrderCommandHandler(
 
         order.SupplierId = request.SupplierId;
         order.Reference = request.Reference;
-        order.OrderDate = request.OrderDate;
+        order.OrderDate = DateTime.SpecifyKind(request.OrderDate, DateTimeKind.Utc);
         order.Notes = request.Notes;
         order.UpdatedAt = DateTime.UtcNow;
 

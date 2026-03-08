@@ -4,4 +4,5 @@
   <Project Path="GemVault.Domain/GemVault.Domain.csproj" />
   <Project Path="GemVault.Infrastructure/GemVault.Infrastructure.csproj" />
   <Project Path="GemVault.Tests/GemVault.Tests.csproj" />
+  <Project Path="GemVault.Tests.Integration/GemVault.Tests.Integration.csproj" />
 </Solution>

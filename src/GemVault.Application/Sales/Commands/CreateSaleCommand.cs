@@ -42,7 +42,7 @@ public class CreateSaleCommandHandler(
 
         var sale = new Sale
         {
-            SaleDate = request.SaleDate,
+            SaleDate = DateTime.SpecifyKind(request.SaleDate, DateTimeKind.Utc),
             BuyerName = request.BuyerName,
             BuyerEmail = request.BuyerEmail,
             Notes = request.Notes,

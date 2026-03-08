@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { parcelsApi } from "@/lib/api";
+import { proxyPhotoUrl } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Plus, Package } from "lucide-react";
@@ -75,9 +76,10 @@ function ParcelCard({ parcel }: { parcel: GemParcelSummaryDto }) {
       <div className="relative aspect-square w-full bg-muted">
         {parcel.coverPhotoUrl ? (
           <Image
-            src={parcel.coverPhotoUrl}
+            src={proxyPhotoUrl(parcel.coverPhotoUrl) ?? ""}
             alt={parcel.name}
             fill
+            unoptimized
             className="object-cover transition-transform group-hover:scale-105"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           />

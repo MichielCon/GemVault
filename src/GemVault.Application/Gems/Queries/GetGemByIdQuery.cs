@@ -21,6 +21,8 @@ public class GetGemByIdQueryHandler(
             .Include(g => g.Photos)
             .Include(g => g.Origin)
             .Include(g => g.PublicToken)
+            .Include(g => g.SaleItems)
+                .ThenInclude(si => si.Sale)
             .FirstOrDefaultAsync(g => g.Id == request.GemId && !g.IsDeleted, ct)
             ?? throw new NotFoundException("Gem", request.GemId);
 

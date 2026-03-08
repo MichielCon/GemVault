@@ -15,6 +15,7 @@ import { ArrowLeft, Globe, Lock, Pencil } from "lucide-react";
 import type { GemParcelDto } from "@/lib/types";
 import { PhotoUploader } from "@/components/gems/photo-uploader";
 import { DeleteParcelButton } from "@/components/parcels/delete-parcel-button";
+import { proxyPhotoUrl } from "@/lib/utils";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -80,9 +81,10 @@ export default async function ParcelDetailPage({ params }: Props) {
           {coverPhoto ? (
             <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-muted">
               <Image
-                src={coverPhoto.url}
+                src={proxyPhotoUrl(coverPhoto.url) ?? ""}
                 alt={parcel.name}
                 fill
+                unoptimized
                 className="object-cover"
                 priority
                 sizes="(max-width: 768px) 100vw, 50vw"
@@ -97,7 +99,7 @@ export default async function ParcelDetailPage({ params }: Props) {
             <div className="grid grid-cols-4 gap-2">
               {otherPhotos.slice(0, 4).map((p) => (
                 <div key={p.id} className="relative aspect-square overflow-hidden rounded-lg bg-muted">
-                  <Image src={p.url} alt="" fill className="object-cover" sizes="15vw" />
+                  <Image src={proxyPhotoUrl(p.url) ?? ""} alt="" fill unoptimized className="object-cover" sizes="15vw" />
                 </div>
               ))}
             </div>

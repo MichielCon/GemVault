@@ -70,6 +70,7 @@ services:
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost/api
       - INTERNAL_API_URL=http://api:5000
+      - MINIO_INTERNAL_URL=http://minio:9000
     depends_on:
       - api
 

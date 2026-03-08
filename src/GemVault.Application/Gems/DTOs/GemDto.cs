@@ -6,6 +6,9 @@ public record GemPhotoDto(
     bool IsCover,
     DateTime CreatedAt);
 
+/// <summary>Populated when the gem has been linked to a sale.</summary>
+public record GemSoldInfoDto(Guid SaleId, DateTime SaleDate, decimal SalePrice);
+
 public record GemDto(
     Guid Id,
     string Name,
@@ -30,7 +33,8 @@ public record GemDto(
     string? PublicToken,
     DateTime CreatedAt,
     DateTime UpdatedAt,
-    List<GemPhotoDto> Photos);
+    List<GemPhotoDto> Photos,
+    GemSoldInfoDto? SoldInfo);
 
 public record GemSummaryDto(
     Guid Id,

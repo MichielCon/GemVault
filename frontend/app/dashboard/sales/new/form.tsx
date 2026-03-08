@@ -29,14 +29,17 @@ interface LineItem {
 interface Props {
   gems: GemSummaryDto[];
   parcels: GemParcelSummaryDto[];
+  preselectedItem?: string | null;
 }
 
 const initialState = { error: null as string | null, id: null as string | null };
 
-export function SaleCreateForm({ gems, parcels }: Props) {
+export function SaleCreateForm({ gems, parcels, preselectedItem }: Props) {
   const router = useRouter();
   const [state, formAction, pending] = useActionState(createSale, initialState);
-  const [items, setItems] = useState<LineItem[]>([{ key: 0, gemOrParcel: null, quantity: "1", salePrice: "" }]);
+  const [items, setItems] = useState<LineItem[]>([
+    { key: 0, gemOrParcel: preselectedItem ?? null, quantity: "1", salePrice: "" },
+  ]);
   const [nextKey, setNextKey] = useState(1);
 
   const today = new Date().toISOString().split("T")[0];

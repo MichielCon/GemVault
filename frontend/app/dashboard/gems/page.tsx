@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { gemsApi } from "@/lib/api";
+import { proxyPhotoUrl } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Plus, Gem } from "lucide-react";
@@ -75,9 +76,10 @@ function GemCard({ gem }: { gem: GemSummaryDto }) {
       <div className="relative aspect-square w-full bg-muted">
         {gem.coverPhotoUrl ? (
           <Image
-            src={gem.coverPhotoUrl}
+            src={proxyPhotoUrl(gem.coverPhotoUrl) ?? ""}
             alt={gem.name}
             fill
+            unoptimized
             className="object-cover transition-transform group-hover:scale-105"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           />

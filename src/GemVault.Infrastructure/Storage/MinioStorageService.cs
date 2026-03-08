@@ -37,7 +37,8 @@ public class MinioStorageService(IMinioClient minioClient, IOptions<MinioOptions
     public string GetPublicUrl(string objectKey)
     {
         var scheme = _opts.UseSSL ? "https" : "http";
-        return $"{scheme}://{_opts.Endpoint}/{_opts.BucketName}/{objectKey}";
+        var host = string.IsNullOrEmpty(_opts.PublicEndpoint) ? _opts.Endpoint : _opts.PublicEndpoint;
+        return $"{scheme}://{host}/{_opts.BucketName}/{objectKey}";
     }
 
     public async Task<bool> ExistsAsync(string objectKey, CancellationToken ct = default)
@@ -62,7 +63,24 @@ public class MinioStorageService(IMinioClient minioClient, IOptions<MinioOptions
             new BucketExistsArgs().WithBucket(_opts.BucketName), ct);
 
         if (!exists)
+        {
             await minioClient.MakeBucketAsync(
                 new MakeBucketArgs().WithBucket(_opts.BucketName), ct);
+
+            // Allow anonymous GET so the photo proxy route can fetch images without credentials
+            var policy = $$"""
+                {
+                  "Version": "2012-10-17",
+                  "Statement": [{
+                    "Effect": "Allow",
+                    "Principal": {"AWS": ["*"]},
+                    "Action": ["s3:GetObject"],
+                    "Resource": ["arn:aws:s3:::{{_opts.BucketName}}/*"]
+                  }]
+                }
+                """;
+            await minioClient.SetPolicyAsync(
+                new SetPolicyArgs().WithBucket(_opts.BucketName).WithPolicy(policy), ct);
+        }
     }
 }

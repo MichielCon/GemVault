@@ -23,6 +23,7 @@ Always start a new feature area by consulting the relevant agent file. Each agen
 | `.claude/agents/architect.md` | Before starting any new feature area — design, API contracts, data model |
 | `.claude/agents/backend-dev.md` | ASP.NET Core API, EF Core, domain logic, C# implementation |
 | `.claude/agents/frontend-dev.md` | Next.js pages, components, TypeScript, API integration |
+| `.claude/agents/ux.md` | UX review, user flows, missing affordances, information architecture |
 | `.claude/agents/db-architect.md` | Schema changes, migrations, query optimization |
 | `.claude/agents/devops.md` | Docker, CI/CD, GitHub Actions, VPS infrastructure |
 | `.claude/agents/qa.md` | Test strategy, xUnit, Playwright E2E |

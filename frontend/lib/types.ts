@@ -31,6 +31,12 @@ export interface GemPhotoDto {
   createdAt: string;
 }
 
+export interface GemSoldInfoDto {
+  saleId: string;
+  saleDate: string;
+  salePrice: number;
+}
+
 export interface GemDto {
   id: string;
   name: string;
@@ -56,6 +62,7 @@ export interface GemDto {
   createdAt: string;
   updatedAt: string;
   photos: GemPhotoDto[];
+  soldInfo: GemSoldInfoDto | null;
 }
 
 export interface GemSummaryDto {
