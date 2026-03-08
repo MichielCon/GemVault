@@ -119,7 +119,7 @@ export default function ProvenanceMap({ origins }: Props) {
   function closePanel() {
     setPanelVisible(false);
     setTimeout(() => setSelected(null), 250);
-    mapRef.current?.flyTo([20, 10], 2, { duration: 1.0, easeLinearity: 0.25 });
+    mapRef.current?.flyTo([20, 10], 3, { duration: 1.0, easeLinearity: 0.25 });
   }
 
   useEffect(() => {
@@ -130,11 +130,13 @@ export default function ProvenanceMap({ origins }: Props) {
     import("leaflet").then((L) => {
       const map = L.map(containerRef.current!, {
         center: [20, 10],
-        zoom: 2,
-        minZoom: 2,
+        zoom: 3,
+        minZoom: 3,
         maxZoom: 10,
         zoomControl: false,
         attributionControl: true,
+        maxBounds: [[-85, -Infinity], [85, Infinity]],
+        maxBoundsViscosity: 1.0,
       });
 
       mapRef.current = map;
