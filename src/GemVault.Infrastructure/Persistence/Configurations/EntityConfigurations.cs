@@ -144,6 +144,7 @@ public class RefreshTokenConfiguration : IEntityTypeConfiguration<Domain.Entitie
 {
     public void Configure(EntityTypeBuilder<Domain.Entities.RefreshToken> builder)
     {
+        builder.HasQueryFilter(t => !t.IsDeleted);
         builder.Property(t => t.TokenHash).IsRequired().HasMaxLength(64);
         builder.HasIndex(t => t.TokenHash).IsUnique();
         builder.HasIndex(t => t.UserId);

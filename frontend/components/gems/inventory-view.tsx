@@ -141,7 +141,7 @@ export function GemInventoryView({ result, page, search, status }: Props) {
       </div>
 
       {result.items.length === 0 ? (
-        <EmptyState />
+        <EmptyState search={search} />
       ) : view === "grid" ? (
         <GridView gems={result.items} />
       ) : (
@@ -273,15 +273,24 @@ function GemRow({ gem }: { gem: GemSummaryDto }) {
   );
 }
 
-function EmptyState() {
+function EmptyState({ search }: { search?: string }) {
   return (
     <div className="flex flex-col items-center justify-center rounded-xl border border-dashed bg-card py-20 text-center">
       <Gem size={40} strokeWidth={1} className="mb-3 text-muted-foreground/50" />
-      <p className="font-medium">No gems yet</p>
-      <p className="mt-1 text-sm text-muted-foreground">Add your first gem to start building your inventory.</p>
-      <Button asChild size="sm" className="mt-4">
-        <Link href="/dashboard/gems/new"><Plus size={15} />Add gem</Link>
-      </Button>
+      {search ? (
+        <>
+          <p className="font-medium">No gems matching &ldquo;{search}&rdquo;</p>
+          <p className="mt-1 text-sm text-muted-foreground">Try a different search term or clear the filter.</p>
+        </>
+      ) : (
+        <>
+          <p className="font-medium">No gems yet</p>
+          <p className="mt-1 text-sm text-muted-foreground">Add your first gem to start building your inventory.</p>
+          <Button asChild size="sm" className="mt-4">
+            <Link href="/dashboard/gems/new"><Plus size={15} />Add gem</Link>
+          </Button>
+        </>
+      )}
     </div>
   );
 }

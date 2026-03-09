@@ -25,7 +25,10 @@ public class GetOriginsQueryHandler(IApplicationDbContext context)
 
         return await query
             .OrderBy(o => o.Country)
-            .Select(o => new OriginDto(o.Id, o.Country, o.Mine, o.Region, o.CreatedAt))
+            .Select(o => new OriginDto(
+                o.Id, o.Country, o.Mine, o.Region, o.CreatedAt,
+                o.Gems.Count(g => !g.IsDeleted),
+                o.GemParcels.Count(p => !p.IsDeleted)))
             .ToListAsync(ct);
     }
 }

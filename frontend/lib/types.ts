@@ -159,6 +159,8 @@ export interface OriginDto {
   mine: string | null;
   region: string | null;
   createdAt: string;
+  gemCount: number;
+  parcelCount: number;
 }
 
 // ─── Suppliers ────────────────────────────────────────────────────────────────

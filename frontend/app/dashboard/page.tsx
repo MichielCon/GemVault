@@ -7,10 +7,7 @@ import type { DashboardStatsDto } from "@/lib/types";
 import { RevenueChart } from "@/components/dashboard/revenue-chart";
 import { SpeciesDonut } from "@/components/dashboard/species-donut";
 
-function fmt(value: number, compact = false) {
-  if (compact && Math.abs(value) >= 1000) {
-    return value.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
-  }
+function fmt(value: number) {
   return value.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 }
 
