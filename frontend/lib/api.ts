@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import type {
   AuthResponse,
+  CertificateDto,
   GemDto,
   GemSummaryDto,
   GemParcelDto,
@@ -103,6 +104,25 @@ async function del(path: string, auth = true): Promise<void> {
   }
 }
 
+async function postForm<T>(path: string, body: FormData, auth = true): Promise<T> {
+  const headers: Record<string, string> = {};
+  // Do NOT set Content-Type — browser sets it with the multipart boundary automatically.
+  if (auth) Object.assign(headers, await authHeader());
+
+  const res = await fetch(`${baseUrl()}${path}`, {
+    method: "POST",
+    headers,
+    body,
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new ApiError(res.status, text);
+  }
+  return res.json() as Promise<T>;
+}
+
 export class ApiError extends Error {
   constructor(
     public readonly status: number,
@@ -134,6 +154,9 @@ export const gemsApi = {
     return get<PagedResult<GemSummaryDto>>(`/api/v1/gems?${q}`);
   },
   get: (id: string) => get<GemDto>(`/api/v1/gems/${id}`),
+  uploadCertificate: (gemId: string, formData: FormData) =>
+    postForm<CertificateDto>(`/api/v1/gems/${gemId}/certificates`, formData),
+  deleteCertificate: (certId: string) => del(`/api/v1/certificates/${certId}`),
 };
 
 // ─── Vocabulary ───────────────────────────────────────────────────────────────

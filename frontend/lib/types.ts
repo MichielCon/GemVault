@@ -22,6 +22,19 @@ export interface PagedResult<T> {
   hasPreviousPage: boolean;
 }
 
+// ─── Certificates ─────────────────────────────────────────────────────────────
+
+export interface CertificateDto {
+  id: string;
+  certNumber: string;
+  lab: string | null;
+  grade: string | null;
+  issueDate: string | null;
+  fileUrl: string | null;
+  gemId: string | null;
+  createdAt: string;
+}
+
 // ─── Gems ─────────────────────────────────────────────────────────────────────
 
 export interface GemPhotoDto {
@@ -63,6 +76,7 @@ export interface GemDto {
   updatedAt: string;
   photos: GemPhotoDto[];
   soldInfo: GemSoldInfoDto | null;
+  certificates: CertificateDto[];
 }
 
 export interface GemSummaryDto {

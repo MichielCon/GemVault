@@ -1,3 +1,4 @@
+using GemVault.Application.Certificates;
 using GemVault.Domain.Entities;
 using GemVault.Domain.Interfaces;
 
@@ -44,6 +45,18 @@ internal static class GemMappingExtensions
                 .Where(p => !p.IsDeleted)
                 .Select(p => new GemPhotoDto(p.Id, storage.GetPublicUrl(p.ObjectKey), p.IsCover, p.CreatedAt))
                 .ToList(),
-            soldInfo);
+            soldInfo,
+            gem.Certificates
+                .Where(c => !c.IsDeleted)
+                .Select(c => new CertificateDto(
+                    c.Id,
+                    c.CertNumber,
+                    c.Lab,
+                    c.Grade,
+                    c.IssueDate,
+                    c.ObjectKey != null ? storage.GetPublicUrl(c.ObjectKey) : null,
+                    c.GemId,
+                    c.CreatedAt))
+                .ToList());
     }
 }
