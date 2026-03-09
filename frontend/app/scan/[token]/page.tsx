@@ -1,8 +1,8 @@
-import { notFound } from "next/navigation";
 import Image from "next/image";
 import { publicApi, ApiError } from "@/lib/api";
 import { proxyPhotoUrl } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { Lock } from "lucide-react";
 import type { PublicGemDto } from "@/lib/types";
 
 interface Props {
@@ -19,7 +19,7 @@ export default async function PublicScanPage({ params }: Props) {
     gem = await publicApi.scan(token);
   } catch (e) {
     if (e instanceof ApiError && e.status === 404) {
-      notFound();
+      return <PrivatePage />;
     }
     throw e;
   }
@@ -124,5 +124,35 @@ function Prop({ label, value }: { label: string; value: string | null | undefine
       <dt className="text-muted-foreground">{label}</dt>
       <dd className="font-medium">{value}</dd>
     </>
+  );
+}
+
+function PrivatePage() {
+  return (
+    <div className="min-h-screen bg-background">
+      <header className="border-b bg-card px-4 py-3">
+        <span className="font-bold tracking-tight">GemVault</span>
+        <span className="ml-2 text-sm text-muted-foreground">/ Public record</span>
+      </header>
+
+      <div className="mx-auto max-w-md px-4 py-24 flex flex-col items-center text-center gap-5">
+        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-slate-100">
+          <span className="text-4xl select-none">💎</span>
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">This gem is incognito</h1>
+          <p className="mt-2 text-muted-foreground">
+            The owner has kept this one private — like a gem still in the rough.
+          </p>
+        </div>
+        <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-500">
+          <Lock size={13} />
+          Private collection
+        </div>
+        <p className="text-xs text-muted-foreground">
+          If you think this is a mistake, contact the owner directly.
+        </p>
+      </div>
+    </div>
   );
 }
