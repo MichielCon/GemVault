@@ -101,6 +101,12 @@ export interface GemParcelPhotoDto {
   createdAt: string;
 }
 
+export interface GemParcelSoldInfoDto {
+  saleId: string;
+  saleDate: string;
+  salePrice: number;
+}
+
 export interface GemParcelDto {
   id: string;
   name: string;
@@ -120,6 +126,7 @@ export interface GemParcelDto {
   createdAt: string;
   updatedAt: string;
   photos: GemParcelPhotoDto[];
+  soldInfo: GemParcelSoldInfoDto | null;
 }
 
 export interface GemParcelSummaryDto {

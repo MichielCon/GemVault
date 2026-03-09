@@ -11,11 +11,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ArrowLeft, Globe, Lock, Pencil } from "lucide-react";
+import { ArrowLeft, Globe, Lock, Pencil, ShoppingCart, Tag } from "lucide-react";
 import type { GemParcelDto } from "@/lib/types";
 import { PhotoUploader } from "@/components/gems/photo-uploader";
 import { DeleteParcelButton } from "@/components/parcels/delete-parcel-button";
 import { QrCodeButton } from "@/components/gems/qr-code-button";
+import { ScanLinkCard } from "@/components/gems/scan-link-card";
 import { proxyPhotoUrl } from "@/lib/utils";
 
 interface Props {
@@ -51,14 +52,30 @@ export default async function ParcelDetailPage({ params }: Props) {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">{parcel.name}</h1>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1 className="text-3xl font-bold tracking-tight">{parcel.name}</h1>
+            {parcel.soldInfo && (
+              <Badge className="bg-amber-100 text-amber-800 border-amber-200 border text-sm">
+                <Tag size={12} className="mr-1" />
+                Sold
+              </Badge>
+            )}
+          </div>
           {(parcel.species || parcel.variety) && (
             <p className="mt-1 text-muted-foreground">
               {[parcel.species, parcel.variety].filter(Boolean).join(" — ")}
             </p>
           )}
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
+          {!parcel.soldInfo && (
+            <Button asChild variant="outline" size="sm">
+              <Link href={`/dashboard/sales/new?gemParcelId=${parcel.id}`}>
+                <ShoppingCart size={14} />
+                Record sale
+              </Link>
+            </Button>
+          )}
           <Button asChild variant="outline" size="sm">
             <Link href={`/dashboard/parcels/${parcel.id}/edit`}>
               <Pencil size={14} />
@@ -146,16 +163,44 @@ export default async function ParcelDetailPage({ params }: Props) {
             </CardContent>
           </Card>
 
-          {parcel.publicToken && (
-            <Card>
-              <CardHeader><CardTitle className="text-base">Public link</CardTitle></CardHeader>
+          {parcel.soldInfo && (
+            <Card className="border-amber-200 bg-amber-50">
+              <CardHeader>
+                <CardTitle className="text-base text-amber-800 flex items-center gap-2">
+                  <Tag size={15} />
+                  Sale record
+                </CardTitle>
+              </CardHeader>
               <CardContent>
-                <p className="break-all font-mono text-xs text-muted-foreground">
-                  /scan/{parcel.publicToken}
-                </p>
+                <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                  <dt className="text-amber-700">Sale date</dt>
+                  <dd className="font-medium">{new Date(parcel.soldInfo.saleDate).toLocaleDateString()}</dd>
+                  <dt className="text-amber-700">Sale price</dt>
+                  <dd className="font-medium font-semibold">
+                    {parcel.soldInfo.salePrice.toLocaleString("en-US", { style: "currency", currency: "USD" })}
+                  </dd>
+                  {parcel.purchasePrice != null && parcel.soldInfo.salePrice > 0 && (
+                    <>
+                      <dt className="text-amber-700">Profit</dt>
+                      <dd className={`font-medium font-semibold ${parcel.soldInfo.salePrice - parcel.purchasePrice >= 0 ? "text-green-700" : "text-red-700"}`}>
+                        {(parcel.soldInfo.salePrice - parcel.purchasePrice).toLocaleString("en-US", { style: "currency", currency: "USD" })}
+                      </dd>
+                    </>
+                  )}
+                </dl>
+                <div className="mt-3">
+                  <Link
+                    href={`/dashboard/sales/${parcel.soldInfo.saleId}`}
+                    className="text-xs text-amber-700 hover:underline"
+                  >
+                    View full sale record →
+                  </Link>
+                </div>
               </CardContent>
             </Card>
           )}
+
+          {parcel.publicToken && <ScanLinkCard token={parcel.publicToken} />}
         </div>
       </div>
     </div>
