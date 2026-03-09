@@ -8,10 +8,10 @@ namespace GemVault.Api.Controllers;
 
 [ApiController]
 [Route("api/v1/vocabulary")]
-[AllowAnonymous]
 public class VocabularyController(IMediator mediator, ICurrentUserService currentUser) : ControllerBase
 {
     [HttpGet("{field}")]
+    [AllowAnonymous]
     public async Task<IActionResult> Get(
         string field,
         [FromQuery] string? parentValue = null,
