@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link2, Copy, Check } from "lucide-react";
@@ -11,7 +11,9 @@ interface Props {
 
 export function ScanLinkCard({ token }: Props) {
   const [copied, setCopied] = useState(false);
-  const url = `${typeof window !== "undefined" ? window.location.origin : ""}/scan/${token}`;
+  const [origin, setOrigin] = useState("");
+  useEffect(() => setOrigin(window.location.origin), []);
+  const url = `${origin}/scan/${token}`;
 
   function copyUrl() {
     navigator.clipboard.writeText(url).then(() => {

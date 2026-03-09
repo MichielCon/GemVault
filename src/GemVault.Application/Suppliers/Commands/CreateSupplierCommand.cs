@@ -15,7 +15,7 @@ public class CreateSupplierCommandValidator : AbstractValidator<CreateSupplierCo
     public CreateSupplierCommandValidator()
     {
         RuleFor(x => x.Name).NotEmpty().MaximumLength(200);
-        RuleFor(x => x.Email).MaximumLength(200).When(x => x.Email != null);
+        RuleFor(x => x.Email).MaximumLength(200).EmailAddress().When(x => x.Email != null);
     }
 }
 

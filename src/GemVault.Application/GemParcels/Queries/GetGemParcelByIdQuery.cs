@@ -21,6 +21,8 @@ public class GetGemParcelByIdQueryHandler(
             .Include(p => p.Photos)
             .Include(p => p.Origin)
             .Include(p => p.PublicToken)
+            .Include(p => p.SaleItems)
+                .ThenInclude(si => si.Sale)
             .FirstOrDefaultAsync(p => p.Id == request.Id && !p.IsDeleted, ct)
             ?? throw new NotFoundException("GemParcel", request.Id);
 

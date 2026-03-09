@@ -9,7 +9,7 @@ public class Certificate : BaseEntity
     public string? Grade { get; set; }
     public DateTime? IssueDate { get; set; }
     public string? ObjectKey { get; set; }
-    public Guid? GemId { get; set; }
+    public Guid GemId { get; set; }
 
     public Gem? Gem { get; set; }
 }

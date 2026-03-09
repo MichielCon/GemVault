@@ -63,10 +63,17 @@ public class UpdateGemParcelCommandHandler(
         parcel.Notes = request.Notes;
         parcel.OriginId = request.OriginId;
 
-        if (request.IsPublic && parcel.PublicToken is null)
-            parcel.PublicToken = new PublicToken { GemParcelId = parcel.Id };
-        else if (!request.IsPublic && parcel.PublicToken is not null)
+        if (request.IsPublic)
+        {
+            if (parcel.PublicToken is null)
+                parcel.PublicToken = new PublicToken { GemParcelId = parcel.Id };
+            else
+                parcel.PublicToken.IsActive = true;
+        }
+        else if (parcel.PublicToken is not null)
+        {
             parcel.PublicToken.IsActive = false;
+        }
 
         parcel.IsPublic = request.IsPublic;
         await context.SaveChangesAsync(ct);

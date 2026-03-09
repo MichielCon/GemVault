@@ -2,15 +2,12 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { dashboardApi } from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
-import { Gem, Package, DollarSign, TrendingUp, Building2, ShoppingCart, ArrowUpRight } from "lucide-react";
+import { Gem, Package, DollarSign, TrendingUp, Building2, ShoppingCart, ArrowUpRight, AlertTriangle } from "lucide-react";
 import type { DashboardStatsDto } from "@/lib/types";
 import { RevenueChart } from "@/components/dashboard/revenue-chart";
 import { SpeciesDonut } from "@/components/dashboard/species-donut";
 
-function fmt(value: number, compact = false) {
-  if (compact && Math.abs(value) >= 1000) {
-    return value.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
-  }
+function fmt(value: number) {
   return value.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 }
 
@@ -25,10 +22,11 @@ const EMPTY_STATS: DashboardStatsDto = {
 
 export default async function DashboardPage() {
   let stats: DashboardStatsDto | null = null;
+  let statsError = false;
   try {
     stats = await dashboardApi.stats();
   } catch {
-    // show zeros
+    statsError = true;
   }
 
   const s = stats ?? EMPTY_STATS;
@@ -40,6 +38,13 @@ export default async function DashboardPage() {
         <h1 className="text-xl font-semibold tracking-tight">Dashboard</h1>
         <p className="text-sm text-muted-foreground">Collection and business overview</p>
       </div>
+
+      {statsError && (
+        <div className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300">
+          <AlertTriangle size={16} className="shrink-0" />
+          <span>Dashboard statistics are temporarily unavailable. Showing placeholder data.</span>
+        </div>
+      )}
 
       {/* Row 1 — Primary KPIs */}
       <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">

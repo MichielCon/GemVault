@@ -13,7 +13,7 @@ public class DeleteVocabularyItemCommandHandler(
 {
     public async Task Handle(DeleteVocabularyItemCommand request, CancellationToken ct)
     {
-        if (currentUser.Role != "Admin")
+        if (!currentUser.IsAdmin)
             throw new ForbiddenException();
 
         var item = await context.GemVocabularies.FindAsync([request.Id], ct)

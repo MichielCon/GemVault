@@ -14,7 +14,7 @@ public class DeleteOriginCommandHandler(
 {
     public async Task Handle(DeleteOriginCommand request, CancellationToken ct)
     {
-        if (currentUser.Role != "Admin")
+        if (!currentUser.IsAdmin)
             throw new ForbiddenException("Only administrators can delete origins.");
 
         var origin = await context.Origins

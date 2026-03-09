@@ -31,6 +31,7 @@ export default async function OriginsPage() {
                 <th className="px-4 py-3 font-medium">Country</th>
                 <th className="px-4 py-3 font-medium">Mine</th>
                 <th className="px-4 py-3 font-medium">Region</th>
+                <th className="px-4 py-3 font-medium">Gems</th>
                 <th className="px-4 py-3 font-medium">Added</th>
               </tr>
             </thead>
@@ -70,6 +71,7 @@ function OriginRow({ origin, even }: { origin: OriginDto; even: boolean }) {
     day: "numeric",
   });
 
+  const total = origin.gemCount + origin.parcelCount;
   return (
     <tr className={even ? "bg-card hover:bg-muted/30" : "bg-muted/20 hover:bg-muted/40"}>
       <td className="px-4 py-3 font-medium">
@@ -79,6 +81,17 @@ function OriginRow({ origin, even }: { origin: OriginDto; even: boolean }) {
       </td>
       <td className="px-4 py-3 text-muted-foreground">{origin.mine ?? "—"}</td>
       <td className="px-4 py-3 text-muted-foreground">{origin.region ?? "—"}</td>
+      <td className="px-4 py-3">
+        {total > 0 ? (
+          <Link href={`/dashboard/origins/${origin.id}`} className="text-primary hover:underline text-xs">
+            {origin.gemCount > 0 && `${origin.gemCount} gem${origin.gemCount !== 1 ? "s" : ""}`}
+            {origin.gemCount > 0 && origin.parcelCount > 0 && ", "}
+            {origin.parcelCount > 0 && `${origin.parcelCount} parcel${origin.parcelCount !== 1 ? "s" : ""}`}
+          </Link>
+        ) : (
+          <span className="text-muted-foreground text-xs">—</span>
+        )}
+      </td>
       <td className="px-4 py-3 text-muted-foreground">{added}</td>
     </tr>
   );

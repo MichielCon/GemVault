@@ -2,6 +2,8 @@ namespace GemVault.Application.GemParcels.DTOs;
 
 public record GemParcelPhotoDto(Guid Id, string Url, bool IsCover, DateTime CreatedAt);
 
+public record GemParcelSoldInfoDto(Guid SaleId, DateTime SaleDate, decimal SalePrice);
+
 public record GemParcelDto(
     Guid Id,
     string Name,
@@ -20,7 +22,8 @@ public record GemParcelDto(
     string? PublicToken,
     DateTime CreatedAt,
     DateTime UpdatedAt,
-    List<GemParcelPhotoDto> Photos);
+    List<GemParcelPhotoDto> Photos,
+    GemParcelSoldInfoDto? SoldInfo);
 
 public record GemParcelSummaryDto(
     Guid Id,

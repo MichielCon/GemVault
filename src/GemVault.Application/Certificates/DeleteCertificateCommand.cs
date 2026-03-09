@@ -23,7 +23,7 @@ public class DeleteCertificateCommandHandler(
         // Verify gem ownership
         var gem = await context.Gems
             .FirstOrDefaultAsync(g => g.Id == certificate.GemId && !g.IsDeleted, ct)
-            ?? throw new NotFoundException("Gem", certificate.GemId ?? Guid.Empty);
+            ?? throw new NotFoundException("Gem", certificate.GemId);
 
         if (gem.OwnerId != currentUser.UserId)
             throw new ForbiddenException();
