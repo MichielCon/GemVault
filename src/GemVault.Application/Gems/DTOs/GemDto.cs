@@ -1,3 +1,5 @@
+using GemVault.Application.Certificates;
+
 namespace GemVault.Application.Gems.DTOs;
 
 public record GemPhotoDto(
@@ -34,7 +36,8 @@ public record GemDto(
     DateTime CreatedAt,
     DateTime UpdatedAt,
     List<GemPhotoDto> Photos,
-    GemSoldInfoDto? SoldInfo);
+    GemSoldInfoDto? SoldInfo,
+    List<CertificateDto> Certificates);
 
 public record GemSummaryDto(
     Guid Id,

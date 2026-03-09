@@ -17,6 +17,7 @@ import { PhotoUploader } from "@/components/gems/photo-uploader";
 import { DeleteGemButton } from "@/components/gems/delete-gem-button";
 import { QrCodeButton } from "@/components/gems/qr-code-button";
 import { proxyPhotoUrl } from "@/lib/utils";
+import { CertificateManager } from "@/components/gems/certificate-manager";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -214,6 +215,8 @@ export default async function GemDetailPage({ params }: Props) {
               </CardContent>
             </Card>
           )}
+
+          <CertificateManager gemId={gem.id} certificates={gem.certificates} />
         </div>
       </div>
     </div>

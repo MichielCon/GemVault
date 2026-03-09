@@ -23,6 +23,7 @@ public class GetGemByIdQueryHandler(
             .Include(g => g.PublicToken)
             .Include(g => g.SaleItems)
                 .ThenInclude(si => si.Sale)
+            .Include(g => g.Certificates)
             .FirstOrDefaultAsync(g => g.Id == request.GemId && !g.IsDeleted, ct)
             ?? throw new NotFoundException("Gem", request.GemId);
 
