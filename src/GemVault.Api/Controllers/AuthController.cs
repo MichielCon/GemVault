@@ -2,11 +2,13 @@ using GemVault.Application.Auth.Commands;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace GemVault.Api.Controllers;
 
 [ApiController]
 [Route("api/v1/auth")]
+[EnableRateLimiting("auth")]
 public class AuthController(IMediator mediator) : ControllerBase
 {
     [HttpPost("register")]
@@ -32,6 +34,7 @@ public class AuthController(IMediator mediator) : ControllerBase
 
     [HttpPost("logout")]
     [Authorize]
+    [DisableRateLimiting]
     public async Task<IActionResult> Logout([FromBody] LogoutCommand command, CancellationToken ct)
     {
         await mediator.Send(command, ct);

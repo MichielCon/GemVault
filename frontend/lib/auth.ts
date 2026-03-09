@@ -92,3 +92,23 @@ export async function getSession() {
   const token = store.get(ACCESS_TOKEN_COOKIE)?.value;
   return token ? { token } : null;
 }
+
+/** Decode the JWT payload (server-side only) and return the user's role.
+ *  No signature verification — backend enforces real auth. */
+export async function getSessionRole(): Promise<"Admin" | "Business" | "Collector" | null> {
+  const store = await cookies();
+  const token = store.get(ACCESS_TOKEN_COOKIE)?.value;
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(
+      Buffer.from(token.split(".")[1], "base64url").toString("utf8")
+    ) as Record<string, unknown>;
+    const roleUri =
+      "http://schemas.microsoft.com/ws/2008/06/identity/claims/role";
+    const role = (payload[roleUri] ?? payload["role"]) as string | undefined;
+    if (role === "Admin" || role === "Business" || role === "Collector") return role;
+    return null;
+  } catch {
+    return null;
+  }
+}

@@ -20,4 +20,7 @@ public class CurrentUserService(IHttpContextAccessor httpContextAccessor) : ICur
 
     public bool IsAuthenticated
         => httpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated ?? false;
+
+    public string? Role
+        => httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.Role);
 }

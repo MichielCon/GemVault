@@ -34,6 +34,17 @@ public class CreateGemCommandValidator : AbstractValidator<CreateGemCommand>
         RuleFor(x => x.Name).NotEmpty().MaximumLength(200);
         RuleFor(x => x.WeightCarats).GreaterThan(0).When(x => x.WeightCarats.HasValue);
         RuleFor(x => x.PurchasePrice).GreaterThanOrEqualTo(0).When(x => x.PurchasePrice.HasValue);
+        RuleFor(x => x.Attributes)
+            .Must(BeValidJson)
+            .WithMessage("Attributes must be a valid JSON object.")
+            .When(x => x.Attributes is not null);
+    }
+
+    private static bool BeValidJson(string? value)
+    {
+        if (value is null) return true;
+        try { System.Text.Json.JsonDocument.Parse(value); return true; }
+        catch { return false; }
     }
 }
 

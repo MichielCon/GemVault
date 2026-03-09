@@ -129,6 +129,14 @@ export interface VocabularyItemDto {
   parentValue: string | null;
 }
 
+export interface VocabularyAdminDto {
+  id: number;
+  field: string;
+  value: string;
+  parentValue: string | null;
+  sortOrder: number;
+}
+
 // ─── Origins ──────────────────────────────────────────────────────────────────
 
 export interface OriginDto {

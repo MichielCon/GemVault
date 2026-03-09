@@ -4,6 +4,23 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GemVault.Application.Vocabulary;
 
+public record GetVocabularyAdminQuery(string Field) : IRequest<List<VocabularyAdminDto>>;
+
+public class GetVocabularyAdminQueryHandler(IApplicationDbContext context)
+    : IRequestHandler<GetVocabularyAdminQuery, List<VocabularyAdminDto>>
+{
+    public async Task<List<VocabularyAdminDto>> Handle(GetVocabularyAdminQuery request, CancellationToken ct)
+    {
+        var field = request.Field.ToLowerInvariant();
+        var items = await context.GemVocabularies
+            .Where(v => v.Field == field)
+            .OrderBy(v => v.SortOrder)
+            .Select(v => new VocabularyAdminDto(v.Id, v.Field, v.Value, v.ParentValue, v.SortOrder))
+            .ToListAsync(ct);
+        return items;
+    }
+}
+
 public record VocabularyItemDto(string Value, string? ParentValue);
 
 public record GetVocabularyQuery(string Field, Guid? UserId, string? ParentValue = null) : IRequest<List<VocabularyItemDto>>;

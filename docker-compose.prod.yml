@@ -1,6 +1,7 @@
 services:
   db:
     restart: always
+    ports: []  # Remove dev port binding — DB only reachable inside Docker network
     volumes:
       - /opt/gemvault/data/postgres:/var/lib/postgresql/data
 
@@ -17,6 +18,8 @@ services:
 
   frontend:
     restart: always
+    environment:
+      - NODE_ENV=production
 
   nginx:
     restart: always

@@ -22,6 +22,9 @@ public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
     {
         RuleFor(x => x.Email).NotEmpty().EmailAddress().MaximumLength(256);
         RuleFor(x => x.Password).NotEmpty().MinimumLength(8).MaximumLength(128);
+        RuleFor(x => x.Role)
+            .Must(r => r == UserRole.Collector || r == UserRole.Business)
+            .WithMessage("Role must be Collector or Business. Admin accounts must be assigned by a system administrator.");
     }
 }
 

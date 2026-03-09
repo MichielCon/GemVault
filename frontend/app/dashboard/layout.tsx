@@ -1,9 +1,11 @@
 import Link from "next/link";
-import { logout } from "@/lib/auth";
-import { Gem, Package, MapPin, Map, LogOut, Building2, ShoppingCart, TrendingUp, LayoutDashboard } from "lucide-react";
+import { logout, getSessionRole } from "@/lib/auth";
+import { Gem, Package, MapPin, Map, LogOut, Building2, ShoppingCart, TrendingUp, LayoutDashboard, BookOpen } from "lucide-react";
 import { NavLink } from "@/components/dashboard/nav-link";
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const role = await getSessionRole();
+
   return (
     <div className="flex min-h-screen bg-slate-50">
       {/* Sidebar */}
@@ -47,6 +49,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <NavLink href="/dashboard/sales" icon={<TrendingUp size={15} />}>
             Sales
           </NavLink>
+
+          {role === "Admin" && (
+            <>
+              <p className="mb-1 mt-4 px-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+                Admin
+              </p>
+              <NavLink href="/dashboard/admin/vocabulary" icon={<BookOpen size={15} />}>
+                Vocabulary
+              </NavLink>
+            </>
+          )}
         </nav>
 
         {/* Sign out */}

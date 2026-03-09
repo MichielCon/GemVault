@@ -10,6 +10,7 @@ import type {
   PagedResult,
   PublicGemDto,
   VocabularyItemDto,
+  VocabularyAdminDto,
   SupplierDto,
   PurchaseOrderDto,
   PurchaseOrderSummaryDto,
@@ -68,6 +69,40 @@ async function post<T>(path: string, body: unknown, auth = true): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+async function put<T>(path: string, body: unknown, auth = true): Promise<T> {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (auth) Object.assign(headers, await authHeader());
+
+  const res = await fetch(`${baseUrl()}${path}`, {
+    method: "PUT",
+    headers,
+    body: JSON.stringify(body),
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new ApiError(res.status, text);
+  }
+  return res.json() as Promise<T>;
+}
+
+async function del(path: string, auth = true): Promise<void> {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (auth) Object.assign(headers, await authHeader());
+
+  const res = await fetch(`${baseUrl()}${path}`, {
+    method: "DELETE",
+    headers,
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new ApiError(res.status, text);
+  }
+}
+
 export class ApiError extends Error {
   constructor(
     public readonly status: number,
@@ -108,6 +143,16 @@ export const vocabularyApi = {
     const q = parentValue ? `?parentValue=${encodeURIComponent(parentValue)}` : "";
     return get<VocabularyItemDto[]>(`/api/v1/vocabulary/${field}${q}`);
   },
+};
+
+export const vocabularyAdminApi = {
+  list: (field: string) =>
+    get<VocabularyAdminDto[]>(`/api/v1/vocabulary/${encodeURIComponent(field)}/admin`),
+  create: (payload: { field: string; value: string; parentValue: string | null; sortOrder: number }) =>
+    post<VocabularyAdminDto>("/api/v1/vocabulary", payload),
+  update: (id: number, payload: { id: number; value: string; parentValue: string | null; sortOrder: number }) =>
+    put<VocabularyAdminDto>(`/api/v1/vocabulary/${id}`, payload),
+  delete: (id: number) => del(`/api/v1/vocabulary/${id}`),
 };
 
 // ─── Origins ──────────────────────────────────────────────────────────────────
