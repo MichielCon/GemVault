@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { gemsApi, vocabularyApi, originsApi, ApiError } from "@/lib/api";
 import type { GemDto } from "@/lib/types";
 import { GemEditForm } from "./form";
+import { CertificateManager } from "@/components/gems/certificate-manager";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -41,18 +42,21 @@ export default async function GemEditPage({ params }: Props) {
   ]);
 
   return (
-    <GemEditForm
-      gem={gem}
-      vocabulary={{
-        species: speciesVocab,
-        variety: varietyVocab,
-        color: colorVocab,
-        clarity: clarityVocab,
-        cut: cutVocab,
-        shape: shapeVocab,
-        treatment: treatmentVocab,
-      }}
-      origins={origins}
-    />
+    <div className="flex flex-col gap-6">
+      <GemEditForm
+        gem={gem}
+        vocabulary={{
+          species: speciesVocab,
+          variety: varietyVocab,
+          color: colorVocab,
+          clarity: clarityVocab,
+          cut: cutVocab,
+          shape: shapeVocab,
+          treatment: treatmentVocab,
+        }}
+        origins={origins}
+      />
+      <CertificateManager gemId={gem.id} certificates={gem.certificates} />
+    </div>
   );
 }

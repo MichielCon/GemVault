@@ -61,7 +61,7 @@ export function ParcelEditForm({ parcel, vocabulary, origins }: Props) {
   }
 
   return (
-    <div className="flex flex-col gap-6 max-w-2xl">
+    <div className="flex flex-col gap-6">
       <div className="flex items-center gap-3">
         <Button asChild variant="ghost" size="sm" className="-ml-2">
           <Link href={`/dashboard/parcels/${parcel.id}`}>
