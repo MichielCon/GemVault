@@ -100,7 +100,7 @@ export default async function GemDetailPage({ params }: Props) {
         {/* Photos */}
         <div className="flex flex-col gap-3">
           {coverPhoto ? (
-            <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-muted">
+            <div className="relative aspect-[4/3] max-h-72 w-full overflow-hidden rounded-xl bg-muted">
               <Image
                 src={proxyPhotoUrl(coverPhoto.url) ?? ""}
                 alt={gem.name}
@@ -112,7 +112,7 @@ export default async function GemDetailPage({ params }: Props) {
               />
             </div>
           ) : (
-            <div className="flex aspect-square w-full items-center justify-center rounded-xl border border-dashed bg-muted text-muted-foreground text-sm">
+            <div className="flex aspect-[4/3] max-h-72 w-full items-center justify-center rounded-xl border border-dashed bg-muted text-muted-foreground text-sm">
               No photo
             </div>
           )}

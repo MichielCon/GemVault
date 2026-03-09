@@ -84,7 +84,7 @@ export function MiniOriginMap({ country, mine, region }: Props) {
       <div
         ref={containerRef}
         className="w-full bg-[#1a1a2e]"
-        style={{ height: 200 }}
+        style={{ height: 140 }}
       />
       <div className="flex items-center justify-between border-t bg-card px-3 py-2">
         <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
