@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/card";
 import type { CertificateDto } from "@/lib/types";
 import { FileText, Trash2, Plus, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
+import { proxyPhotoUrl } from "@/lib/utils";
 
 interface Props {
   gemId: string;
@@ -210,7 +211,7 @@ function CertificateRow({
       <div className="flex items-center gap-1 shrink-0">
         {cert.fileUrl && (
           <Button asChild variant="ghost" size="sm" className="h-7 w-7 p-0">
-            <a href={cert.fileUrl} target="_blank" rel="noopener noreferrer" title="Open PDF">
+            <a href={proxyPhotoUrl(cert.fileUrl) ?? "#"} target="_blank" rel="noopener noreferrer" title="Open PDF">
               <ExternalLink size={13} />
             </a>
           </Button>
