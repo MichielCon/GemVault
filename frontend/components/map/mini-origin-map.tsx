@@ -16,24 +16,18 @@ interface Props {
 export function MiniOriginMap({ country, mine, region }: Props) {
   const coords = getCountryCoords(country);
   const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<unknown>(null);
+  const mapRef = useRef<import("leaflet").Map | null>(null);
 
-  // Only depend on `country` — coords derive from it and are a new array ref each render.
-  // mine/region are display-only labels that don't affect the map position.
   useEffect(() => {
-    if (!coords || !containerRef.current) return;
-
-    const container = containerRef.current;
-    let destroyed = false;
+    if (!containerRef.current) return;
+    if (mapRef.current) return;
 
     import("leaflet").then((L) => {
-      if (destroyed || !container || mapRef.current) return;
+      if (!containerRef.current || mapRef.current) return;
 
-      const label = [mine, region, country].filter(Boolean).join(", ");
-
-      const map = L.map(container, {
-        center: coords,
-        zoom: 5,
+      const map = L.map(containerRef.current, {
+        center: coords ?? [20, 10],
+        zoom: coords ? 5 : 3,
         zoomControl: false,
         scrollWheelZoom: false,
         dragging: false,
@@ -43,54 +37,59 @@ export function MiniOriginMap({ country, mine, region }: Props) {
         attributionControl: false,
       });
 
+      mapRef.current = map;
+
       L.tileLayer(
-        "https://{s}.basemaps.cartocdn.com/dark_matter_no_labels/{z}/{x}/{y}{r}.png",
-        { subdomains: "abcd", maxZoom: 10 }
+        "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+        { subdomains: "abcd", maxZoom: 19 }
       ).addTo(map);
 
-      const icon = L.divIcon({
-        className: "",
-        html: `<div style="
-          width:28px;height:28px;border-radius:50%;
-          background:rgba(139,92,246,0.9);
-          border:2px solid rgba(167,139,250,0.9);
-          box-shadow:0 0 0 6px rgba(139,92,246,0.2);
-          display:flex;align-items:center;justify-content:center;
-        ">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
-            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-          </svg>
-        </div>`,
-        iconSize: [28, 28],
-        iconAnchor: [14, 14],
-      });
+      if (coords) {
+        const label = [mine, region, country].filter(Boolean).join(", ");
 
-      L.marker(coords, { icon })
-        .bindTooltip(label, { permanent: false, direction: "top", offset: [0, -16] })
-        .addTo(map);
+        const icon = L.divIcon({
+          className: "",
+          html: `<div style="
+            width:28px;height:28px;border-radius:50%;
+            background:rgba(139,92,246,0.9);
+            border:2px solid rgba(167,139,250,0.9);
+            box-shadow:0 0 0 6px rgba(139,92,246,0.2);
+            display:flex;align-items:center;justify-content:center;
+          ">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+            </svg>
+          </div>`,
+          iconSize: [28, 28],
+          iconAnchor: [14, 14],
+        });
 
-      mapRef.current = map;
+        L.marker(coords, { icon })
+          .bindTooltip(label, { permanent: false, direction: "top", offset: [0, -16] })
+          .addTo(map);
+      }
     });
 
     return () => {
-      destroyed = true;
-      if (mapRef.current) {
-        (mapRef.current as { remove: () => void }).remove();
-        mapRef.current = null;
-      }
+      mapRef.current?.remove();
+      mapRef.current = null;
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [country]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  if (!coords) return null;
+  const label = [mine, region, country].filter(Boolean).join(", ");
 
   return (
     <div className="overflow-hidden rounded-lg border">
-      <div ref={containerRef} style={{ height: 200 }} />
+      <div
+        ref={containerRef}
+        className="w-full bg-[#1a1a2e]"
+        style={{ height: 200 }}
+      />
       <div className="flex items-center justify-between border-t bg-card px-3 py-2">
         <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <MapPin size={12} />
-          {[mine, region, country].filter(Boolean).join(", ")}
+          {label}
         </span>
         <Link
           href="/dashboard/map"
