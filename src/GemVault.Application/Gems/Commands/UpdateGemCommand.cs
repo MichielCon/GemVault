@@ -86,10 +86,17 @@ public class UpdateGemCommandHandler(
         gem.Attributes = request.Attributes;
 
         // Manage public token
-        if (request.IsPublic && gem.PublicToken is null)
-            gem.PublicToken = new PublicToken { GemId = gem.Id };
-        else if (!request.IsPublic && gem.PublicToken is not null)
+        if (request.IsPublic)
+        {
+            if (gem.PublicToken is null)
+                gem.PublicToken = new PublicToken { GemId = gem.Id };
+            else
+                gem.PublicToken.IsActive = true;
+        }
+        else if (gem.PublicToken is not null)
+        {
             gem.PublicToken.IsActive = false;
+        }
 
         gem.IsPublic = request.IsPublic;
         await context.SaveChangesAsync(ct);

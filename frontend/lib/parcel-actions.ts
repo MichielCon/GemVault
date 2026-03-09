@@ -163,7 +163,27 @@ export async function uploadParcelPhoto(
     return { error: parseApiError(e) };
   }
 
-  redirect(`/dashboard/parcels/${id}`);
+  return { error: null };
+}
+
+export async function deleteParcelPhoto(
+  photoId: string
+): Promise<{ error: string | null }> {
+  try {
+    const headers: Record<string, string> = { ...(await authHeader()) };
+    const res = await fetch(`${baseUrl()}/api/v1/gem-parcels/photos/${photoId}`, {
+      method: "DELETE",
+      headers,
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new ApiError(res.status, text);
+    }
+  } catch (e) {
+    return { error: parseApiError(e) };
+  }
+  return { error: null };
 }
 
 export async function deleteParcel(

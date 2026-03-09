@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { parcelsApi } from "@/lib/api";
 import { ApiError } from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
@@ -13,12 +12,11 @@ import {
 } from "@/components/ui/card";
 import { ArrowLeft, Globe, Lock, Pencil, ShoppingCart, Tag } from "lucide-react";
 import type { GemParcelDto } from "@/lib/types";
-import { PhotoUploader } from "@/components/gems/photo-uploader";
+import { PhotoGallery } from "@/components/gems/photo-gallery";
 import { DeleteParcelButton } from "@/components/parcels/delete-parcel-button";
 import { QrCodeButton } from "@/components/gems/qr-code-button";
 import { ScanLinkCard } from "@/components/gems/scan-link-card";
 import { MiniOriginMapWrapper } from "@/components/map/mini-origin-map-wrapper";
-import { proxyPhotoUrl } from "@/lib/utils";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -36,9 +34,6 @@ export default async function ParcelDetailPage({ params }: Props) {
     }
     throw e;
   }
-
-  const coverPhoto = parcel.photos.find((p) => p.isCover) ?? parcel.photos[0];
-  const otherPhotos = parcel.photos.filter((p) => p !== coverPhoto);
 
   return (
     <div className="flex flex-col gap-6">
@@ -98,33 +93,7 @@ export default async function ParcelDetailPage({ params }: Props) {
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {/* Photos */}
         <div className="flex flex-col gap-3">
-          {coverPhoto ? (
-            <div className="relative aspect-[4/3] max-h-72 w-full overflow-hidden rounded-xl bg-muted">
-              <Image
-                src={proxyPhotoUrl(coverPhoto.url) ?? ""}
-                alt={parcel.name}
-                fill
-                unoptimized
-                className="object-cover"
-                priority
-                sizes="(max-width: 768px) 100vw, 50vw"
-              />
-            </div>
-          ) : (
-            <div className="flex aspect-[4/3] max-h-72 w-full items-center justify-center rounded-xl border border-dashed bg-muted text-muted-foreground text-sm">
-              No photo
-            </div>
-          )}
-          {otherPhotos.length > 0 && (
-            <div className="grid grid-cols-4 gap-2">
-              {otherPhotos.slice(0, 4).map((p) => (
-                <div key={p.id} className="relative aspect-square overflow-hidden rounded-lg bg-muted">
-                  <Image src={proxyPhotoUrl(p.url) ?? ""} alt="" fill unoptimized className="object-cover" sizes="15vw" />
-                </div>
-              ))}
-            </div>
-          )}
-          <PhotoUploader id={parcel.id} type="parcel" />
+          <PhotoGallery photos={parcel.photos} name={parcel.name} entityId={parcel.id} type="parcel" />
           {parcel.originCountry && (
             <MiniOriginMapWrapper country={parcel.originCountry} />
           )}

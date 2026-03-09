@@ -61,6 +61,13 @@ public class GemsController(IMediator mediator) : ControllerBase
         return NoContent();
     }
 
+    [HttpDelete("photos/{photoId:guid}")]
+    public async Task<IActionResult> DeletePhoto(Guid photoId, CancellationToken ct)
+    {
+        await mediator.Send(new DeleteGemPhotoCommand(photoId), ct);
+        return NoContent();
+    }
+
     [HttpPost("{id:guid}/photos")]
     [RequestSizeLimit(25 * 1024 * 1024)]
     public async Task<IActionResult> UploadPhoto(
