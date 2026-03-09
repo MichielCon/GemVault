@@ -40,7 +40,7 @@ export default async function GemDetailPage({ params }: Props) {
   const otherPhotos = gem.photos.filter((p) => p !== coverPhoto);
 
   return (
-    <div className="flex flex-col gap-6 max-w-4xl">
+    <div className="flex flex-col gap-6">
       {/* Back */}
       <Button asChild variant="ghost" size="sm" className="-ml-2 w-fit">
         <Link href="/dashboard/gems">

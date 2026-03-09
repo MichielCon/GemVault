@@ -35,7 +35,7 @@ export default async function OriginDetailPage({ params }: Props) {
   const parcels = parcelsResult.status === "fulfilled" ? parcelsResult.value.items : [];
 
   return (
-    <div className="flex flex-col gap-6 max-w-5xl">
+    <div className="flex flex-col gap-6">
       <Button asChild variant="ghost" size="sm" className="-ml-2 w-fit">
         <Link href="/dashboard/origins">
           <ArrowLeft size={16} />

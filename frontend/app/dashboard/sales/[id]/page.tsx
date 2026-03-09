@@ -25,7 +25,7 @@ export default async function SaleDetailPage({ params }: Props) {
   }
 
   return (
-    <div className="flex flex-col gap-6 max-w-4xl">
+    <div className="flex flex-col gap-6">
       <Button asChild variant="ghost" size="sm" className="-ml-2 w-fit">
         <Link href="/dashboard/sales">
           <ArrowLeft size={16} />
