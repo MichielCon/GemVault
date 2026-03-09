@@ -18,15 +18,20 @@ export function MiniOriginMap({ country, mine, region }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<unknown>(null);
 
+  // Only depend on `country` — coords derive from it and are a new array ref each render.
+  // mine/region are display-only labels that don't affect the map position.
   useEffect(() => {
-    if (!coords || !containerRef.current || mapRef.current) return;
+    if (!coords || !containerRef.current) return;
 
-    let map: ReturnType<typeof import("leaflet").map> | null = null;
+    const container = containerRef.current;
+    let destroyed = false;
 
     import("leaflet").then((L) => {
-      if (!containerRef.current || mapRef.current) return;
+      if (destroyed || !container || mapRef.current) return;
 
-      map = L.map(containerRef.current, {
+      const label = [mine, region, country].filter(Boolean).join(", ");
+
+      const map = L.map(container, {
         center: coords,
         zoom: 5,
         zoomControl: false,
@@ -42,8 +47,6 @@ export function MiniOriginMap({ country, mine, region }: Props) {
         "https://{s}.basemaps.cartocdn.com/dark_matter_no_labels/{z}/{x}/{y}{r}.png",
         { subdomains: "abcd", maxZoom: 10 }
       ).addTo(map);
-
-      const label = [mine, region, country].filter(Boolean).join(", ");
 
       const icon = L.divIcon({
         className: "",
@@ -70,12 +73,14 @@ export function MiniOriginMap({ country, mine, region }: Props) {
     });
 
     return () => {
-      if (map) {
-        map.remove();
+      destroyed = true;
+      if (mapRef.current) {
+        (mapRef.current as { remove: () => void }).remove();
         mapRef.current = null;
       }
     };
-  }, [coords, country, mine, region]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [country]);
 
   if (!coords) return null;
 
