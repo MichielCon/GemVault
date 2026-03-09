@@ -17,6 +17,7 @@ import { PhotoUploader } from "@/components/gems/photo-uploader";
 import { DeleteParcelButton } from "@/components/parcels/delete-parcel-button";
 import { QrCodeButton } from "@/components/gems/qr-code-button";
 import { ScanLinkCard } from "@/components/gems/scan-link-card";
+import { MiniOriginMapWrapper } from "@/components/map/mini-origin-map-wrapper";
 import { proxyPhotoUrl } from "@/lib/utils";
 
 interface Props {
@@ -198,6 +199,10 @@ export default async function ParcelDetailPage({ params }: Props) {
                 </div>
               </CardContent>
             </Card>
+          )}
+
+          {parcel.originCountry && (
+            <MiniOriginMapWrapper country={parcel.originCountry} />
           )}
 
           {parcel.publicToken && <ScanLinkCard token={parcel.publicToken} />}

@@ -19,6 +19,7 @@ import { QrCodeButton } from "@/components/gems/qr-code-button";
 import { ScanLinkCard } from "@/components/gems/scan-link-card";
 import { proxyPhotoUrl } from "@/lib/utils";
 import { CertificateManager } from "@/components/gems/certificate-manager";
+import { MiniOriginMapWrapper } from "@/components/map/mini-origin-map-wrapper";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -204,6 +205,10 @@ export default async function GemDetailPage({ params }: Props) {
                 </div>
               </CardContent>
             </Card>
+          )}
+
+          {gem.originCountry && (
+            <MiniOriginMapWrapper country={gem.originCountry} />
           )}
 
           {gem.publicToken && <ScanLinkCard token={gem.publicToken} />}
