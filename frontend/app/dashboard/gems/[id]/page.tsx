@@ -16,6 +16,7 @@ import type { GemDto } from "@/lib/types";
 import { PhotoUploader } from "@/components/gems/photo-uploader";
 import { DeleteGemButton } from "@/components/gems/delete-gem-button";
 import { QrCodeButton } from "@/components/gems/qr-code-button";
+import { ScanLinkCard } from "@/components/gems/scan-link-card";
 import { proxyPhotoUrl } from "@/lib/utils";
 import { CertificateManager } from "@/components/gems/certificate-manager";
 
@@ -205,16 +206,7 @@ export default async function GemDetailPage({ params }: Props) {
             </Card>
           )}
 
-          {gem.publicToken && (
-            <Card>
-              <CardHeader><CardTitle className="text-base">Public link</CardTitle></CardHeader>
-              <CardContent>
-                <p className="break-all font-mono text-xs text-muted-foreground">
-                  /scan/{gem.publicToken}
-                </p>
-              </CardContent>
-            </Card>
-          )}
+          {gem.publicToken && <ScanLinkCard token={gem.publicToken} />}
 
           <CertificateManager gemId={gem.id} certificates={gem.certificates} />
         </div>
