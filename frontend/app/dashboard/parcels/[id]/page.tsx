@@ -125,6 +125,10 @@ export default async function ParcelDetailPage({ params }: Props) {
             </div>
           )}
           <PhotoUploader id={parcel.id} type="parcel" />
+          {parcel.originCountry && (
+            <MiniOriginMapWrapper country={parcel.originCountry} />
+          )}
+          {parcel.publicToken && <ScanLinkCard token={parcel.publicToken} />}
         </div>
 
         {/* Details */}
@@ -201,11 +205,6 @@ export default async function ParcelDetailPage({ params }: Props) {
             </Card>
           )}
 
-          {parcel.originCountry && (
-            <MiniOriginMapWrapper country={parcel.originCountry} />
-          )}
-
-          {parcel.publicToken && <ScanLinkCard token={parcel.publicToken} />}
         </div>
       </div>
     </div>

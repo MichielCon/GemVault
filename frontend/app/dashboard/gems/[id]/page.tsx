@@ -126,6 +126,10 @@ export default async function GemDetailPage({ params }: Props) {
             </div>
           )}
           <PhotoUploader id={gem.id} type="gem" />
+          {gem.originCountry && (
+            <MiniOriginMapWrapper country={gem.originCountry} />
+          )}
+          {gem.publicToken && <ScanLinkCard token={gem.publicToken} />}
         </div>
 
         {/* Details */}
@@ -206,12 +210,6 @@ export default async function GemDetailPage({ params }: Props) {
               </CardContent>
             </Card>
           )}
-
-          {gem.originCountry && (
-            <MiniOriginMapWrapper country={gem.originCountry} />
-          )}
-
-          {gem.publicToken && <ScanLinkCard token={gem.publicToken} />}
 
           <CertificateManager gemId={gem.id} certificates={gem.certificates} />
         </div>
