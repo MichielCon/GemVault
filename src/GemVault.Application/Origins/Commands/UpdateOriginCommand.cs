@@ -24,7 +24,7 @@ public class UpdateOriginCommandHandler(
 {
     public async Task<OriginDto> Handle(UpdateOriginCommand request, CancellationToken ct)
     {
-        if (currentUser.Role != "Admin")
+        if (!currentUser.IsAdmin)
             throw new ForbiddenException("Only administrators can update origins.");
 
         var origin = await context.Origins

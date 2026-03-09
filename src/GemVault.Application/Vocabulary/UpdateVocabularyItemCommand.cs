@@ -27,7 +27,7 @@ public class UpdateVocabularyItemCommandHandler(
 {
     public async Task<VocabularyAdminDto> Handle(UpdateVocabularyItemCommand request, CancellationToken ct)
     {
-        if (currentUser.Role != "Admin")
+        if (!currentUser.IsAdmin)
             throw new ForbiddenException();
 
         var item = await context.GemVocabularies.FindAsync([request.Id], ct)

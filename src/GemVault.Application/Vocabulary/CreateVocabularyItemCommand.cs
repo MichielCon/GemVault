@@ -43,7 +43,7 @@ public class CreateVocabularyItemCommandHandler(
 {
     public async Task<VocabularyAdminDto> Handle(CreateVocabularyItemCommand request, CancellationToken ct)
     {
-        if (currentUser.Role != "Admin")
+        if (!currentUser.IsAdmin)
             throw new ForbiddenException();
 
         var field = request.Field.ToLowerInvariant();

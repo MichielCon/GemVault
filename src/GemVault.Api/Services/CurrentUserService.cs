@@ -1,4 +1,5 @@
 using GemVault.Application.Interfaces;
+using GemVault.Domain.Enums;
 using System.Security.Claims;
 
 namespace GemVault.Api.Services;
@@ -23,4 +24,7 @@ public class CurrentUserService(IHttpContextAccessor httpContextAccessor) : ICur
 
     public string? Role
         => httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.Role);
+
+    public bool IsAdmin
+        => Enum.TryParse<UserRole>(Role, out var role) && role == UserRole.Admin;
 }

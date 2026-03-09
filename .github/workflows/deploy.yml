@@ -17,18 +17,48 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || 22 }}
+          envs: GITHUB_SHA
           script: |
+            set -e
             cd /opt/gemvault
+
+            # Tag current images as previous (rollback targets)
+            docker tag gemvault-api:latest gemvault-api:previous 2>/dev/null || true
+            docker tag gemvault-frontend:latest gemvault-frontend:previous 2>/dev/null || true
+
             git pull origin main
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+
+            # Build and tag new images with git SHA
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml build
+            docker tag gemvault-api:latest gemvault-api:$GITHUB_SHA 2>/dev/null || true
+            docker tag gemvault-frontend:latest gemvault-frontend:$GITHUB_SHA 2>/dev/null || true
+
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+            # Keep :previous and :$GITHUB_SHA; prune only dangling images
             docker image prune -f
 
       - name: Health check
         run: |
-          sleep 30
-          curl --fail --retry 5 --retry-delay 10 https://${{ secrets.VPS_HOST }}/api/health || exit 1
+          sleep 60
+          curl --fail --retry 12 --retry-delay 15 --retry-all-errors https://${{ secrets.VPS_HOST }}/api/health || exit 1
 
-      - name: Notify on failure
+      - name: Rollback on failure
         if: failure()
-        run: echo "Deployment failed — check VPS logs"
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script: |
+            cd /opt/gemvault
+            if docker image inspect gemvault-api:previous >/dev/null 2>&1; then
+              echo "Rolling back to previous images..."
+              docker tag gemvault-api:previous gemvault-api:latest
+              docker tag gemvault-frontend:previous gemvault-frontend:latest
+              docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+              echo "Rollback complete"
+            else
+              echo "No previous image found — manual intervention required"
+            fi
