@@ -31,7 +31,7 @@ function buildCountryGroups(origins: OriginMapDto[]): CountryGroup[] {
   const groups: CountryGroup[] = [];
   for (const [country, list] of map.entries()) {
     const coords = getCountryCoords(country);
-    if (!coords) continue; // skip unknown countries
+    if (!coords) continue;
 
     groups.push({
       country,
@@ -124,9 +124,8 @@ export default function ProvenanceMap({ origins }: Props) {
 
   useEffect(() => {
     if (!containerRef.current) return;
-    if (mapRef.current) return; // already initialised
+    if (mapRef.current) return;
 
-    // Dynamically import Leaflet to avoid SSR issues
     import("leaflet").then((L) => {
       const map = L.map(containerRef.current!, {
         center: [20, 10],
@@ -141,20 +140,13 @@ export default function ProvenanceMap({ origins }: Props) {
 
       mapRef.current = map;
 
-      // Dark Matter tiles
       L.tileLayer(
         "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-        {
-          attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
-          subdomains: "abcd",
-          maxZoom: 19,
-        }
+        { attribution: '&copy; <a href="https://carto.com/">CARTO</a>', subdomains: "abcd", maxZoom: 19 }
       ).addTo(map);
 
-      // Add zoom control to bottom-right
       L.control.zoom({ position: "bottomright" }).addTo(map);
 
-      // Add markers
       for (const group of groups) {
         const total = group.totalGems + group.totalParcels;
         const size = markerSize(total);
@@ -166,24 +158,9 @@ export default function ProvenanceMap({ origins }: Props) {
           className: "",
           html: `
             <div class="gem-marker-wrap" style="width:${pulseSize}px;height:${pulseSize}px;position:relative">
-              <div class="gem-marker-pulse" style="
-                width:${pulseSize}px;height:${pulseSize}px;
-                background:${colors.pulse};
-                top:0;left:0;position:absolute;
-              "></div>
-              <div class="gem-marker-pulse gem-marker-pulse-2" style="
-                width:${pulseSize}px;height:${pulseSize}px;
-                background:${colors.pulse};
-                top:0;left:0;position:absolute;
-              "></div>
-              <div class="gem-marker-dot" style="
-                width:${size}px;height:${size}px;
-                font-size:${fontSize}px;
-                background:${colors.bg};
-                position:absolute;
-                top:${(pulseSize - size) / 2}px;
-                left:${(pulseSize - size) / 2}px;
-              ">${total}</div>
+              <div class="gem-marker-pulse" style="width:${pulseSize}px;height:${pulseSize}px;background:${colors.pulse};top:0;left:0;position:absolute;"></div>
+              <div class="gem-marker-pulse gem-marker-pulse-2" style="width:${pulseSize}px;height:${pulseSize}px;background:${colors.pulse};top:0;left:0;position:absolute;"></div>
+              <div class="gem-marker-dot" style="width:${size}px;height:${size}px;font-size:${fontSize}px;background:${colors.bg};position:absolute;top:${(pulseSize - size) / 2}px;left:${(pulseSize - size) / 2}px;">${total}</div>
             </div>
           `,
           iconSize: [pulseSize, pulseSize],
@@ -192,13 +169,11 @@ export default function ProvenanceMap({ origins }: Props) {
         });
 
         const marker = L.marker(group.coords, { icon });
-
         marker.bindTooltip(
           `<div style="font-weight:600;font-size:13px">${COUNTRY_FLAG[group.country] ?? "🌍"} ${group.country}</div>
            <div style="font-size:11px;color:#999;margin-top:2px">${total} item${total !== 1 ? "s" : ""} · ${fmtCt(group.totalCarats)}</div>`,
           { direction: "top", offset: [0, -size / 2 - 4], className: "" }
         );
-
         marker.on("click", () => selectGroup(group));
         marker.addTo(map);
       }
@@ -212,22 +187,22 @@ export default function ProvenanceMap({ origins }: Props) {
   }, []);
 
   return (
-    <div className="relative w-full h-full bg-[#1a1a2e]">
-      {/* Stats strip */}
-      <div className="absolute top-0 left-0 right-0 z-[1000] flex items-center gap-6 px-5 py-2.5 bg-slate-900/90 backdrop-blur-sm border-b border-slate-700/50 text-sm">
+    <div className="flex flex-col w-full h-full bg-[#1a1a2e]">
+      {/* Stats strip — in flow, no absolute positioning = no gap */}
+      <div className="shrink-0 flex items-center gap-5 px-5 py-3 bg-zinc-950 border-b border-zinc-800/80 text-sm">
         <div className="flex items-center gap-1.5 text-violet-400 font-semibold">
           <MapPin size={14} />
           <span>{totalCountries} {totalCountries === 1 ? "country" : "countries"}</span>
         </div>
-        <div className="h-4 w-px bg-slate-700" />
-        <div className="flex items-center gap-1.5 text-slate-300">
+        <div className="h-4 w-px bg-zinc-800" />
+        <div className="flex items-center gap-1.5 text-zinc-300">
           <Gem size={13} />
           <span>{totalGems} gem{totalGems !== 1 ? "s" : ""}</span>
         </div>
         {totalParcels > 0 && (
           <>
-            <div className="h-4 w-px bg-slate-700" />
-            <div className="flex items-center gap-1.5 text-slate-300">
+            <div className="h-4 w-px bg-zinc-800" />
+            <div className="flex items-center gap-1.5 text-zinc-300">
               <Package size={13} />
               <span>{totalParcels} parcel{totalParcels !== 1 ? "s" : ""}</span>
             </div>
@@ -235,14 +210,14 @@ export default function ProvenanceMap({ origins }: Props) {
         )}
         {totalCarats > 0 && (
           <>
-            <div className="h-4 w-px bg-slate-700" />
-            <span className="text-slate-300">{fmtCt(totalCarats)}</span>
+            <div className="h-4 w-px bg-zinc-800" />
+            <span className="text-zinc-300">{fmtCt(totalCarats)}</span>
           </>
         )}
         {totalInvested > 0 && (
           <>
-            <div className="h-4 w-px bg-slate-700" />
-            <div className="flex items-center gap-1 text-slate-300">
+            <div className="h-4 w-px bg-zinc-800" />
+            <div className="flex items-center gap-1 text-zinc-300">
               <DollarSign size={12} />
               <span>{fmt(totalInvested)} invested</span>
             </div>
@@ -250,140 +225,136 @@ export default function ProvenanceMap({ origins }: Props) {
         )}
       </div>
 
-      {/* Legend */}
-      <div className="absolute bottom-8 left-4 z-[1000] bg-slate-900/90 backdrop-blur-sm rounded-lg border border-slate-700/50 px-3 py-2.5 text-xs text-slate-400 space-y-1.5">
-        <p className="font-semibold text-slate-300 mb-2">Items per location</p>
-        {[
-          { label: "1–2", color: "rgba(167,139,250,0.85)", size: 16 },
-          { label: "3–5", color: "rgba(139,92,246,0.9)", size: 19 },
-          { label: "6–15", color: "rgba(109,40,217,0.92)", size: 22 },
-          { label: "16+", color: "rgba(76,29,149,0.95)", size: 26 },
-        ].map(({ label, color, size }) => (
-          <div key={label} className="flex items-center gap-2">
-            <div style={{ width: size, height: size, borderRadius: "50%", background: color, flexShrink: 0 }} />
-            <span>{label}</span>
-          </div>
-        ))}
-      </div>
+      {/* Map area — fills remaining height */}
+      <div className="relative flex-1 min-h-0">
+        {/* Leaflet container fills the box */}
+        <div ref={containerRef} className="absolute inset-0" />
 
-      {/* Leaflet container */}
-      <div ref={containerRef} className="w-full h-full" style={{ paddingTop: "44px" }} />
-
-      {/* Side panel */}
-      {selected && (
-        <div
-          key={selected.country}
-          className={`absolute top-[44px] right-0 bottom-0 w-80 bg-slate-900/95 backdrop-blur-md border-l border-slate-700/50 z-[1000] flex flex-col overflow-hidden ${panelVisible ? "map-panel-enter" : "map-panel-exit"}`}
-        >
-          {/* Panel header */}
-          <div className="flex items-start justify-between gap-3 px-5 py-4 border-b border-slate-700/50">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">{COUNTRY_FLAG[selected.country] ?? "🌍"}</span>
-                <h2 className="text-lg font-bold text-white leading-tight">{selected.country}</h2>
-              </div>
-              <p className="text-xs text-slate-400 mt-1">
-                {selected.totalGems + selected.totalParcels} items · {fmtCt(selected.totalCarats)}
-              </p>
+        {/* Legend */}
+        <div className="absolute bottom-8 left-4 z-[1000] bg-zinc-950/95 backdrop-blur-sm rounded-lg border border-zinc-800 px-3 py-2.5 text-xs text-zinc-400 space-y-1.5">
+          <p className="font-semibold text-zinc-300 mb-2">Items per location</p>
+          {[
+            { label: "1–2", color: "rgba(167,139,250,0.85)", size: 16 },
+            { label: "3–5", color: "rgba(139,92,246,0.9)", size: 19 },
+            { label: "6–15", color: "rgba(109,40,217,0.92)", size: 22 },
+            { label: "16+", color: "rgba(76,29,149,0.95)", size: 26 },
+          ].map(({ label, color, size }) => (
+            <div key={label} className="flex items-center gap-2">
+              <div style={{ width: size, height: size, borderRadius: "50%", background: color, flexShrink: 0 }} />
+              <span>{label}</span>
             </div>
-            <button
-              onClick={closePanel}
-              className="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors shrink-0 mt-0.5"
-            >
-              <X size={16} />
-            </button>
-          </div>
+          ))}
+        </div>
 
-          {/* Stats row */}
-          <div className="grid grid-cols-2 gap-px bg-slate-700/30 border-b border-slate-700/50">
-            <div className="bg-slate-900/80 px-4 py-3">
-              <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-0.5">Invested</p>
-              <p className="text-sm font-bold text-violet-300">{fmt(selected.totalInvested)}</p>
-            </div>
-            <div className="bg-slate-900/80 px-4 py-3">
-              <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-0.5">Total weight</p>
-              <p className="text-sm font-bold text-violet-300">{fmtCt(selected.totalCarats)}</p>
-            </div>
-          </div>
-
-          {/* Species tags */}
-          {selected.allSpecies.length > 0 && (
-            <div className="px-5 py-3 border-b border-slate-700/30">
-              <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-2">Species</p>
-              <div className="flex flex-wrap gap-1.5">
-                {selected.allSpecies.map((s) => (
-                  <span key={s} className="text-[11px] px-2 py-0.5 rounded-full bg-violet-900/50 text-violet-300 border border-violet-700/40">
-                    {s}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Origins list */}
-          <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
-            <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-3">
-              {selected.origins.length === 1 ? "Origin" : `${selected.origins.length} Origins`}
-            </p>
-            {selected.origins.map((o) => (
-              <Link
-                key={o.id}
-                href={`/dashboard/origins/${o.id}`}
-                className="block rounded-lg border border-slate-700/40 bg-slate-800/50 px-4 py-3 hover:border-violet-500/40 hover:bg-slate-800 transition-all group"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-white group-hover:text-violet-300 transition-colors truncate">
-                      {o.mine ?? o.region ?? o.country}
-                    </p>
-                    {o.region && o.mine && (
-                      <p className="text-[11px] text-slate-500 truncate">{o.region}</p>
-                    )}
-                  </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-xs font-medium text-slate-300">{o.gemCount + o.parcelCount} items</p>
-                    {o.totalCarats > 0 && (
-                      <p className="text-[10px] text-slate-500">{fmtCt(o.totalCarats)}</p>
-                    )}
-                  </div>
+        {/* Side panel */}
+        {selected && (
+          <div
+            key={selected.country}
+            className={`absolute top-0 right-0 bottom-0 w-80 bg-zinc-950/95 backdrop-blur-md border-l border-zinc-800 z-[1000] flex flex-col overflow-hidden ${panelVisible ? "map-panel-enter" : "map-panel-exit"}`}
+          >
+            <div className="flex items-start justify-between gap-3 px-5 py-4 border-b border-zinc-800">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">{COUNTRY_FLAG[selected.country] ?? "🌍"}</span>
+                  <h2 className="text-lg font-bold text-white leading-tight">{selected.country}</h2>
                 </div>
-                {o.species.length > 0 && (
-                  <div className="flex gap-1 mt-2 flex-wrap">
-                    {o.species.slice(0, 4).map((s) => (
-                      <span key={s} className="text-[10px] px-1.5 py-0.5 rounded bg-slate-700/60 text-slate-400">
-                        {s}
-                      </span>
-                    ))}
-                    {o.species.length > 4 && (
-                      <span className="text-[10px] text-slate-600">+{o.species.length - 4}</span>
-                    )}
+                <p className="text-xs text-zinc-400 mt-1">
+                  {selected.totalGems + selected.totalParcels} items · {fmtCt(selected.totalCarats)}
+                </p>
+              </div>
+              <button
+                onClick={closePanel}
+                className="p-1.5 rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-colors shrink-0 mt-0.5"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-px bg-zinc-800/30 border-b border-zinc-800">
+              <div className="bg-zinc-950/80 px-4 py-3">
+                <p className="text-[10px] uppercase tracking-widest text-zinc-500 mb-0.5">Invested</p>
+                <p className="text-sm font-bold text-violet-300">{fmt(selected.totalInvested)}</p>
+              </div>
+              <div className="bg-zinc-950/80 px-4 py-3">
+                <p className="text-[10px] uppercase tracking-widest text-zinc-500 mb-0.5">Total weight</p>
+                <p className="text-sm font-bold text-violet-300">{fmtCt(selected.totalCarats)}</p>
+              </div>
+            </div>
+
+            {selected.allSpecies.length > 0 && (
+              <div className="px-5 py-3 border-b border-zinc-800/30">
+                <p className="text-[10px] uppercase tracking-widest text-zinc-500 mb-2">Species</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {selected.allSpecies.map((s) => (
+                    <span key={s} className="text-[11px] px-2 py-0.5 rounded-full bg-violet-900/50 text-violet-300 border border-violet-700/40">
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
+              <p className="text-[10px] uppercase tracking-widest text-zinc-500 mb-3">
+                {selected.origins.length === 1 ? "Origin" : `${selected.origins.length} Origins`}
+              </p>
+              {selected.origins.map((o) => (
+                <Link
+                  key={o.id}
+                  href={`/dashboard/origins/${o.id}`}
+                  className="block rounded-lg border border-zinc-800/40 bg-zinc-900/50 px-4 py-3 hover:border-violet-500/40 hover:bg-zinc-900 transition-all group"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-white group-hover:text-violet-300 transition-colors truncate">
+                        {o.mine ?? o.region ?? o.country}
+                      </p>
+                      {o.region && o.mine && (
+                        <p className="text-[11px] text-zinc-500 truncate">{o.region}</p>
+                      )}
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-xs font-medium text-zinc-300">{o.gemCount + o.parcelCount} items</p>
+                      {o.totalCarats > 0 && (
+                        <p className="text-[10px] text-zinc-500">{fmtCt(o.totalCarats)}</p>
+                      )}
+                    </div>
                   </div>
-                )}
+                  {o.species.length > 0 && (
+                    <div className="flex gap-1 mt-2 flex-wrap">
+                      {o.species.slice(0, 4).map((s) => (
+                        <span key={s} className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800/60 text-zinc-400">{s}</span>
+                      ))}
+                      {o.species.length > 4 && (
+                        <span className="text-[10px] text-zinc-600">+{o.species.length - 4}</span>
+                      )}
+                    </div>
+                  )}
+                </Link>
+              ))}
+            </div>
+
+            <div className="px-5 py-3 border-t border-zinc-800">
+              <Link
+                href="/dashboard/origins"
+                className="flex items-center justify-center gap-1.5 text-xs text-zinc-400 hover:text-violet-300 transition-colors"
+              >
+                <MapPin size={12} />
+                View all origins
               </Link>
-            ))}
+            </div>
           </div>
+        )}
 
-          {/* Footer */}
-          <div className="px-5 py-3 border-t border-slate-700/50">
-            <Link
-              href="/dashboard/origins"
-              className="flex items-center justify-center gap-1.5 text-xs text-slate-400 hover:text-violet-300 transition-colors"
-            >
-              <MapPin size={12} />
-              View all origins
-            </Link>
+        {/* Empty state */}
+        {groups.length === 0 && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
+            <MapPin size={48} strokeWidth={1} className="mb-4 text-zinc-600" />
+            <p className="text-zinc-400 font-medium">No origin data yet</p>
+            <p className="text-zinc-600 text-sm mt-1">Add origins to gems and parcels to see them on the map.</p>
           </div>
-        </div>
-      )}
-
-      {/* Empty state */}
-      {groups.length === 0 && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none" style={{ paddingTop: "44px" }}>
-          <MapPin size={48} strokeWidth={1} className="mb-4 text-slate-600" />
-          <p className="text-slate-400 font-medium">No origin data yet</p>
-          <p className="text-slate-600 text-sm mt-1">Add origins to gems and parcels to see them on the map.</p>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

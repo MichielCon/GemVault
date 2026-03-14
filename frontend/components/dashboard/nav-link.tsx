@@ -20,12 +20,15 @@ export function NavLink({
   return (
     <Link
       href={href}
-      className={`flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors ${
+      className={`relative flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors ${
         isActive
-          ? "bg-white/10 text-white font-medium"
-          : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
+          ? "bg-white/8 text-white font-medium"
+          : "text-zinc-400 hover:bg-white/5 hover:text-zinc-200"
       }`}
     >
+      {isActive && (
+        <span className="absolute left-0 top-1/2 h-4 w-0.5 -translate-y-1/2 rounded-full bg-violet-500" />
+      )}
       {icon}
       {children}
     </Link>

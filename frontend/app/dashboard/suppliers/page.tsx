@@ -20,13 +20,13 @@ export default async function SuppliersPage({ searchParams }: Props) {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+    <div className="h-full flex flex-col">
+      <div className="shrink-0 flex items-center justify-between mb-5">
         <div>
           <h1 className="text-xl font-semibold tracking-tight">Suppliers</h1>
           <p className="text-sm text-muted-foreground">Manage your gem suppliers</p>
         </div>
-        <Button asChild size="sm">
+        <Button asChild size="sm" variant="violet">
           <Link href="/dashboard/suppliers/new">
             <Plus size={16} />
             Add supplier
@@ -34,36 +34,40 @@ export default async function SuppliersPage({ searchParams }: Props) {
         </Button>
       </div>
 
-      <SearchInput basePath="/dashboard/suppliers" placeholder="Search suppliers…" defaultValue={search} />
+      <div className="shrink-0 mb-4">
+        <SearchInput basePath="/dashboard/suppliers" placeholder="Search suppliers…" defaultValue={search} />
+      </div>
 
-      {suppliers.length === 0 ? (
-        <EmptyState hasSearch={!!search} />
-      ) : (
-        <div className="overflow-hidden rounded-lg border bg-card">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-muted/30 text-left">
-                <th className="px-4 py-2.5 text-xs font-medium text-muted-foreground">Name</th>
-                <th className="px-4 py-2.5 text-xs font-medium text-muted-foreground">Email</th>
-                <th className="px-4 py-2.5 text-xs font-medium text-muted-foreground">Phone</th>
-                <th className="px-4 py-2.5 text-xs font-medium text-muted-foreground">Orders</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {suppliers.map((supplier) => (
-                <SupplierRow key={supplier.id} supplier={supplier} />
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <div className="flex-1 min-h-0 overflow-y-auto">
+        {suppliers.length === 0 ? (
+          <EmptyState hasSearch={!!search} />
+        ) : (
+          <div className="overflow-hidden rounded-xl border border-zinc-200/80 bg-card shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-zinc-100 bg-zinc-50/60 text-left">
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Name</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Email</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Phone</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Orders</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-100">
+                {suppliers.map((supplier) => (
+                  <SupplierRow key={supplier.id} supplier={supplier} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
 function SupplierRow({ supplier }: { supplier: SupplierDto }) {
   return (
-    <tr className="hover:bg-muted/20 transition-colors">
+    <tr className="hover:bg-zinc-50 transition-colors">
       <td className="px-4 py-3 font-medium">
         <Link href={`/dashboard/suppliers/${supplier.id}`} className="hover:underline">
           {supplier.name}
@@ -78,14 +82,14 @@ function SupplierRow({ supplier }: { supplier: SupplierDto }) {
 
 function EmptyState({ hasSearch }: { hasSearch: boolean }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-16 text-center">
-      <Building2 size={40} strokeWidth={1} className="mb-3 text-muted-foreground/50" />
+    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-200 bg-white py-16 text-center">
+      <Building2 size={40} strokeWidth={1} className="mb-3 text-zinc-300" />
       <p className="font-medium">{hasSearch ? "No results" : "No suppliers yet"}</p>
       <p className="mt-1 text-sm text-muted-foreground">
         {hasSearch ? "Try a different search term." : "Add suppliers to track where your gems come from."}
       </p>
       {!hasSearch && (
-        <Button asChild size="sm" className="mt-4">
+        <Button asChild size="sm" variant="violet" className="mt-4">
           <Link href="/dashboard/suppliers/new"><Plus size={16} />Add supplier</Link>
         </Button>
       )}

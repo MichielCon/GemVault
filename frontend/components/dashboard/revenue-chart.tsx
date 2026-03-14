@@ -38,8 +38,8 @@ function CustomTooltip({ active, payload, label }: {
 }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-lg border bg-white px-3 py-2 shadow-md text-sm">
-      <p className="font-medium text-slate-700">{label}</p>
+    <div className="rounded-lg border border-zinc-200 bg-white px-3 py-2 shadow-[0_4px_16px_rgba(0,0,0,0.08)] text-sm">
+      <p className="font-medium text-zinc-700">{label}</p>
       <p className="text-violet-600 font-semibold">
         {payload[0].value.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 })}
       </p>
@@ -62,21 +62,21 @@ export function RevenueChart({ data }: { data: MonthlyRevenueDto[] }) {
   return (
     <ResponsiveContainer width="100%" height="100%">
       <BarChart data={chartData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+        <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" vertical={false} />
         <XAxis
           dataKey="label"
-          tick={{ fontSize: 12, fill: "#94a3b8" }}
+          tick={{ fontSize: 12, fill: "#a1a1aa" }}
           axisLine={false}
           tickLine={false}
         />
         <YAxis
           tickFormatter={formatYAxis}
-          tick={{ fontSize: 11, fill: "#94a3b8" }}
+          tick={{ fontSize: 11, fill: "#a1a1aa" }}
           axisLine={false}
           tickLine={false}
           width={44}
         />
-        <Tooltip content={<CustomTooltip />} cursor={{ fill: "#f1f5f9" }} />
+        <Tooltip content={<CustomTooltip />} cursor={{ fill: "#f4f4f5" }} />
         <Bar dataKey="revenue" fill="#7c3aed" radius={[4, 4, 0, 0]} maxBarSize={48} />
       </BarChart>
     </ResponsiveContainer>

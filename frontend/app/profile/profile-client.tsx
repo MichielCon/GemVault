@@ -30,15 +30,15 @@ function formatDate(dateStr: string) {
 function roleBadgeClass(role: string) {
   if (role === "Admin") return "bg-violet-100 text-violet-700 border-violet-200";
   if (role === "Business") return "bg-blue-100 text-blue-700 border-blue-200";
-  return "bg-slate-100 text-slate-600 border-slate-200";
+  return "bg-zinc-100 text-zinc-600 border-zinc-200";
 }
 
 export default function ProfileClient({ profile, sessions }: Props) {
   return (
-    <div className="space-y-6 max-w-2xl">
+    <div className="space-y-4 max-w-2xl">
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">Profile</h1>
-        <p className="mt-1 text-sm text-slate-500">Manage your account settings and security</p>
+        <h1 className="text-xl font-semibold tracking-tight">Profile</h1>
+        <p className="mt-0.5 text-sm text-zinc-500">Manage your account settings and security</p>
       </div>
 
       <AccountOverviewCard profile={profile} />
@@ -53,39 +53,39 @@ export default function ProfileClient({ profile, sessions }: Props) {
 
 function AccountOverviewCard({ profile }: { profile: ProfileDto }) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Account Overview</CardTitle>
+    <Card hoverable>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm font-semibold text-zinc-500 uppercase tracking-wide">Account Overview</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent>
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-500 mb-1">Email</p>
-            <p className="text-slate-800 font-medium">{profile.email}</p>
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-zinc-400 mb-1">Email</p>
+            <p className="text-zinc-800 font-medium">{profile.email}</p>
           </div>
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-500 mb-1">Role</p>
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-zinc-400 mb-1">Role</p>
             <span className={`inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold ${roleBadgeClass(profile.role)}`}>
               {profile.role}
             </span>
           </div>
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-500 mb-1">Member Since</p>
-            <p className="text-slate-700">{formatDate(profile.joinedAt)}</p>
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-zinc-400 mb-1">Member Since</p>
+            <p className="text-zinc-700">{formatDate(profile.joinedAt)}</p>
           </div>
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-500 mb-1">Display Name</p>
-            <p className="text-slate-700">
-              {profile.displayName ? profile.displayName : <span className="text-slate-400 italic">Not set</span>}
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-zinc-400 mb-1">Display Name</p>
+            <p className="text-zinc-700">
+              {profile.displayName ? profile.displayName : <span className="text-zinc-400 italic">Not set</span>}
             </p>
           </div>
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-500 mb-1">Gems</p>
-            <p className="text-slate-700">{profile.gemCount}</p>
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-zinc-400 mb-1">Gems</p>
+            <p className="text-zinc-700 font-medium">{profile.gemCount}</p>
           </div>
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-500 mb-1">Parcels</p>
-            <p className="text-slate-700">{profile.parcelCount}</p>
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-zinc-400 mb-1">Parcels</p>
+            <p className="text-zinc-700 font-medium">{profile.parcelCount}</p>
           </div>
         </div>
       </CardContent>
@@ -97,9 +97,9 @@ function DisplayNameCard({ currentDisplayName }: { currentDisplayName: string | 
   const [state, action, isPending] = useActionState(updateDisplayName, { error: null });
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Display Name</CardTitle>
+    <Card hoverable>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm font-semibold text-zinc-500 uppercase tracking-wide">Display Name</CardTitle>
       </CardHeader>
       <CardContent>
         <form action={action} className="flex flex-col gap-4">
@@ -111,6 +111,7 @@ function DisplayNameCard({ currentDisplayName }: { currentDisplayName: string | 
               defaultValue={currentDisplayName ?? ""}
               placeholder="Your name (optional)"
               maxLength={100}
+              className="border-zinc-200"
             />
           </div>
           {state.error && (
@@ -131,9 +132,9 @@ function ChangeEmailCard() {
   const [state, action, isPending] = useActionState(changeEmail, { error: null });
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Change Email</CardTitle>
+    <Card hoverable>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm font-semibold text-zinc-500 uppercase tracking-wide">Change Email</CardTitle>
       </CardHeader>
       <CardContent>
         <form action={action} className="flex flex-col gap-4">
@@ -145,6 +146,7 @@ function ChangeEmailCard() {
               type="email"
               placeholder="new@example.com"
               required
+              className="border-zinc-200"
             />
           </div>
           <div className="space-y-1.5">
@@ -155,14 +157,13 @@ function ChangeEmailCard() {
               type="password"
               placeholder="Enter current password"
               required
+              className="border-zinc-200"
             />
           </div>
           {state.error && (
             <p className="text-sm text-destructive">{state.error}</p>
           )}
-          <p className="text-xs text-slate-500">
-            You will be signed out after changing your email.
-          </p>
+          <p className="text-xs text-zinc-400">You will be signed out after changing your email.</p>
           <div>
             <Button type="submit" size="sm" disabled={isPending}>
               {isPending ? "Updating…" : "Update Email"}
@@ -175,17 +176,14 @@ function ChangeEmailCard() {
 }
 
 function ChangePasswordCard() {
-  // Use a submission counter to track whether the form has ever been submitted.
-  // After a successful submit (no error), we show a success message.
   const [submitCount, setSubmitCount] = useState(0);
   const [state, action, isPending] = useActionState(changePassword, { error: null });
-
   const showSuccess = submitCount > 0 && state.error === null && !isPending;
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Change Password</CardTitle>
+    <Card hoverable>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm font-semibold text-zinc-500 uppercase tracking-wide">Change Password</CardTitle>
       </CardHeader>
       <CardContent>
         <form
@@ -201,6 +199,7 @@ function ChangePasswordCard() {
               type="password"
               placeholder="Enter current password"
               required
+              className="border-zinc-200"
             />
           </div>
           <div className="space-y-1.5">
@@ -211,14 +210,11 @@ function ChangePasswordCard() {
               type="password"
               placeholder="Enter new password"
               required
+              className="border-zinc-200"
             />
           </div>
-          {state.error && (
-            <p className="text-sm text-destructive">{state.error}</p>
-          )}
-          {showSuccess && (
-            <p className="text-sm text-green-600">Password changed successfully.</p>
-          )}
+          {state.error && <p className="text-sm text-destructive">{state.error}</p>}
+          {showSuccess && <p className="text-sm text-green-600">Password changed successfully.</p>}
           <div>
             <Button type="submit" size="sm" disabled={isPending}>
               {isPending ? "Changing…" : "Change Password"}
@@ -240,46 +236,42 @@ function ActiveSessionsCard({ sessions }: { sessions: ProfileSessionDto[] }) {
     setError(null);
     startTransition(async () => {
       const result = await revokeMySession(id);
-      if (result.error) {
-        setError(result.error);
-      }
+      if (result.error) setError(result.error);
       setRevoking(null);
     });
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Active Sessions</CardTitle>
+    <Card hoverable>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm font-semibold text-zinc-500 uppercase tracking-wide">Active Sessions</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
-        {error && (
-          <p className="px-6 py-3 text-sm text-destructive">{error}</p>
-        )}
+        {error && <p className="px-6 py-3 text-sm text-destructive">{error}</p>}
         {sessions.length === 0 ? (
-          <p className="px-6 py-4 text-sm text-slate-500">No active sessions found.</p>
+          <p className="px-6 py-4 text-sm text-zinc-400">No active sessions found.</p>
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b bg-muted/30 text-left">
-                <th className="px-6 py-3 text-xs font-medium text-muted-foreground">Created</th>
-                <th className="px-6 py-3 text-xs font-medium text-muted-foreground">Expires</th>
-                <th className="px-6 py-3 text-xs font-medium text-muted-foreground">Status</th>
-                <th className="px-6 py-3 text-xs font-medium text-muted-foreground"></th>
+              <tr className="border-b border-zinc-100 bg-zinc-50/60 text-left">
+                <th className="px-6 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Created</th>
+                <th className="px-6 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Expires</th>
+                <th className="px-6 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Status</th>
+                <th className="px-6 py-2.5"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody className="divide-y divide-zinc-100">
               {sessions.map((s) => (
-                <tr key={s.id} className="hover:bg-muted/20 transition-colors">
-                  <td className="px-6 py-3 text-slate-600">{formatDate(s.createdAt)}</td>
-                  <td className="px-6 py-3 text-slate-600">{formatDate(s.expiresAt)}</td>
+                <tr key={s.id} className="hover:bg-zinc-50 transition-colors">
+                  <td className="px-6 py-3 text-zinc-600">{formatDate(s.createdAt)}</td>
+                  <td className="px-6 py-3 text-zinc-600">{formatDate(s.expiresAt)}</td>
                   <td className="px-6 py-3">
                     {s.isExpired ? (
-                      <span className="inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium bg-slate-100 text-slate-500 border-slate-200">
+                      <span className="inline-flex items-center rounded-md border border-zinc-200 px-2 py-0.5 text-xs font-medium bg-zinc-100 text-zinc-500">
                         Expired
                       </span>
                     ) : (
-                      <span className="inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 border-green-200">
+                      <span className="inline-flex items-center rounded-md border border-green-200 px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700">
                         Active
                       </span>
                     )}
@@ -309,21 +301,17 @@ function DangerZoneCard() {
   const [confirmed, setConfirmed] = useState(false);
 
   return (
-    <Card className="border-red-200 bg-red-50/40">
-      <CardHeader>
-        <CardTitle className="text-red-700">Danger Zone</CardTitle>
+    <Card className="border-red-200/80 bg-red-50/40">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm font-semibold text-red-600 uppercase tracking-wide">Danger Zone</CardTitle>
       </CardHeader>
       <CardContent>
         {!confirmed ? (
           <div className="space-y-3">
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-zinc-600">
               Permanently delete your account and all associated data. This action cannot be undone.
             </p>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => setConfirmed(true)}
-            >
+            <Button variant="destructive" size="sm" onClick={() => setConfirmed(true)}>
               Delete My Account
             </Button>
           </div>
@@ -340,18 +328,12 @@ function DangerZoneCard() {
                 type="password"
                 placeholder="Enter password to confirm"
                 required
+                className="border-red-200"
               />
             </div>
-            {state.error && (
-              <p className="text-sm text-destructive">{state.error}</p>
-            )}
+            {state.error && <p className="text-sm text-destructive">{state.error}</p>}
             <div className="flex gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setConfirmed(false)}
-              >
+              <Button type="button" variant="outline" size="sm" onClick={() => setConfirmed(false)}>
                 Cancel
               </Button>
               <Button type="submit" variant="destructive" size="sm" disabled={isPending}>

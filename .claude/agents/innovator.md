@@ -1,3 +1,8 @@
+---
+name: innovator
+description: GemVault innovator agent
+model: claude-sonnet-4-6
+---
 # GemVault — Innovation Agent
 
 ## Role

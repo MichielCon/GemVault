@@ -1,3 +1,8 @@
+---
+name: security
+description: GemVault security agent
+model: claude-sonnet-4-6
+---
 # GemVault — Security Agent
 
 ## Role

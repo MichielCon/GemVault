@@ -1,3 +1,8 @@
+---
+name: db-architect
+description: GemVault db-architect agent
+model: claude-sonnet-4-6
+---
 # GemVault — Database Architect Agent
 
 ## Role

@@ -1,3 +1,8 @@
+---
+name: backend-dev
+description: GemVault backend-dev agent
+model: claude-sonnet-4-6
+---
 # GemVault — Backend Developer Agent
 
 ## Role

@@ -1,3 +1,9 @@
+---
+name: frontend-dev
+description: GemVault frontend developer — Next.js 16, TypeScript, Tailwind CSS v4, shadcn/ui, Magic UI
+model: claude-sonnet-4-6
+---
+
 # GemVault — Frontend Developer Agent
 
 ## Role
@@ -80,6 +86,43 @@ frontend/
 - `export PATH="/c/nvm4w/nodejs:$PATH" && npm run build` — must succeed with no TypeScript errors
 - Check browser console for runtime errors
 - For new forms: submit the form and verify the API call succeeds (check Network tab)
+
+## Design System (MANDATORY — enforce on ALL pages)
+
+GemVault is used at gem shows and by professionals. **Polish and detail are non-negotiable.**
+
+### Layout — NO PAGE SCROLL
+- Dashboard layout: `flex h-screen overflow-hidden` on outer container
+- Main content: `flex-1 overflow-y-auto p-5` — scrolls internally, never the full page
+- Sidebar: `h-full flex flex-col` with `overflow-y-auto` on nav section, `shrink-0` on footer
+- Profile/logout in sidebar are ALWAYS visible — they must never scroll off screen
+- All new pages must fit this shell — never use `min-h-screen` inside dashboard
+
+### Color Palette
+- Background: `#fafaf8` (warm off-white) — already on `body` via CSS var
+- Cards: white (`bg-card`) with `border-zinc-200/80` and `shadow-[0_1px_3px_rgba(0,0,0,0.06)]`
+- Hover card shadow: `shadow-[0_4px_16px_rgba(0,0,0,0.08)]`
+- Table headers: `bg-zinc-50/60`, text `text-[11px] font-semibold uppercase tracking-wide text-zinc-500`
+- Table rows: `divide-y divide-zinc-100`, hover `hover:bg-zinc-50`
+- Muted text: `text-zinc-500`, labels: `text-zinc-400`
+- Brand accent: `text-violet-600`, `bg-violet-600` (primary CTA buttons)
+- Sidebar: `bg-zinc-950`, active nav indicator: `bg-violet-500` left bar
+
+### Components
+- **Button** primary CTA: `variant="violet"` (purple). Default (black) for secondary actions.
+- **Card**: Use `hoverable` prop on interactive cards for subtle shadow lift on hover
+- **Card section titles**: `text-sm font-semibold text-zinc-500 uppercase tracking-wide` inside `CardTitle`
+- **Detail rows** (key/value): `<dt>` = `text-zinc-400 text-xs font-medium uppercase tracking-wide`, `<dd>` = `font-medium text-zinc-800`
+- **Badge**: `variant="violet"` for Public status, `variant="outline"` for Private
+- **Magic UI components** available in `components/magicui/`: NumberTicker, BentoGrid, DotPattern, MagicCard, BorderBeam, ShimmerButton, AnimatedGradientText
+- **MagicCard**: wrap grid item cards for mouse-following gradient glow on hover
+- **Empty states**: `border-dashed border-zinc-200 bg-white py-16`, icon `text-zinc-300`, CTA `variant="violet"`
+
+### Back navigation
+- Always `variant="ghost" size="sm" className="-ml-2 w-fit text-zinc-500 hover:text-zinc-900"`
+
+### After every change
+- Run `docker compose build frontend && docker compose up -d frontend` (NOT just `up -d`)
 
 ## How to Invoke This Agent
 Include in your prompt:

@@ -1,3 +1,8 @@
+---
+name: devops
+description: GemVault devops agent
+model: claude-sonnet-4-6
+---
 # GemVault — DevOps Agent
 
 ## Role

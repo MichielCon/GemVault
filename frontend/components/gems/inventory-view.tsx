@@ -7,6 +7,7 @@ import Image from "next/image";
 import { LayoutGrid, List, Plus, Gem, Search, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { MagicCard } from "@/components/magicui/magic-card";
 import type { GemSummaryDto, PagedResult } from "@/lib/types";
 import { proxyPhotoUrl } from "@/lib/utils";
 
@@ -67,14 +68,14 @@ export function GemInventoryView({ result, page, search, status }: Props) {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="shrink-0 flex items-center justify-between mb-5">
         <div>
           <h1 className="text-xl font-semibold tracking-tight">Gems</h1>
           <p className="text-sm text-muted-foreground">Individual gemstone inventory</p>
         </div>
-        <Button asChild size="sm">
+        <Button asChild size="sm" variant="violet">
           <Link href="/dashboard/gems/new">
             <Plus size={15} />
             Add gem
@@ -83,7 +84,7 @@ export function GemInventoryView({ result, page, search, status }: Props) {
       </div>
 
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="shrink-0 flex flex-wrap items-center gap-2 mb-4">
         {/* Search */}
         <form onSubmit={handleSearch} className="relative flex-1 min-w-[180px] max-w-xs">
           <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
@@ -91,7 +92,7 @@ export function GemInventoryView({ result, page, search, status }: Props) {
             ref={inputRef}
             defaultValue={search ?? ""}
             placeholder="Search gems…"
-            className="w-full rounded-md border bg-card pl-8 pr-8 py-1.5 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+            className="w-full rounded-lg border border-zinc-200 bg-white pl-8 pr-8 py-1.5 text-sm outline-none transition-shadow focus:ring-2 focus:ring-violet-500/20 focus:border-zinc-300"
           />
           {search && (
             <button type="button" onClick={clearSearch} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
@@ -101,15 +102,15 @@ export function GemInventoryView({ result, page, search, status }: Props) {
         </form>
 
         {/* Status filter */}
-        <div className="flex rounded-md border bg-card overflow-hidden">
+        <div className="flex rounded-lg border border-zinc-200 bg-white overflow-hidden">
           {STATUS_OPTIONS.map((s) => (
             <button
               key={s}
               onClick={() => handleStatus(s)}
               className={`px-3 py-1.5 text-xs font-medium transition-colors ${
                 activeStatus === s
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  ? "bg-zinc-900 text-white"
+                  : "text-muted-foreground hover:text-foreground hover:bg-zinc-50"
               }`}
             >
               {s === "InStock" ? "In Stock" : s}
@@ -118,11 +119,11 @@ export function GemInventoryView({ result, page, search, status }: Props) {
         </div>
 
         {/* View toggle */}
-        <div className="flex rounded-md border bg-card overflow-hidden">
+        <div className="flex rounded-lg border border-zinc-200 bg-white overflow-hidden">
           <button
             onClick={() => toggle("grid")}
             className={`flex items-center px-2.5 py-1.5 text-sm transition-colors ${
-              view === "grid" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"
+              view === "grid" ? "bg-zinc-900 text-white" : "text-muted-foreground hover:text-foreground hover:bg-zinc-50"
             }`}
             title="Grid view"
           >
@@ -131,7 +132,7 @@ export function GemInventoryView({ result, page, search, status }: Props) {
           <button
             onClick={() => toggle("list")}
             className={`flex items-center px-2.5 py-1.5 text-sm transition-colors ${
-              view === "list" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"
+              view === "list" ? "bg-zinc-900 text-white" : "text-muted-foreground hover:text-foreground hover:bg-zinc-50"
             }`}
             title="List view"
           >
@@ -140,15 +141,21 @@ export function GemInventoryView({ result, page, search, status }: Props) {
         </div>
       </div>
 
-      {result.items.length === 0 ? (
-        <EmptyState search={search} />
-      ) : view === "grid" ? (
-        <GridView gems={result.items} />
-      ) : (
-        <ListView gems={result.items} />
-      )}
+      {/* Content — 12 items fit without overflow at 1080p+ */}
+      <div className="flex-1 min-h-0">
+        {result.items.length === 0 ? (
+          <EmptyState search={search} />
+        ) : view === "grid" ? (
+          <GridView gems={result.items} />
+        ) : (
+          <ListView gems={result.items} />
+        )}
+      </div>
 
-      <Pagination page={page} totalPages={result.totalPages} search={search} status={status} />
+      {/* Pagination pinned to bottom */}
+      <div className="shrink-0 pt-3">
+        <Pagination page={page} totalPages={result.totalPages} search={search} status={status} />
+      </div>
     </div>
   );
 }
@@ -166,60 +173,59 @@ function GridView({ gems }: { gems: GemSummaryDto[] }) {
 function GemCard({ gem }: { gem: GemSummaryDto }) {
   const subtitle = [gem.species, gem.variety, gem.color].filter(Boolean).join(" · ") || "Unknown species";
   return (
-    <Link
-      href={`/dashboard/gems/${gem.id}`}
-      className="group flex flex-col overflow-hidden rounded-lg border bg-card shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5"
-    >
-      <div className="relative aspect-[4/3] w-full bg-muted">
-        {gem.coverPhotoUrl ? (
-          <Image
-            src={proxyPhotoUrl(gem.coverPhotoUrl) ?? ""}
-            alt={gem.name}
-            fill
-            unoptimized
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center text-muted-foreground/40">
-            <Gem size={32} strokeWidth={1} />
-          </div>
-        )}
-        <div className="absolute right-1.5 top-1.5 flex flex-col gap-1">
-          {gem.isSold && (
-            <Badge className="text-[10px] px-1.5 py-0 bg-amber-500 text-white border-0 shadow-sm">Sold</Badge>
+    <Link href={`/dashboard/gems/${gem.id}`} className="group block">
+      <MagicCard className="flex flex-col overflow-hidden rounded-xl border border-zinc-200/80 bg-card shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-shadow hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
+        <div className="relative aspect-[4/3] w-full bg-zinc-100">
+          {gem.coverPhotoUrl ? (
+            <Image
+              src={proxyPhotoUrl(gem.coverPhotoUrl) ?? ""}
+              alt={gem.name}
+              fill
+              unoptimized
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center text-zinc-300">
+              <Gem size={32} strokeWidth={1} />
+            </div>
           )}
-          {gem.isPublic && (
-            <Badge className="text-[10px] px-1.5 py-0 bg-white/90 text-slate-700 border-0 shadow-sm">Public</Badge>
+          <div className="absolute right-1.5 top-1.5 flex flex-col gap-1">
+            {gem.isSold && (
+              <Badge className="text-[10px] px-1.5 py-0 bg-amber-500 text-white border-0 shadow-sm">Sold</Badge>
+            )}
+            {gem.isPublic && (
+              <Badge className="text-[10px] px-1.5 py-0 bg-white/90 text-slate-700 border-0 shadow-sm">Public</Badge>
+            )}
+          </div>
+        </div>
+        <div className="flex flex-col gap-0.5 p-2.5">
+          <p className="truncate text-sm font-medium leading-snug">{gem.name}</p>
+          <p className="truncate text-[11px] text-muted-foreground">{subtitle}</p>
+          {gem.weightCarats && (
+            <p className="text-[11px] font-medium text-muted-foreground">{gem.weightCarats} ct</p>
           )}
         </div>
-      </div>
-      <div className="flex flex-col gap-0.5 p-2.5">
-        <p className="truncate text-sm font-medium leading-snug">{gem.name}</p>
-        <p className="truncate text-[11px] text-muted-foreground">{subtitle}</p>
-        {gem.weightCarats && (
-          <p className="text-[11px] font-medium text-muted-foreground">{gem.weightCarats} ct</p>
-        )}
-      </div>
+      </MagicCard>
     </Link>
   );
 }
 
 function ListView({ gems }: { gems: GemSummaryDto[] }) {
   return (
-    <div className="overflow-hidden rounded-lg border bg-card shadow-sm">
+    <div className="overflow-hidden rounded-xl border border-zinc-200/80 bg-card shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b bg-muted/30 text-left">
-            <th className="px-4 py-2.5 text-xs font-medium text-muted-foreground">Gem</th>
-            <th className="px-4 py-2.5 text-xs font-medium text-muted-foreground hidden sm:table-cell">Species / Variety</th>
-            <th className="px-4 py-2.5 text-xs font-medium text-muted-foreground hidden md:table-cell">Color</th>
-            <th className="px-4 py-2.5 text-xs font-medium text-muted-foreground">Weight</th>
-            <th className="px-4 py-2.5 text-xs font-medium text-muted-foreground hidden lg:table-cell">Added</th>
-            <th className="px-4 py-2.5 text-xs font-medium text-muted-foreground">Status</th>
+          <tr className="border-b border-zinc-100 bg-zinc-50/60 text-left">
+            <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Gem</th>
+            <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500 hidden sm:table-cell">Species / Variety</th>
+            <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500 hidden md:table-cell">Color</th>
+            <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Weight</th>
+            <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500 hidden lg:table-cell">Added</th>
+            <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Status</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-border">
+        <tbody className="divide-y divide-zinc-100">
           {gems.map((gem) => (
             <GemRow key={gem.id} gem={gem} />
           ))}
@@ -232,10 +238,10 @@ function ListView({ gems }: { gems: GemSummaryDto[] }) {
 function GemRow({ gem }: { gem: GemSummaryDto }) {
   const speciesLabel = [gem.species, gem.variety].filter(Boolean).join(" — ") || "—";
   return (
-    <tr className="hover:bg-muted/20 transition-colors">
+    <tr className="hover:bg-zinc-50 transition-colors">
       <td className="px-4 py-2.5">
         <Link href={`/dashboard/gems/${gem.id}`} className="flex items-center gap-3">
-          <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-md bg-muted">
+          <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-zinc-100">
             {gem.coverPhotoUrl ? (
               <Image
                 src={proxyPhotoUrl(gem.coverPhotoUrl) ?? ""}
@@ -246,7 +252,7 @@ function GemRow({ gem }: { gem: GemSummaryDto }) {
                 sizes="40px"
               />
             ) : (
-              <div className="flex h-full items-center justify-center text-muted-foreground/40">
+              <div className="flex h-full items-center justify-center text-zinc-300">
                 <Gem size={16} strokeWidth={1} />
               </div>
             )}
@@ -275,8 +281,8 @@ function GemRow({ gem }: { gem: GemSummaryDto }) {
 
 function EmptyState({ search }: { search?: string }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed bg-card py-20 text-center">
-      <Gem size={40} strokeWidth={1} className="mb-3 text-muted-foreground/50" />
+    <div className="relative flex flex-col items-center justify-center overflow-hidden rounded-xl border border-dashed border-zinc-200 bg-white py-20 text-center">
+      <Gem size={40} strokeWidth={1} className="mb-3 text-zinc-300" />
       {search ? (
         <>
           <p className="font-medium">No gems matching &ldquo;{search}&rdquo;</p>
@@ -286,7 +292,7 @@ function EmptyState({ search }: { search?: string }) {
         <>
           <p className="font-medium">No gems yet</p>
           <p className="mt-1 text-sm text-muted-foreground">Add your first gem to start building your inventory.</p>
-          <Button asChild size="sm" className="mt-4">
+          <Button asChild size="sm" variant="violet" className="mt-4">
             <Link href="/dashboard/gems/new"><Plus size={15} />Add gem</Link>
           </Button>
         </>
@@ -299,13 +305,21 @@ function Pagination({ page, totalPages, search, status }: { page: number; totalP
   if (totalPages <= 1) return null;
   return (
     <div className="flex items-center justify-center gap-2">
-      <Button asChild variant="outline" size="sm" disabled={page <= 1}>
-        <Link href={paginationUrl(page - 1, search, status)}>Previous</Link>
-      </Button>
+      {page <= 1 ? (
+        <Button variant="outline" size="sm" disabled>Previous</Button>
+      ) : (
+        <Button asChild variant="outline" size="sm">
+          <Link href={paginationUrl(page - 1, search, status)}>Previous</Link>
+        </Button>
+      )}
       <span className="text-sm text-muted-foreground">{page} / {totalPages}</span>
-      <Button asChild variant="outline" size="sm" disabled={page >= totalPages}>
-        <Link href={paginationUrl(page + 1, search, status)}>Next</Link>
-      </Button>
+      {page >= totalPages ? (
+        <Button variant="outline" size="sm" disabled>Next</Button>
+      ) : (
+        <Button asChild variant="outline" size="sm">
+          <Link href={paginationUrl(page + 1, search, status)}>Next</Link>
+        </Button>
+      )}
     </div>
   );
 }

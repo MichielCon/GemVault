@@ -11,7 +11,7 @@ export default async function ParcelsPage({ searchParams }: Props) {
 
   let result;
   try {
-    result = await parcelsApi.list(page, 24, search, undefined, status);
+    result = await parcelsApi.list(page, 12, search, undefined, status);
   } catch {
     return <p className="text-muted-foreground">Failed to load parcels. Is the API running?</p>;
   }

@@ -36,11 +36,11 @@ export default async function ParcelDetailPage({ params }: Props) {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-5">
       {/* Back */}
-      <Button asChild variant="ghost" size="sm" className="-ml-2 w-fit">
+      <Button asChild variant="ghost" size="sm" className="-ml-2 w-fit text-zinc-500 hover:text-zinc-900">
         <Link href="/dashboard/parcels">
-          <ArrowLeft size={16} />
+          <ArrowLeft size={15} />
           All parcels
         </Link>
       </Button>
@@ -48,17 +48,17 @@ export default async function ParcelDetailPage({ params }: Props) {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-3xl font-bold tracking-tight">{parcel.name}</h1>
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <h1 className="text-2xl font-bold tracking-tight">{parcel.name}</h1>
             {parcel.soldInfo && (
-              <Badge className="bg-amber-100 text-amber-800 border-amber-200 border text-sm">
-                <Tag size={12} className="mr-1" />
+              <Badge className="bg-amber-100 text-amber-700 border border-amber-200">
+                <Tag size={11} className="mr-1" />
                 Sold
               </Badge>
             )}
           </div>
           {(parcel.species || parcel.variety) && (
-            <p className="mt-1 text-muted-foreground">
+            <p className="mt-0.5 text-sm text-zinc-500">
               {[parcel.species, parcel.variety].filter(Boolean).join(" — ")}
             </p>
           )}
@@ -72,7 +72,7 @@ export default async function ParcelDetailPage({ params }: Props) {
               </Link>
             </Button>
           )}
-          <Button asChild variant="outline" size="sm">
+          <Button asChild variant="violet" size="sm">
             <Link href={`/dashboard/parcels/${parcel.id}/edit`}>
               <Pencil size={14} />
               Edit
@@ -80,18 +80,18 @@ export default async function ParcelDetailPage({ params }: Props) {
           </Button>
           {parcel.publicToken && <QrCodeButton token={parcel.publicToken} name={parcel.name} />}
           <DeleteParcelButton id={parcel.id} />
-          <Badge variant={parcel.isPublic ? "default" : "outline"}>
-          {parcel.isPublic ? (
-            <><Globe size={12} className="mr-1" />Public</>
-          ) : (
-            <><Lock size={12} className="mr-1" />Private</>
-          )}
+          <Badge variant={parcel.isPublic ? "violet" : "outline"}>
+            {parcel.isPublic ? (
+              <><Globe size={11} className="mr-1" />Public</>
+            ) : (
+              <><Lock size={11} className="mr-1" />Private</>
+            )}
           </Badge>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        {/* Photos */}
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+        {/* Left column */}
         <div className="flex flex-col gap-3">
           <PhotoGallery photos={parcel.photos} name={parcel.name} entityId={parcel.id} type="parcel" />
           {parcel.originCountry && (
@@ -100,12 +100,14 @@ export default async function ParcelDetailPage({ params }: Props) {
           {parcel.publicToken && <ScanLinkCard token={parcel.publicToken} />}
         </div>
 
-        {/* Details */}
-        <div className="flex flex-col gap-4">
-          <Card>
-            <CardHeader><CardTitle className="text-base">Lot details</CardTitle></CardHeader>
+        {/* Right column */}
+        <div className="flex flex-col gap-3">
+          <Card hoverable>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold text-zinc-500 uppercase tracking-wide">Lot Details</CardTitle>
+            </CardHeader>
             <CardContent>
-              <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+              <dl className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-sm">
                 <Detail label="Quantity" value={String(parcel.quantity)} />
                 <Detail
                   label="Total weight"
@@ -118,10 +120,12 @@ export default async function ParcelDetailPage({ params }: Props) {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader><CardTitle className="text-base">Acquisition</CardTitle></CardHeader>
+          <Card hoverable>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold text-zinc-500 uppercase tracking-wide">Acquisition</CardTitle>
+            </CardHeader>
             <CardContent>
-              <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+              <dl className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-sm">
                 <Detail
                   label="Purchase price"
                   value={parcel.purchasePrice != null ? `$${parcel.purchasePrice.toFixed(2)}` : null}
@@ -132,31 +136,31 @@ export default async function ParcelDetailPage({ params }: Props) {
                 />
               </dl>
               {parcel.notes && (
-                <p className="mt-3 text-sm text-muted-foreground">{parcel.notes}</p>
+                <p className="mt-3 text-sm text-zinc-500 leading-relaxed">{parcel.notes}</p>
               )}
             </CardContent>
           </Card>
 
           {parcel.soldInfo && (
-            <Card className="border-amber-200 bg-amber-50">
-              <CardHeader>
-                <CardTitle className="text-base text-amber-800 flex items-center gap-2">
-                  <Tag size={15} />
+            <Card className="border-amber-200/80 bg-amber-50/60">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-semibold text-amber-700 uppercase tracking-wide flex items-center gap-1.5">
+                  <Tag size={13} />
                   Sale record
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                  <dt className="text-amber-700">Sale date</dt>
+                <dl className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-sm">
+                  <dt className="text-amber-600/80">Sale date</dt>
                   <dd className="font-medium">{new Date(parcel.soldInfo.saleDate).toLocaleDateString()}</dd>
-                  <dt className="text-amber-700">Sale price</dt>
-                  <dd className="font-medium font-semibold">
+                  <dt className="text-amber-600/80">Sale price</dt>
+                  <dd className="font-semibold">
                     {parcel.soldInfo.salePrice.toLocaleString("en-US", { style: "currency", currency: "USD" })}
                   </dd>
                   {parcel.purchasePrice != null && parcel.soldInfo.salePrice > 0 && (
                     <>
-                      <dt className="text-amber-700">Profit</dt>
-                      <dd className={`font-medium font-semibold ${parcel.soldInfo.salePrice - parcel.purchasePrice >= 0 ? "text-green-700" : "text-red-700"}`}>
+                      <dt className="text-amber-600/80">Profit</dt>
+                      <dd className={`font-semibold ${parcel.soldInfo.salePrice - parcel.purchasePrice >= 0 ? "text-green-700" : "text-red-700"}`}>
                         {(parcel.soldInfo.salePrice - parcel.purchasePrice).toLocaleString("en-US", { style: "currency", currency: "USD" })}
                       </dd>
                     </>
@@ -165,7 +169,7 @@ export default async function ParcelDetailPage({ params }: Props) {
                 <div className="mt-3">
                   <Link
                     href={`/dashboard/sales/${parcel.soldInfo.saleId}`}
-                    className="text-xs text-amber-700 hover:underline"
+                    className="text-xs font-medium text-amber-700 hover:underline"
                   >
                     View full sale record →
                   </Link>
@@ -173,7 +177,6 @@ export default async function ParcelDetailPage({ params }: Props) {
               </CardContent>
             </Card>
           )}
-
         </div>
       </div>
     </div>
@@ -184,8 +187,8 @@ function Detail({ label, value }: { label: string; value: string | null | undefi
   if (!value) return null;
   return (
     <>
-      <dt className="text-muted-foreground">{label}</dt>
-      <dd className="font-medium">{value}</dd>
+      <dt className="text-zinc-400 text-xs font-medium uppercase tracking-wide">{label}</dt>
+      <dd className="font-medium text-zinc-800">{value}</dd>
     </>
   );
 }

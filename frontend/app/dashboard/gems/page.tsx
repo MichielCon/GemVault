@@ -11,7 +11,7 @@ export default async function GemsPage({ searchParams }: Props) {
 
   let result;
   try {
-    result = await gemsApi.list(page, 24, search, undefined, status);
+    result = await gemsApi.list(page, 12, search, undefined, status);
   } catch {
     return <p className="text-muted-foreground">Failed to load gems. Is the API running?</p>;
   }

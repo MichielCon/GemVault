@@ -18,31 +18,35 @@ export default async function OriginsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <Header />
+    <div className="h-full flex flex-col">
+      <div className="shrink-0 mb-5">
+        <Header />
+      </div>
 
-      {origins.length === 0 ? (
-        <EmptyState />
-      ) : (
-        <div className="overflow-hidden rounded-xl border">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-muted/50 text-left text-muted-foreground">
-                <th className="px-4 py-3 font-medium">Country</th>
-                <th className="px-4 py-3 font-medium">Mine</th>
-                <th className="px-4 py-3 font-medium">Region</th>
-                <th className="px-4 py-3 font-medium">Gems</th>
-                <th className="px-4 py-3 font-medium">Added</th>
-              </tr>
-            </thead>
-            <tbody>
-              {origins.map((origin, i) => (
-                <OriginRow key={origin.id} origin={origin} even={i % 2 === 0} />
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <div className="flex-1 min-h-0 overflow-y-auto">
+        {origins.length === 0 ? (
+          <EmptyState />
+        ) : (
+          <div className="overflow-hidden rounded-xl border border-zinc-200/80 bg-card shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-zinc-100 bg-zinc-50/60 text-left">
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Country</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Mine</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Region</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Gems</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Added</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-100">
+                {origins.map((origin) => (
+                  <OriginRow key={origin.id} origin={origin} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -51,10 +55,10 @@ function Header() {
   return (
     <div className="flex items-center justify-between">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Origins</h1>
+        <h1 className="text-xl font-semibold tracking-tight">Origins</h1>
         <p className="text-sm text-muted-foreground">Mine and locality records</p>
       </div>
-      <Button asChild size="sm">
+      <Button asChild size="sm" variant="violet">
         <Link href="/dashboard/origins/new">
           <Plus size={16} />
           Add origin
@@ -64,7 +68,7 @@ function Header() {
   );
 }
 
-function OriginRow({ origin, even }: { origin: OriginDto; even: boolean }) {
+function OriginRow({ origin }: { origin: OriginDto }) {
   const added = new Date(origin.createdAt).toLocaleDateString(undefined, {
     year: "numeric",
     month: "short",
@@ -73,7 +77,7 @@ function OriginRow({ origin, even }: { origin: OriginDto; even: boolean }) {
 
   const total = origin.gemCount + origin.parcelCount;
   return (
-    <tr className={even ? "bg-card hover:bg-muted/30" : "bg-muted/20 hover:bg-muted/40"}>
+    <tr className="hover:bg-zinc-50 transition-colors">
       <td className="px-4 py-3 font-medium">
         <Link href={`/dashboard/origins/${origin.id}`} className="hover:underline">
           {origin.country}
@@ -83,7 +87,7 @@ function OriginRow({ origin, even }: { origin: OriginDto; even: boolean }) {
       <td className="px-4 py-3 text-muted-foreground">{origin.region ?? "—"}</td>
       <td className="px-4 py-3">
         {total > 0 ? (
-          <Link href={`/dashboard/origins/${origin.id}`} className="text-primary hover:underline text-xs">
+          <Link href={`/dashboard/origins/${origin.id}`} className="text-violet-600 hover:underline text-xs">
             {origin.gemCount > 0 && `${origin.gemCount} gem${origin.gemCount !== 1 ? "s" : ""}`}
             {origin.gemCount > 0 && origin.parcelCount > 0 && ", "}
             {origin.parcelCount > 0 && `${origin.parcelCount} parcel${origin.parcelCount !== 1 ? "s" : ""}`}
@@ -99,13 +103,13 @@ function OriginRow({ origin, even }: { origin: OriginDto; even: boolean }) {
 
 function EmptyState() {
   return (
-    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-16 text-center">
-      <MapPin size={48} strokeWidth={1} className="mb-4 text-muted-foreground" />
+    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-200 bg-white py-16 text-center">
+      <MapPin size={48} strokeWidth={1} className="mb-4 text-zinc-300" />
       <p className="font-medium">No origins yet</p>
       <p className="mt-1 text-sm text-muted-foreground">
         Add mine and locality records to link gems to their source.
       </p>
-      <Button asChild size="sm" className="mt-4">
+      <Button asChild size="sm" variant="violet" className="mt-4">
         <Link href="/dashboard/origins/new">
           <Plus size={16} />
           Add origin

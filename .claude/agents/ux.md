@@ -1,3 +1,8 @@
+---
+name: ux
+description: GemVault ux agent
+model: claude-sonnet-4-6
+---
 # GemVault — UX Agent
 
 ## Role

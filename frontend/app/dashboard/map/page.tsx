@@ -11,7 +11,7 @@ export default async function MapPage() {
   }
 
   return (
-    <div className="-m-8 flex flex-col" style={{ height: "100vh" }}>
+    <div className="absolute inset-0 overflow-hidden">
       <MapClientWrapper origins={origins} />
     </div>
   );
