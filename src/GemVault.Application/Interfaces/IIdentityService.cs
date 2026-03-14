@@ -14,4 +14,12 @@ public interface IIdentityService
         Guid userId, CancellationToken ct = default);
 
     Task<bool> UserExistsAsync(string email, CancellationToken ct = default);
+
+    Task<(bool Found, string? DisplayName, string Email, UserRole Role, DateTime CreatedAt)>
+        GetProfileAsync(Guid userId, CancellationToken ct = default);
+
+    Task<IReadOnlyList<string>> UpdateDisplayNameAsync(Guid userId, string? displayName, CancellationToken ct = default);
+    Task<IReadOnlyList<string>> UpdateEmailAsync(Guid userId, string newEmail, CancellationToken ct = default);
+    Task<IReadOnlyList<string>> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword, CancellationToken ct = default);
+    Task<IReadOnlyList<string>> SoftDeleteUserAsync(Guid userId, CancellationToken ct = default);
 }

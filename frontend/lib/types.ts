@@ -318,6 +318,116 @@ export interface OriginMapDto {
   createdAt: string;
 }
 
+// ─── Admin ────────────────────────────────────────────────────────────────────
+
+export interface AdminUserDto {
+  id: string;
+  email: string;
+  role: string;
+  isDeleted: boolean;
+  createdAt: string;
+  gemCount: number;
+  parcelCount: number;
+}
+
+export interface RecentUserDto {
+  id: string;
+  email: string;
+  role: string;
+  createdAt: string;
+}
+
+export interface AdminStatsDto {
+  totalUsers: number;
+  adminCount: number;
+  businessCount: number;
+  collectorCount: number;
+  activeUsers: number;
+  deletedUsers: number;
+  newUsersThisMonth: number;
+  totalGems: number;
+  totalParcels: number;
+  totalPhotos: number;
+  totalCertificates: number;
+  totalPublicTokens: number;
+  activePublicTokens: number;
+  recentUsers: RecentUserDto[];
+}
+
+export interface AdminSessionDto {
+  id: string;
+  userId: string;
+  userEmail: string;
+  tokenHashMasked: string;
+  createdAt: string;
+  expiresAt: string;
+  isExpired: boolean;
+}
+
+export interface AdminPublicTokenDto {
+  id: string;
+  token: string;
+  isActive: boolean;
+  gemId: string | null;
+  gemName: string | null;
+  gemParcelId: string | null;
+  gemParcelName: string | null;
+  ownerId: string;
+  ownerEmail: string;
+  createdAt: string;
+}
+
+// ─── Admin Content ────────────────────────────────────────────────────────────
+
+export interface AdminPhotoDto {
+  id: string;
+  url: string;
+  fileName: string;
+  fileSizeBytes: number;
+  contentType: string;
+  gemId: string | null;
+  gemName: string | null;
+  gemParcelId: string | null;
+  gemParcelName: string | null;
+  ownerId: string;
+  ownerEmail: string;
+  isCover: boolean;
+  createdAt: string;
+}
+
+export interface AdminCertificateDto {
+  id: string;
+  certNumber: string;
+  lab: string | null;
+  grade: string | null;
+  issueDate: string | null;
+  fileUrl: string | null;
+  gemId: string;
+  gemName: string;
+  ownerId: string;
+  ownerEmail: string;
+  createdAt: string;
+}
+
+// ─── Profile ──────────────────────────────────────────────────────────────────
+
+export interface ProfileDto {
+  id: string;
+  email: string;
+  displayName: string | null;
+  role: string;
+  joinedAt: string;
+  gemCount: number;
+  parcelCount: number;
+}
+
+export interface ProfileSessionDto {
+  id: string;
+  createdAt: string;
+  expiresAt: string;
+  isExpired: boolean;
+}
+
 // ─── Public scan ──────────────────────────────────────────────────────────────
 
 export interface PublicPhotoDto {

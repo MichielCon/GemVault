@@ -18,6 +18,14 @@ import type {
   SaleDto,
   SaleSummaryDto,
   DashboardStatsDto,
+  AdminUserDto,
+  AdminStatsDto,
+  AdminSessionDto,
+  AdminPublicTokenDto,
+  AdminPhotoDto,
+  AdminCertificateDto,
+  ProfileDto,
+  ProfileSessionDto,
 } from "./types";
 
 // Server-side: uses INTERNAL_API_URL so SSR requests go container-to-container.
@@ -85,6 +93,7 @@ async function put<T>(path: string, body: unknown, auth = true): Promise<T> {
     const text = await res.text().catch(() => "");
     throw new ApiError(res.status, text);
   }
+  if (res.status === 204) return undefined as T;
   return res.json() as Promise<T>;
 }
 
@@ -244,4 +253,89 @@ export const dashboardApi = {
 
 export const publicApi = {
   scan: (token: string) => get<PublicGemDto>(`/api/v1/public/${token}`, false),
+};
+
+// ─── Admin ────────────────────────────────────────────────────────────────────
+
+async function delWithBody<T = void>(path: string, body: unknown, auth = true): Promise<T> {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (auth) Object.assign(headers, await authHeader());
+
+  const res = await fetch(`${baseUrl()}${path}`, {
+    method: "DELETE",
+    headers,
+    body: JSON.stringify(body),
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new ApiError(res.status, text);
+  }
+  if (res.status === 204) return undefined as T;
+  return res.json() as Promise<T>;
+}
+
+// ─── Profile ──────────────────────────────────────────────────────────────────
+
+export const profileApi = {
+  get: () => get<ProfileDto>("/api/v1/profile"),
+  getSessions: () => get<ProfileSessionDto[]>("/api/v1/profile/sessions"),
+  updateDisplayName: (displayName: string | null) =>
+    put<void>("/api/v1/profile/display-name", { displayName }),
+  changeEmail: (currentPassword: string, newEmail: string) =>
+    put<void>("/api/v1/profile/email", { currentPassword, newEmail }),
+  changePassword: (currentPassword: string, newPassword: string) =>
+    put<void>("/api/v1/profile/password", { currentPassword, newPassword }),
+  revokeSession: (id: string) =>
+    del(`/api/v1/profile/sessions/${id}`),
+  deleteAccount: (currentPassword: string) =>
+    delWithBody<void>("/api/v1/profile", { currentPassword }),
+};
+
+// ─── Admin ────────────────────────────────────────────────────────────────────
+
+export const adminApi = {
+  stats: () => get<AdminStatsDto>("/api/v1/admin/stats"),
+  getUsers: (page = 1, pageSize = 20, search?: string, role?: string, isDeleted?: boolean) => {
+    const q = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
+    if (search) q.set("search", search);
+    if (role) q.set("role", role);
+    if (isDeleted !== undefined) q.set("isDeleted", String(isDeleted));
+    return get<PagedResult<AdminUserDto>>(`/api/v1/admin/users?${q}`);
+  },
+  changeRole: (userId: string, role: string) =>
+    put<void>(`/api/v1/admin/users/${userId}/role`, { role }),
+  deactivateUser: (userId: string) =>
+    put<void>(`/api/v1/admin/users/${userId}/deactivate`, {}),
+  reactivateUser: (userId: string) =>
+    put<void>(`/api/v1/admin/users/${userId}/reactivate`, {}),
+  revokeUserSessions: (userId: string) =>
+    del(`/api/v1/admin/users/${userId}/sessions`),
+  getSessions: (page = 1, pageSize = 20, search?: string) => {
+    const q = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
+    if (search) q.set("search", search);
+    return get<PagedResult<AdminSessionDto>>(`/api/v1/admin/sessions?${q}`);
+  },
+  revokeSession: (sessionId: string) =>
+    del(`/api/v1/admin/sessions/${sessionId}`),
+  getPublicTokens: (page = 1, pageSize = 20, isActive?: boolean) => {
+    const q = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
+    if (isActive !== undefined) q.set("isActive", String(isActive));
+    return get<PagedResult<AdminPublicTokenDto>>(`/api/v1/admin/public-tokens?${q}`);
+  },
+  togglePublicToken: (tokenId: string) =>
+    put<AdminPublicTokenDto>(`/api/v1/admin/public-tokens/${tokenId}/toggle`, {}),
+  getPhotos: (page = 1, pageSize = 20, search?: string) => {
+    const q = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
+    if (search) q.set("search", search);
+    return get<PagedResult<AdminPhotoDto>>(`/api/v1/admin/photos?${q}`);
+  },
+  deletePhoto: (photoId: string) => del(`/api/v1/admin/photos/${photoId}`),
+  getCertificates: (page = 1, pageSize = 20, search?: string) => {
+    const q = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
+    if (search) q.set("search", search);
+    return get<PagedResult<AdminCertificateDto>>(`/api/v1/admin/certificates?${q}`);
+  },
+  deleteCertificate: (certId: string) => del(`/api/v1/admin/certificates/${certId}`),
 };

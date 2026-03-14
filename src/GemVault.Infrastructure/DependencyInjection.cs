@@ -41,6 +41,7 @@ public static class DependencyInjection
         services.Configure<JwtOptions>(configuration.GetSection("Jwt"));
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IIdentityService, IdentityService>();
+        services.AddScoped<IAdminUserService, AdminUserService>();
 
         // MinIO
         services.Configure<MinioOptions>(configuration.GetSection("Minio"));

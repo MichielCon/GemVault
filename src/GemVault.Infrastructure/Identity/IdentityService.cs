@@ -47,4 +47,76 @@ public class IdentityService(UserManager<ApplicationUser> userManager) : IIdenti
 
     public async Task<bool> UserExistsAsync(string email, CancellationToken ct = default)
         => await userManager.FindByEmailAsync(email) is not null;
+
+    public async Task<(bool Found, string? DisplayName, string Email, UserRole Role, DateTime CreatedAt)>
+        GetProfileAsync(Guid userId, CancellationToken ct = default)
+    {
+        var user = await userManager.FindByIdAsync(userId.ToString());
+        return user is null || user.IsDeleted
+            ? (false, null, string.Empty, UserRole.Collector, default)
+            : (true, user.DisplayName, user.Email!, user.Role, user.CreatedAt);
+    }
+
+    public async Task<IReadOnlyList<string>> UpdateDisplayNameAsync(Guid userId, string? displayName, CancellationToken ct = default)
+    {
+        var user = await userManager.FindByIdAsync(userId.ToString());
+        if (user is null || user.IsDeleted)
+            return ["User not found."];
+
+        user.DisplayName = displayName;
+        user.UpdatedAt = DateTime.UtcNow;
+        var result = await userManager.UpdateAsync(user);
+        return result.Succeeded
+            ? Array.Empty<string>()
+            : result.Errors.Select(e => e.Description).ToList();
+    }
+
+    public async Task<IReadOnlyList<string>> UpdateEmailAsync(Guid userId, string newEmail, CancellationToken ct = default)
+    {
+        var user = await userManager.FindByIdAsync(userId.ToString());
+        if (user is null || user.IsDeleted)
+            return ["User not found."];
+
+        var token = await userManager.GenerateChangeEmailTokenAsync(user, newEmail);
+        var result = await userManager.ChangeEmailAsync(user, newEmail, token);
+        if (!result.Succeeded)
+            return result.Errors.Select(e => e.Description).ToList();
+
+        // Keep UserName in sync with Email
+        user.UserName = newEmail;
+        user.UpdatedAt = DateTime.UtcNow;
+        var updateResult = await userManager.UpdateAsync(user);
+        return updateResult.Succeeded
+            ? Array.Empty<string>()
+            : updateResult.Errors.Select(e => e.Description).ToList();
+    }
+
+    public async Task<IReadOnlyList<string>> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword, CancellationToken ct = default)
+    {
+        var user = await userManager.FindByIdAsync(userId.ToString());
+        if (user is null || user.IsDeleted)
+            return ["User not found."];
+
+        var result = await userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+        if (!result.Succeeded)
+            return result.Errors.Select(e => e.Description).ToList();
+
+        user.UpdatedAt = DateTime.UtcNow;
+        await userManager.UpdateAsync(user);
+        return Array.Empty<string>();
+    }
+
+    public async Task<IReadOnlyList<string>> SoftDeleteUserAsync(Guid userId, CancellationToken ct = default)
+    {
+        var user = await userManager.FindByIdAsync(userId.ToString());
+        if (user is null || user.IsDeleted)
+            return ["User not found."];
+
+        user.IsDeleted = true;
+        user.UpdatedAt = DateTime.UtcNow;
+        var result = await userManager.UpdateAsync(user);
+        return result.Succeeded
+            ? Array.Empty<string>()
+            : result.Errors.Select(e => e.Description).ToList();
+    }
 }

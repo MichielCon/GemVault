@@ -33,7 +33,7 @@ export default async function DashboardPage() {
   const profitPositive = s.netProfit >= 0;
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-3">
       <div>
         <h1 className="text-xl font-semibold tracking-tight">Dashboard</h1>
         <p className="text-sm text-muted-foreground">Collection and business overview</p>
@@ -47,7 +47,7 @@ export default async function DashboardPage() {
       )}
 
       {/* Row 1 — Primary KPIs */}
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         <KpiCard
           label="In Stock"
           value={s.unsoldGemCount.toLocaleString()}
@@ -84,7 +84,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Row 2 — Charts */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
         {/* Revenue bar chart — 2/3 */}
         <div className="flex flex-col gap-3 rounded-lg border bg-card p-5 shadow-sm lg:col-span-2">
           <div className="flex items-center justify-between">
@@ -96,7 +96,7 @@ export default async function DashboardPage() {
               View sales <ArrowUpRight size={12} />
             </Link>
           </div>
-          <div className="h-48">
+          <div className="h-36">
             <RevenueChart data={s.monthlyRevenue} />
           </div>
         </div>
@@ -107,14 +107,14 @@ export default async function DashboardPage() {
             <p className="text-sm font-semibold">Inventory Composition</p>
             <p className="text-xs text-muted-foreground">Unsold gems by species</p>
           </div>
-          <div className="flex-1 min-h-[192px]">
+          <div className="flex-1 min-h-[144px]">
             <SpeciesDonut data={s.inventoryBySpecies} totalUnsold={s.unsoldGemCount} />
           </div>
         </div>
       </div>
 
       {/* Row 3 — Activity tables */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
         {/* Recent sales */}
         <div className="flex flex-col gap-3 rounded-lg border bg-card shadow-sm">
           <div className="flex items-center justify-between border-b px-4 py-3">
@@ -205,7 +205,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Row 4 — Business counters */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-3">
         <MiniStat label="Suppliers" value={s.supplierCount} icon={<Building2 size={14} />} href="/dashboard/suppliers" />
         <MiniStat label="Orders" value={s.purchaseOrderCount} icon={<ShoppingCart size={14} />} href="/dashboard/orders" />
         <MiniStat label="Sales" value={s.saleCount} icon={<TrendingUp size={14} />} href="/dashboard/sales" />
@@ -222,7 +222,7 @@ function KpiCard({
   valueColor?: string;
 }) {
   return (
-    <Link href={href} className="group flex flex-col gap-3 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5">
+    <Link href={href} className="group flex flex-col gap-2 rounded-lg border bg-card p-3 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5">
       <div className="flex items-center justify-between">
         <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{label}</span>
         <div className={`flex h-7 w-7 items-center justify-center rounded-md ${iconBg}`}>{icon}</div>

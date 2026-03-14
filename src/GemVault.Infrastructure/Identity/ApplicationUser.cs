@@ -6,6 +6,7 @@ namespace GemVault.Infrastructure.Identity;
 public class ApplicationUser : IdentityUser<Guid>
 {
     public UserRole Role { get; set; } = UserRole.Collector;
+    public string? DisplayName { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     public bool IsDeleted { get; set; }
