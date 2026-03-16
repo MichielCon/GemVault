@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -18,27 +18,75 @@ type Status = (typeof STATUS_OPTIONS)[number];
 interface Props {
   result: PagedResult<GemSummaryDto>;
   page: number;
+  pageSize: number;
   search?: string;
   status?: string;
 }
 
-function paginationUrl(p: number, search?: string, status?: string) {
-  const q = new URLSearchParams({ page: String(p) });
+function paginationUrl(p: number, pageSize: number, search?: string, status?: string) {
+  const q = new URLSearchParams({ page: String(p), pageSize: String(pageSize) });
   if (search) q.set("search", search);
   if (status && status !== "All") q.set("status", status);
   return `/dashboard/gems?${q}`;
 }
 
-export function GemInventoryView({ result, page, search, status }: Props) {
+export function GemInventoryView({ result, page, pageSize, search, status }: Props) {
   const [view, setView] = useState<"grid" | "list">("grid");
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef  = useRef<HTMLDivElement>(null);
+  const headerRef     = useRef<HTMLDivElement>(null);
+  const toolbarRef    = useRef<HTMLDivElement>(null);
+  const paginationRef = useRef<HTMLDivElement>(null);
   const activeStatus: Status = (STATUS_OPTIONS.includes(status as Status) ? status : "All") as Status;
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved === "list" || saved === "grid") setView(saved);
   }, []);
+
+  useLayoutEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    function calcIdealPageSize(currentView: "grid" | "list"): number {
+      const c = containerRef.current;
+      if (!c) return pageSize;
+      const totalH      = c.clientHeight;
+      const headerH     = (headerRef.current?.offsetHeight   ?? 52) + 20;
+      const toolbarH    = (toolbarRef.current?.offsetHeight  ?? 36) + 16;
+      const paginationH = paginationRef.current?.offsetHeight ?? 0;
+      const available   = Math.max(0, totalH - headerH - toolbarH - paginationH);
+
+      if (currentView === "list") {
+        const THEAD_H = 37;
+        const ROW_H   = 61;
+        return Math.max(1, Math.floor((available - THEAD_H) / ROW_H));
+      } else {
+        const W    = c.clientWidth;
+        const cols = W >= 1536 ? 6 : W >= 1280 ? 5 : W >= 1024 ? 4 : W >= 640 ? 3 : 2;
+        const gap  = 12;
+        const cardW = Math.max(1, (W - (cols - 1) * gap) / cols);
+        const cardH = cardW * 0.75 + 64;
+        const rows  = Math.max(1, Math.floor(available / (cardH + gap)));
+        return rows * cols;
+      }
+    }
+
+    function apply() {
+      const ideal = calcIdealPageSize(view);
+      if (ideal === pageSize) return;
+      const q = new URLSearchParams({ page: "1", pageSize: String(ideal) });
+      if (search)                 q.set("search", search);
+      if (activeStatus !== "All") q.set("status", activeStatus);
+      router.replace(`/dashboard/gems?${q}`);
+    }
+
+    apply();
+    const ro = new ResizeObserver(apply);
+    ro.observe(container);
+    return () => ro.disconnect();
+  }, [view]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function toggle(v: "grid" | "list") {
     setView(v);
@@ -68,23 +116,15 @@ export function GemInventoryView({ result, page, search, status }: Props) {
   }
 
   return (
-    <div className="h-full flex flex-col">
+    <div ref={containerRef} className="flex flex-col" style={{ height: "calc(100vh - 2.5rem)" }}>
       {/* Header */}
-      <div className="shrink-0 flex items-center justify-between mb-5">
-        <div>
-          <h1 className="text-xl font-semibold tracking-tight">Gems</h1>
-          <p className="text-sm text-muted-foreground">Individual gemstone inventory</p>
-        </div>
-        <Button asChild size="sm" variant="violet">
-          <Link href="/dashboard/gems/new">
-            <Plus size={15} />
-            Add gem
-          </Link>
-        </Button>
+      <div ref={headerRef} className="shrink-0 mb-5">
+        <h1 className="text-xl font-semibold tracking-tight">Gems</h1>
+        <p className="text-sm text-muted-foreground">Individual gemstone inventory</p>
       </div>
 
       {/* Toolbar */}
-      <div className="shrink-0 flex flex-wrap items-center gap-2 mb-4">
+      <div ref={toolbarRef} className="shrink-0 flex flex-wrap items-center gap-2 mb-4">
         {/* Search */}
         <form onSubmit={handleSearch} className="relative flex-1 min-w-[180px] max-w-xs">
           <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
@@ -139,10 +179,17 @@ export function GemInventoryView({ result, page, search, status }: Props) {
             <List size={15} />
           </button>
         </div>
+
+        {/* Add button */}
+        <div className="ml-auto">
+          <Button asChild size="sm" variant="violet">
+            <Link href="/dashboard/gems/new"><Plus size={15} />Add gem</Link>
+          </Button>
+        </div>
       </div>
 
-      {/* Content — 12 items fit without overflow at 1080p+ */}
-      <div className="flex-1 min-h-0">
+      {/* Content */}
+      <div className="flex-1 min-h-0 overflow-hidden">
         {result.items.length === 0 ? (
           <EmptyState search={search} />
         ) : view === "grid" ? (
@@ -152,9 +199,9 @@ export function GemInventoryView({ result, page, search, status }: Props) {
         )}
       </div>
 
-      {/* Pagination pinned to bottom */}
-      <div className="shrink-0 pt-3">
-        <Pagination page={page} totalPages={result.totalPages} search={search} status={status} />
+      {/* Pagination — shrink-0 so it's always pinned at the bottom */}
+      <div ref={paginationRef} className="shrink-0 py-4">
+        <Pagination page={page} totalPages={result.totalPages} pageSize={pageSize} search={search} status={status} />
       </div>
     </div>
   );
@@ -195,7 +242,7 @@ function GemCard({ gem }: { gem: GemSummaryDto }) {
               <Badge className="text-[10px] px-1.5 py-0 bg-amber-500 text-white border-0 shadow-sm">Sold</Badge>
             )}
             {gem.isPublic && (
-              <Badge className="text-[10px] px-1.5 py-0 bg-white/90 text-slate-700 border-0 shadow-sm">Public</Badge>
+              <Badge className="text-[10px] px-1.5 py-0 bg-white/90 text-zinc-700 border-0 shadow-sm">Public</Badge>
             )}
           </div>
         </div>
@@ -301,7 +348,7 @@ function EmptyState({ search }: { search?: string }) {
   );
 }
 
-function Pagination({ page, totalPages, search, status }: { page: number; totalPages: number; search?: string; status?: string }) {
+function Pagination({ page, totalPages, pageSize, search, status }: { page: number; totalPages: number; pageSize: number; search?: string; status?: string }) {
   if (totalPages <= 1) return null;
   return (
     <div className="flex items-center justify-center gap-2">
@@ -309,7 +356,7 @@ function Pagination({ page, totalPages, search, status }: { page: number; totalP
         <Button variant="outline" size="sm" disabled>Previous</Button>
       ) : (
         <Button asChild variant="outline" size="sm">
-          <Link href={paginationUrl(page - 1, search, status)}>Previous</Link>
+          <Link href={paginationUrl(page - 1, pageSize, search, status)}>Previous</Link>
         </Button>
       )}
       <span className="text-sm text-muted-foreground">{page} / {totalPages}</span>
@@ -317,7 +364,7 @@ function Pagination({ page, totalPages, search, status }: { page: number; totalP
         <Button variant="outline" size="sm" disabled>Next</Button>
       ) : (
         <Button asChild variant="outline" size="sm">
-          <Link href={paginationUrl(page + 1, search, status)}>Next</Link>
+          <Link href={paginationUrl(page + 1, pageSize, search, status)}>Next</Link>
         </Button>
       )}
     </div>
