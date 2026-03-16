@@ -1,13 +1,20 @@
 import Link from "next/link";
 import { originsApi } from "@/lib/api";
 import { Button } from "@/components/ui/button";
+import { SearchInput } from "@/components/ui/search-input";
 import { Plus, MapPin } from "lucide-react";
 import type { OriginDto } from "@/lib/types";
 
-export default async function OriginsPage() {
+interface Props {
+  searchParams: Promise<{ search?: string }>;
+}
+
+export default async function OriginsPage({ searchParams }: Props) {
+  const { search } = await searchParams;
+
   let origins: OriginDto[];
   try {
-    origins = await originsApi.list();
+    origins = await originsApi.list(search);
   } catch {
     return (
       <div className="flex flex-col gap-4">
@@ -23,9 +30,19 @@ export default async function OriginsPage() {
         <Header />
       </div>
 
+      <div className="shrink-0 mb-4 flex items-center gap-2">
+        <SearchInput basePath="/dashboard/origins" placeholder="Search origins…" defaultValue={search} />
+        <Button asChild size="sm" variant="violet" className="ml-auto shrink-0">
+          <Link href="/dashboard/origins/new">
+            <Plus size={16} />
+            Add origin
+          </Link>
+        </Button>
+      </div>
+
       <div className="flex-1 min-h-0 overflow-y-auto">
         {origins.length === 0 ? (
-          <EmptyState />
+          <EmptyState hasSearch={!!search} />
         ) : (
           <div className="overflow-hidden rounded-xl border border-zinc-200/80 bg-card shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
             <table className="w-full text-sm">
@@ -53,17 +70,9 @@ export default async function OriginsPage() {
 
 function Header() {
   return (
-    <div className="flex items-center justify-between">
-      <div>
-        <h1 className="text-xl font-semibold tracking-tight">Origins</h1>
-        <p className="text-sm text-muted-foreground">Mine and locality records</p>
-      </div>
-      <Button asChild size="sm" variant="violet">
-        <Link href="/dashboard/origins/new">
-          <Plus size={16} />
-          Add origin
-        </Link>
-      </Button>
+    <div>
+      <h1 className="text-xl font-semibold tracking-tight">Origins</h1>
+      <p className="text-sm text-muted-foreground">Mine and locality records</p>
     </div>
   );
 }
@@ -101,20 +110,22 @@ function OriginRow({ origin }: { origin: OriginDto }) {
   );
 }
 
-function EmptyState() {
+function EmptyState({ hasSearch }: { hasSearch: boolean }) {
   return (
     <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-200 bg-white py-16 text-center">
       <MapPin size={48} strokeWidth={1} className="mb-4 text-zinc-300" />
-      <p className="font-medium">No origins yet</p>
+      <p className="font-medium">{hasSearch ? "No results" : "No origins yet"}</p>
       <p className="mt-1 text-sm text-muted-foreground">
-        Add mine and locality records to link gems to their source.
+        {hasSearch ? "Try a different search term." : "Add mine and locality records to link gems to their source."}
       </p>
-      <Button asChild size="sm" variant="violet" className="mt-4">
-        <Link href="/dashboard/origins/new">
-          <Plus size={16} />
-          Add origin
-        </Link>
-      </Button>
+      {!hasSearch && (
+        <Button asChild size="sm" variant="violet" className="mt-4">
+          <Link href="/dashboard/origins/new">
+            <Plus size={16} />
+            Add origin
+          </Link>
+        </Button>
+      )}
     </div>
   );
 }

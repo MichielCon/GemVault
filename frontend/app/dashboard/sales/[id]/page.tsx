@@ -4,7 +4,7 @@ import { salesApi } from "@/lib/api";
 import { ApiError } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Pencil } from "lucide-react";
 import { DeleteSaleButton } from "@/components/sales/delete-sale-button";
 
 interface Props {
@@ -42,7 +42,15 @@ export default async function SaleDetailPage({ params }: Props) {
             <p className="mt-0.5 text-sm text-zinc-500">Buyer: {sale.buyerName}</p>
           )}
         </div>
-        <DeleteSaleButton id={sale.id} />
+        <div className="flex items-center gap-2 shrink-0">
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/dashboard/sales/${sale.id}/edit`}>
+              <Pencil size={14} />
+              Edit
+            </Link>
+          </Button>
+          <DeleteSaleButton id={sale.id} />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
@@ -94,7 +102,7 @@ export default async function SaleDetailPage({ params }: Props) {
               <tbody className="divide-y divide-zinc-100">
                 {sale.items.map((item) => {
                   const name = item.gemName ?? item.gemParcelName ?? "—";
-                  const type = item.gemId ? "Gem" : "Parcel";
+                  const type = item.gemId ? "Gem" : item.gemParcelId ? "Parcel" : "—";
                   const href = item.gemId
                     ? `/dashboard/gems/${item.gemId}`
                     : item.gemParcelId

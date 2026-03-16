@@ -5,7 +5,8 @@ import { originsApi, gemsApi, parcelsApi } from "@/lib/api";
 import { ApiError } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Gem, Package, MapPin } from "lucide-react";
+import { ArrowLeft, Gem, Package, MapPin, Pencil } from "lucide-react";
+import { DeleteOriginButton } from "@/components/origins/delete-origin-button";
 import type { GemSummaryDto, GemParcelSummaryDto } from "@/lib/types";
 import { proxyPhotoUrl } from "@/lib/utils";
 
@@ -44,15 +45,26 @@ export default async function OriginDetailPage({ params }: Props) {
       </Button>
 
       {/* Header */}
-      <div className="flex items-start gap-3">
-        <MapPin size={28} className="mt-1 shrink-0 text-muted-foreground" />
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">{origin.country}</h1>
-          {(origin.mine || origin.region) && (
-            <p className="mt-1 text-muted-foreground">
-              {[origin.mine, origin.region].filter(Boolean).join(" · ")}
-            </p>
-          )}
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start gap-3">
+          <MapPin size={28} className="mt-1 shrink-0 text-muted-foreground" />
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">{origin.country}</h1>
+            {(origin.mine || origin.region) && (
+              <p className="mt-1 text-muted-foreground">
+                {[origin.mine, origin.region].filter(Boolean).join(" · ")}
+              </p>
+            )}
+          </div>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/dashboard/origins/${origin.id}/edit`}>
+              <Pencil size={14} />
+              Edit
+            </Link>
+          </Button>
+          <DeleteOriginButton id={origin.id} />
         </div>
       </div>
 
@@ -116,7 +128,7 @@ function GemCard({ gem }: { gem: GemSummaryDto }) {
           </div>
         )}
         {gem.isPublic && (
-          <Badge className="absolute right-1.5 top-1.5 text-[10px] px-1.5 py-0 bg-white/90 text-slate-700 border-0 shadow-sm">
+          <Badge className="absolute right-1.5 top-1.5 text-[10px] px-1.5 py-0 bg-white/90 text-zinc-700 border-0 shadow-sm">
             Public
           </Badge>
         )}
@@ -155,7 +167,7 @@ function ParcelCard({ parcel }: { parcel: GemParcelSummaryDto }) {
           </div>
         )}
         {parcel.isPublic && (
-          <Badge className="absolute right-1.5 top-1.5 text-[10px] px-1.5 py-0 bg-white/90 text-slate-700 border-0 shadow-sm">
+          <Badge className="absolute right-1.5 top-1.5 text-[10px] px-1.5 py-0 bg-white/90 text-zinc-700 border-0 shadow-sm">
             Public
           </Badge>
         )}

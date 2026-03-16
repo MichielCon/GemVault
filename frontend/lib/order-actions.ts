@@ -88,6 +88,38 @@ export async function createPurchaseOrder(
   }
 }
 
+export async function updatePurchaseOrder(
+  _prev: { error: string | null; id: string | null },
+  formData: FormData
+): Promise<{ error: string | null; id: string | null }> {
+  const id = formData.get("id") as string;
+  const raw = {
+    supplierId: formData.get("supplierId") as string,
+    reference: (formData.get("reference") as string) || null,
+    orderDate: formData.get("orderDate") as string,
+    notes: (formData.get("notes") as string) || null,
+  };
+  try {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...(await authHeader()),
+    };
+    const res = await fetch(`${baseUrl()}/api/v1/purchase-orders/${id}`, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify(raw),
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new ApiError(res.status, text);
+    }
+    return { error: null, id };
+  } catch (e) {
+    return { error: parseApiError(e), id: null };
+  }
+}
+
 export async function deletePurchaseOrder(
   _prev: { error: string | null },
   formData: FormData

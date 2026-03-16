@@ -88,6 +88,38 @@ export async function createSale(
   }
 }
 
+export async function updateSale(
+  _prev: { error: string | null; id: string | null },
+  formData: FormData
+): Promise<{ error: string | null; id: string | null }> {
+  const id = formData.get("id") as string;
+  const raw = {
+    saleDate: formData.get("saleDate") as string,
+    buyerName: (formData.get("buyerName") as string) || null,
+    buyerEmail: (formData.get("buyerEmail") as string) || null,
+    notes: (formData.get("notes") as string) || null,
+  };
+  try {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...(await authHeader()),
+    };
+    const res = await fetch(`${baseUrl()}/api/v1/sales/${id}`, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify(raw),
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new ApiError(res.status, text);
+    }
+    return { error: null, id };
+  } catch (e) {
+    return { error: parseApiError(e), id: null };
+  }
+}
+
 export async function deleteSale(
   _prev: { error: string | null },
   formData: FormData

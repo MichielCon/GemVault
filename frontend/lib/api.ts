@@ -224,9 +224,10 @@ export const suppliersApi = {
 // ─── PurchaseOrders ───────────────────────────────────────────────────────────
 
 export const purchaseOrdersApi = {
-  list: (page = 1, pageSize = 20, search?: string) => {
+  list: (page = 1, pageSize = 20, search?: string, supplierId?: string) => {
     const q = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
     if (search) q.set("search", search);
+    if (supplierId) q.set("supplierId", supplierId);
     return get<PagedResult<PurchaseOrderSummaryDto>>(`/api/v1/purchase-orders?${q}`);
   },
   get: (id: string) => get<PurchaseOrderDto>(`/api/v1/purchase-orders/${id}`),

@@ -72,6 +72,39 @@ export async function createOrigin(
   redirect("/dashboard/origins");
 }
 
+export async function updateOrigin(
+  _prev: { error: string | null },
+  formData: FormData
+): Promise<{ error: string | null }> {
+  const id = formData.get("id") as string;
+  const raw = {
+    country: formData.get("country") as string,
+    mine: (formData.get("mine") as string) || null,
+    region: (formData.get("region") as string) || null,
+  };
+
+  try {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...(await authHeader()),
+    };
+    const res = await fetch(`${baseUrl()}/api/v1/origins/${id}`, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify(raw),
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new ApiError(res.status, text);
+    }
+  } catch (e) {
+    return { error: parseApiError(e) };
+  }
+
+  redirect(`/dashboard/origins/${id}`);
+}
+
 export async function deleteOrigin(
   _prev: { error: string | null },
   formData: FormData

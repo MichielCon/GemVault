@@ -4,7 +4,7 @@ import { purchaseOrdersApi } from "@/lib/api";
 import { ApiError } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Pencil } from "lucide-react";
 import { DeleteOrderButton } from "@/components/orders/delete-order-button";
 
 interface Props {
@@ -42,7 +42,15 @@ export default async function OrderDetailPage({ params }: Props) {
             {order.supplierName} · {new Date(order.orderDate).toLocaleDateString()}
           </p>
         </div>
-        <DeleteOrderButton id={order.id} />
+        <div className="flex items-center gap-2 shrink-0">
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/dashboard/orders/${order.id}/edit`}>
+              <Pencil size={14} />
+              Edit
+            </Link>
+          </Button>
+          <DeleteOrderButton id={order.id} />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
@@ -53,7 +61,11 @@ export default async function OrderDetailPage({ params }: Props) {
           <CardContent>
             <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2.5 text-sm">
               <dt className="text-zinc-400 text-xs font-medium uppercase tracking-wide">Supplier</dt>
-              <dd className="font-medium text-zinc-800">{order.supplierName}</dd>
+              <dd className="font-medium text-zinc-800">
+                <Link href={`/dashboard/suppliers/${order.supplierId}`} className="text-violet-600 hover:underline">
+                  {order.supplierName}
+                </Link>
+              </dd>
               <dt className="text-zinc-400 text-xs font-medium uppercase tracking-wide">Date</dt>
               <dd className="font-medium text-zinc-800">{new Date(order.orderDate).toLocaleDateString()}</dd>
               {order.reference && (
@@ -90,7 +102,7 @@ export default async function OrderDetailPage({ params }: Props) {
               <tbody className="divide-y divide-zinc-100">
                 {order.items.map((item) => {
                   const name = item.gemName ?? item.gemParcelName ?? "—";
-                  const type = item.gemId ? "Gem" : "Parcel";
+                  const type = item.gemId ? "Gem" : item.gemParcelId ? "Parcel" : "—";
                   const href = item.gemId
                     ? `/dashboard/gems/${item.gemId}`
                     : item.gemParcelId

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { suppliersApi } from "@/lib/api";
+import { suppliersApi, purchaseOrdersApi } from "@/lib/api";
 import { ApiError } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,6 +24,9 @@ export default async function SupplierDetailPage({ params }: Props) {
     throw e;
   }
 
+  const ordersResult = await purchaseOrdersApi.list(1, 100, undefined, id).catch(() => null);
+  const orders = ordersResult?.items ?? [];
+
   return (
     <div className="flex flex-col gap-6">
       <Button asChild variant="ghost" size="sm" className="-ml-2 w-fit">
@@ -35,7 +38,7 @@ export default async function SupplierDetailPage({ params }: Props) {
 
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">{supplier.name}</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{supplier.name}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {supplier.orderCount} order{supplier.orderCount !== 1 ? "s" : ""}
           </p>
@@ -81,13 +84,47 @@ export default async function SupplierDetailPage({ params }: Props) {
         </Card>
       </div>
 
-      {/* Orders link */}
-      <div className="flex items-center gap-2">
-        <ShoppingCart size={16} className="text-muted-foreground" />
-        <Button asChild variant="outline" size="sm">
-          <Link href="/dashboard/orders">View all orders</Link>
-        </Button>
-      </div>
+      {/* Orders section */}
+      <section className="flex flex-col gap-3">
+        <div className="flex items-center gap-2">
+          <ShoppingCart size={18} className="text-muted-foreground" />
+          <h2 className="text-lg font-semibold">Orders ({orders.length})</h2>
+        </div>
+        {orders.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No orders from this supplier yet.</p>
+        ) : (
+          <div className="overflow-hidden rounded-xl border border-zinc-200/80 bg-card shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-zinc-100 bg-zinc-50/60 text-left">
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Reference</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Date</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Items</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Total</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-100">
+                {orders.map((order) => (
+                  <tr key={order.id} className="hover:bg-zinc-50 transition-colors">
+                    <td className="px-4 py-3 font-medium">
+                      <Link href={`/dashboard/orders/${order.id}`} className="text-violet-600 hover:underline">
+                        {order.reference ?? "—"}
+                      </Link>
+                    </td>
+                    <td className="px-4 py-3 text-zinc-500">
+                      {new Date(order.orderDate).toLocaleDateString()}
+                    </td>
+                    <td className="px-4 py-3 text-zinc-500">{order.itemCount}</td>
+                    <td className="px-4 py-3 font-medium">
+                      {order.totalCost.toLocaleString("en-US", { style: "currency", currency: "USD" })}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
     </div>
   );
 }
