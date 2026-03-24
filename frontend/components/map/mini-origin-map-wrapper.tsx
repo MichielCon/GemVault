@@ -10,8 +10,7 @@ const MiniOriginMapClient = dynamic(
 
 interface Props {
   country: string;
-  mine?: string | null;
-  region?: string | null;
+  locality?: string | null;
 }
 
 export function MiniOriginMapWrapper(props: Props) {

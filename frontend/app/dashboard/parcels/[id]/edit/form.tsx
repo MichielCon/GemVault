@@ -16,6 +16,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
+import { OriginPicker } from "@/components/origins/origin-picker";
 import type { GemParcelDto, VocabularyItemDto, OriginDto } from "@/lib/types";
 
 interface Props {
@@ -37,8 +38,6 @@ export function ParcelEditForm({ parcel, vocabulary, origins }: Props) {
   const [variety, setVariety] = useState<string | null>(parcel.variety ?? null);
   const [color, setColor] = useState<string | null>(parcel.color ?? null);
   const [treatment, setTreatment] = useState<string | null>(parcel.treatment ?? null);
-  const [originId, setOriginId] = useState<string | null>(parcel.originId ?? null);
-
   const speciesOptions = vocabulary.species.map((v) => ({ value: v.value, label: v.value }));
 
   const varietyOptions = species
@@ -49,11 +48,6 @@ export function ParcelEditForm({ parcel, vocabulary, origins }: Props) {
 
   const colorOptions = vocabulary.color.map((v) => ({ value: v.value, label: v.value }));
   const treatmentOptions = vocabulary.treatment.map((v) => ({ value: v.value, label: v.value }));
-
-  const originOptions = origins.map((o) => ({
-    value: o.id,
-    label: [o.country, o.mine, o.region].filter(Boolean).join(" — "),
-  }));
 
   function handleSpeciesChange(val: string | null) {
     setSpecies(val);
@@ -178,16 +172,7 @@ export function ParcelEditForm({ parcel, vocabulary, origins }: Props) {
             </div>
 
             {/* Origin */}
-            <div className="flex flex-col gap-1.5">
-              <Label>Origin</Label>
-              <Combobox
-                name="originId"
-                options={originOptions}
-                value={originId}
-                onChange={setOriginId}
-                placeholder="Select origin..."
-              />
-            </div>
+            <OriginPicker allOrigins={origins} initialOriginId={parcel.originId} />
 
             {/* Purchase price */}
             <div className="flex flex-col gap-1.5">

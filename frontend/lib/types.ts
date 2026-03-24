@@ -163,8 +163,7 @@ export interface VocabularyAdminDto {
 export interface OriginDto {
   id: string;
   country: string;
-  mine: string | null;
-  region: string | null;
+  locality: string | null;
   createdAt: string;
   gemCount: number;
   parcelCount: number;
@@ -308,8 +307,7 @@ export interface DashboardStatsDto {
 export interface OriginMapDto {
   id: string;
   country: string;
-  mine: string | null;
-  region: string | null;
+  locality: string | null;
   gemCount: number;
   parcelCount: number;
   totalCarats: number;
@@ -452,8 +450,7 @@ export interface PublicGemDto {
   quantity: number | null;
   notes: string | null;
   originCountry: string | null;
-  originMine: string | null;
-  originRegion: string | null;
+  originLocality: string | null;
   createdAt: string;
   photos: PublicPhotoDto[];
 }

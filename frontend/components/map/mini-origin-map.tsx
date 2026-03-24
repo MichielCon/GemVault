@@ -4,17 +4,21 @@ import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { MapPin } from "lucide-react";
 import { getCountryCoords } from "@/lib/country-coords";
+import { getLocalityCoords } from "@/lib/locality-coords";
 
 import "leaflet/dist/leaflet.css";
 
 interface Props {
   country: string;
-  mine?: string | null;
-  region?: string | null;
+  locality?: string | null;
 }
 
-export function MiniOriginMap({ country, mine, region }: Props) {
-  const coords = getCountryCoords(country);
+export function MiniOriginMap({ country, locality }: Props) {
+  // Prefer locality-specific coords when available
+  const coords =
+    (locality ? getLocalityCoords(country, locality) : null) ??
+    getCountryCoords(country);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<import("leaflet").Map | null>(null);
 
@@ -45,7 +49,7 @@ export function MiniOriginMap({ country, mine, region }: Props) {
       ).addTo(map);
 
       if (coords) {
-        const label = [mine, region, country].filter(Boolean).join(", ");
+        const label = [locality, country].filter(Boolean).join(", ");
 
         const icon = L.divIcon({
           className: "",
@@ -77,7 +81,7 @@ export function MiniOriginMap({ country, mine, region }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const label = [mine, region, country].filter(Boolean).join(", ");
+  const label = [locality, country].filter(Boolean).join(", ");
 
   return (
     <div className="overflow-hidden rounded-lg border">

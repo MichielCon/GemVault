@@ -196,6 +196,10 @@ export const originsApi = {
   },
   get: (id: string) => get<OriginDto>(`/api/v1/origins/${id}`, false),
   mapData: () => get<OriginMapDto[]>("/api/v1/origins/map-data"),
+  byCountry: (country: string) =>
+    get<OriginDto[]>(`/api/v1/origins/by-country?country=${encodeURIComponent(country)}`, false),
+  findOrCreate: (data: { country: string; locality: string | null }) =>
+    post<OriginDto>("/api/v1/origins/find-or-create", data),
 };
 
 // ─── GemParcels ───────────────────────────────────────────────────────────────

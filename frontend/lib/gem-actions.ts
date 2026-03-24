@@ -3,6 +3,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ApiError } from "./api";
+import { findOrCreateOrigin } from "./origin-actions";
 
 function baseUrl() {
   return (
@@ -45,6 +46,17 @@ export async function createGem(
   _prev: { error: string | null },
   formData: FormData
 ): Promise<{ error: string | null }> {
+  const originId = formData.get("originId") as string;
+  const originCountry = formData.get("originCountry") as string;
+  const originLocality = formData.get("originLocality") as string;
+
+  let resolvedOriginId: string | null = originId || null;
+  if (!resolvedOriginId && originCountry) {
+    const result = await findOrCreateOrigin(originCountry, originLocality || null);
+    if (result.error) return { error: result.error };
+    resolvedOriginId = result.id;
+  }
+
   const raw = {
     name: formData.get("name") as string,
     species: (formData.get("species") as string) || null,
@@ -62,7 +74,7 @@ export async function createGem(
       : null,
     notes: (formData.get("notes") as string) || null,
     isPublic: formData.get("isPublic") === "on",
-    originId: (formData.get("originId") as string) || null,
+    originId: resolvedOriginId,
   };
 
   let gem: { id: string };
@@ -94,6 +106,18 @@ export async function updateGem(
   formData: FormData
 ): Promise<{ error: string | null }> {
   const id = formData.get("id") as string;
+
+  const originId = formData.get("originId") as string;
+  const originCountry = formData.get("originCountry") as string;
+  const originLocality = formData.get("originLocality") as string;
+
+  let resolvedOriginId: string | null = originId || null;
+  if (!resolvedOriginId && originCountry) {
+    const result = await findOrCreateOrigin(originCountry, originLocality || null);
+    if (result.error) return { error: result.error };
+    resolvedOriginId = result.id;
+  }
+
   const raw = {
     name: formData.get("name") as string,
     species: (formData.get("species") as string) || null,
@@ -111,7 +135,7 @@ export async function updateGem(
       : null,
     notes: (formData.get("notes") as string) || null,
     isPublic: formData.get("isPublic") === "on",
-    originId: (formData.get("originId") as string) || null,
+    originId: resolvedOriginId,
   };
 
   try {
