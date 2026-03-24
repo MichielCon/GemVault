@@ -237,3 +237,25 @@ export async function deleteParcel(
 
   redirect("/dashboard/parcels");
 }
+
+export async function bulkDeleteParcels(ids: string[]): Promise<{ error: string | null }> {
+  try {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...(await authHeader()),
+    };
+    const res = await fetch(`${baseUrl()}/api/v1/gem-parcels/bulk`, {
+      method: "DELETE",
+      headers,
+      body: JSON.stringify({ ids }),
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new ApiError(res.status, text);
+    }
+    return { error: null };
+  } catch (e) {
+    return { error: parseApiError(e) };
+  }
+}

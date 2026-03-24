@@ -4,12 +4,13 @@ import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { LayoutGrid, List, Plus, Gem, Search, X, Filter, ArrowUp, ArrowDown } from "lucide-react";
+import { LayoutGrid, List, Plus, Gem, Search, X, Filter, ArrowUp, ArrowDown, CheckSquare, Check, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MagicCard } from "@/components/magicui/magic-card";
 import type { GemSummaryDto, PagedResult } from "@/lib/types";
 import { proxyPhotoUrl } from "@/lib/utils";
+import { bulkDeleteGems } from "@/lib/gem-actions";
 
 const STORAGE_KEY = "gem-view";
 const STATUS_OPTIONS = ["All", "InStock", "Sold"] as const;
@@ -79,10 +80,18 @@ export function GemInventoryView({
   const [minPriceInput, setMinPriceInput] = useState(minPrice ?? "");
   const [maxPriceInput, setMaxPriceInput] = useState(maxPrice ?? "");
 
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [bulkError, setBulkError] = useState<string | null>(null);
+
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved === "list" || saved === "grid") setView(saved);
   }, []);
+
+  useEffect(() => {
+    setSelectedIds(new Set());
+  }, [result.items]);
 
   useLayoutEffect(() => {
     const container = containerRef.current;
@@ -236,8 +245,35 @@ export function GemInventoryView({
     router.push(`/dashboard/gems?${q}`);
   }
 
+  function toggleSelect(id: string) {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleSelectAll() {
+    if (selectedIds.size === result.items.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(result.items.map(g => g.id)));
+    }
+  }
+
+  async function handleBulkDelete() {
+    if (!confirm(`Delete ${selectedIds.size} gem${selectedIds.size !== 1 ? "s" : ""}? This cannot be undone.`)) return;
+    setBulkDeleting(true);
+    setBulkError(null);
+    const { error } = await bulkDeleteGems([...selectedIds]);
+    setBulkDeleting(false);
+    if (error) { setBulkError(error); return; }
+    setSelectedIds(new Set());
+    router.refresh();
+  }
+
   return (
-    <div ref={containerRef} className="flex flex-col" style={{ height: "calc(100vh - 2.5rem)" }}>
+    <div ref={containerRef} className="relative flex flex-col" style={{ height: "calc(100vh - 2.5rem)" }}>
       {/* Header */}
       <div ref={headerRef} className="shrink-0 mb-5">
         <h1 className="text-xl font-semibold tracking-tight">Gems</h1>
@@ -263,6 +299,17 @@ export function GemInventoryView({
               </button>
             )}
           </form>
+
+          {/* Select all */}
+          {result.items.length > 0 && (
+            <button
+              onClick={toggleSelectAll}
+              className="flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-medium text-zinc-600 hover:text-zinc-800 transition-colors"
+            >
+              <CheckSquare size={13} />
+              {selectedIds.size === result.items.length && result.items.length > 0 ? "Deselect all" : "Select all"}
+            </button>
+          )}
 
           {/* Sold/InStock filter */}
           <div className="flex rounded-lg border border-zinc-200 bg-white overflow-hidden">
@@ -417,14 +464,19 @@ export function GemInventoryView({
         )}
       </div>
 
+      {/* Bulk error */}
+      {bulkError && (
+        <p className="shrink-0 mb-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">{bulkError}</p>
+      )}
+
       {/* Content */}
       <div className="flex-1 min-h-0 overflow-hidden">
         {result.items.length === 0 ? (
           <EmptyState search={search} />
         ) : view === "grid" ? (
-          <GridView gems={result.items} />
+          <GridView gems={result.items} selectedIds={selectedIds} onToggle={toggleSelect} />
         ) : (
-          <ListView gems={result.items} />
+          <ListView gems={result.items} selectedIds={selectedIds} onToggle={toggleSelect} />
         )}
       </div>
 
@@ -437,21 +489,43 @@ export function GemInventoryView({
           sortBy={sortBy} sortDir={sortDir}
         />
       </div>
+
+      {/* Floating bulk action bar */}
+      {selectedIds.size > 0 && (
+        <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-full border border-zinc-700 bg-zinc-900 px-4 py-2.5 shadow-2xl">
+          <span className="text-xs font-medium text-zinc-300">{selectedIds.size} selected</span>
+          <div className="h-3 w-px bg-zinc-700" />
+          <button
+            onClick={handleBulkDelete}
+            disabled={bulkDeleting}
+            className="flex items-center gap-1.5 rounded-full bg-red-600 px-3 py-1 text-xs font-medium text-white hover:bg-red-700 transition-colors disabled:opacity-50"
+          >
+            <Trash2 size={12} />
+            {bulkDeleting ? "Deleting…" : "Delete"}
+          </button>
+          <button
+            onClick={() => setSelectedIds(new Set())}
+            className="flex items-center gap-1 text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
+          >
+            <X size={12} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }
 
-function GridView({ gems }: { gems: GemSummaryDto[] }) {
+function GridView({ gems, selectedIds, onToggle }: { gems: GemSummaryDto[]; selectedIds: Set<string>; onToggle: (id: string) => void }) {
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
       {gems.map((gem) => (
-        <GemCard key={gem.id} gem={gem} />
+        <GemCard key={gem.id} gem={gem} isSelected={selectedIds.has(gem.id)} onToggle={onToggle} />
       ))}
     </div>
   );
 }
 
-function GemCard({ gem }: { gem: GemSummaryDto }) {
+function GemCard({ gem, isSelected, onToggle }: { gem: GemSummaryDto; isSelected: boolean; onToggle: (id: string) => void }) {
   const subtitle = [gem.species, gem.variety, gem.color].filter(Boolean).join(" · ") || "Unknown species";
   return (
     <Link href={`/dashboard/gems/${gem.id}`} className="group block">
@@ -471,6 +545,18 @@ function GemCard({ gem }: { gem: GemSummaryDto }) {
               <Gem size={32} strokeWidth={1} />
             </div>
           )}
+          {/* Checkbox overlay — top left */}
+          <button
+            type="button"
+            onClick={(e) => { e.preventDefault(); onToggle(gem.id); }}
+            className={`absolute left-1.5 top-1.5 z-10 flex h-5 w-5 items-center justify-center rounded border-2 transition-colors ${
+              isSelected
+                ? "border-violet-500 bg-violet-500 text-white"
+                : "border-white/70 bg-black/20 text-transparent hover:border-violet-300"
+            }`}
+          >
+            {isSelected && <Check size={11} />}
+          </button>
           <div className="absolute right-1.5 top-1.5 flex flex-col gap-1">
             {gem.isSold && (
               <Badge className="text-[10px] px-1.5 py-0 bg-amber-500 text-white border-0 shadow-sm">Sold</Badge>
@@ -492,12 +578,13 @@ function GemCard({ gem }: { gem: GemSummaryDto }) {
   );
 }
 
-function ListView({ gems }: { gems: GemSummaryDto[] }) {
+function ListView({ gems, selectedIds, onToggle }: { gems: GemSummaryDto[]; selectedIds: Set<string>; onToggle: (id: string) => void }) {
   return (
     <div className="overflow-hidden rounded-xl border border-zinc-200/80 bg-card shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-zinc-100 bg-zinc-50/60 text-left">
+            <th className="px-3 py-2.5 w-8" />
             <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Gem</th>
             <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500 hidden sm:table-cell">Species / Variety</th>
             <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500 hidden md:table-cell">Color</th>
@@ -508,7 +595,7 @@ function ListView({ gems }: { gems: GemSummaryDto[] }) {
         </thead>
         <tbody className="divide-y divide-zinc-100">
           {gems.map((gem) => (
-            <GemRow key={gem.id} gem={gem} />
+            <GemRow key={gem.id} gem={gem} isSelected={selectedIds.has(gem.id)} onToggle={onToggle} />
           ))}
         </tbody>
       </table>
@@ -516,10 +603,21 @@ function ListView({ gems }: { gems: GemSummaryDto[] }) {
   );
 }
 
-function GemRow({ gem }: { gem: GemSummaryDto }) {
+function GemRow({ gem, isSelected, onToggle }: { gem: GemSummaryDto; isSelected: boolean; onToggle: (id: string) => void }) {
   const speciesLabel = [gem.species, gem.variety].filter(Boolean).join(" — ") || "—";
   return (
     <tr className="hover:bg-zinc-50 transition-colors">
+      <td className="px-3 py-2.5 w-8">
+        <button
+          type="button"
+          onClick={(e) => { e.preventDefault(); onToggle(gem.id); }}
+          className={`flex h-4 w-4 items-center justify-center rounded border-2 transition-colors ${
+            isSelected ? "border-violet-500 bg-violet-500 text-white" : "border-zinc-300 hover:border-violet-400"
+          }`}
+        >
+          {isSelected && <Check size={10} />}
+        </button>
+      </td>
       <td className="px-4 py-2.5">
         <Link href={`/dashboard/gems/${gem.id}`} className="flex items-center gap-3">
           <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-zinc-100">

@@ -68,6 +68,15 @@ public class GemParcelsController(IMediator mediator) : ControllerBase
         return NoContent();
     }
 
+    [HttpDelete("bulk")]
+    public async Task<IActionResult> BulkDelete(
+        [FromBody] BulkDeleteGemParcelsRequest body,
+        CancellationToken ct)
+    {
+        await mediator.Send(new BulkDeleteGemParcelsCommand(body.Ids.Select(Guid.Parse).ToList()), ct);
+        return NoContent();
+    }
+
     [HttpDelete("photos/{photoId:guid}")]
     public async Task<IActionResult> DeletePhoto(Guid photoId, CancellationToken ct)
     {
@@ -94,6 +103,8 @@ public class GemParcelsController(IMediator mediator) : ControllerBase
         return Ok(result);
     }
 }
+
+public record BulkDeleteGemParcelsRequest(List<string> Ids);
 
 // Separate body record to allow id injection from route
 public record UpdateGemParcelCommandBody(

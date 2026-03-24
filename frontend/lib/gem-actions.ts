@@ -244,3 +244,25 @@ export async function deleteGem(
 
   redirect("/dashboard/gems");
 }
+
+export async function bulkDeleteGems(ids: string[]): Promise<{ error: string | null }> {
+  try {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...(await authHeader()),
+    };
+    const res = await fetch(`${baseUrl()}/api/v1/gems/bulk`, {
+      method: "DELETE",
+      headers,
+      body: JSON.stringify({ ids }),
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new ApiError(res.status, text);
+    }
+    return { error: null };
+  } catch (e) {
+    return { error: parseApiError(e) };
+  }
+}
