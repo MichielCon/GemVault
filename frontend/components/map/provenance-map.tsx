@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import { X, Gem, Package, MapPin, DollarSign } from "lucide-react";
+import { X, Gem, Package, MapPin, DollarSign, Search } from "lucide-react";
 import type { OriginMapDto } from "@/lib/types";
 import { getCountryCoords } from "@/lib/country-coords";
 import { getLocalityCoords } from "@/lib/locality-coords";
@@ -108,16 +108,26 @@ interface Props {
 export default function ProvenanceMap({ origins }: Props) {
   const mapRef = useRef<import("leaflet").Map | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const markersRef = useRef<Map<string, import("leaflet").Marker>>(new Map());
   const [selected, setSelected] = useState<CountryGroup | null>(null);
   const [panelVisible, setPanelVisible] = useState(false);
+  const [selectedSpecies, setSelectedSpecies] = useState<string | null>(null);
+  const [countrySearch, setCountrySearch] = useState("");
 
   const groups = buildCountryGroups(origins);
+  const allSpecies = [...new Set(groups.flatMap(g => g.allSpecies))].sort();
 
-  const totalCountries = groups.length;
-  const totalGems = groups.reduce((s, g) => s + g.totalGems, 0);
-  const totalParcels = groups.reduce((s, g) => s + g.totalParcels, 0);
-  const totalCarats = groups.reduce((s, g) => s + g.totalCarats, 0);
-  const totalInvested = groups.reduce((s, g) => s + g.totalInvested, 0);
+  const filteredGroups = groups.filter(g => {
+    const speciesMatch = !selectedSpecies || g.allSpecies.includes(selectedSpecies);
+    const searchMatch = !countrySearch.trim() || g.country.toLowerCase().includes(countrySearch.toLowerCase().trim());
+    return speciesMatch && searchMatch;
+  });
+
+  const totalCountries = filteredGroups.length;
+  const totalGems = filteredGroups.reduce((s, g) => s + g.totalGems, 0);
+  const totalParcels = filteredGroups.reduce((s, g) => s + g.totalParcels, 0);
+  const totalCarats = filteredGroups.reduce((s, g) => s + g.totalCarats, 0);
+  const totalInvested = filteredGroups.reduce((s, g) => s + g.totalInvested, 0);
 
   function selectGroup(group: CountryGroup) {
     setSelected(group);
@@ -185,6 +195,7 @@ export default function ProvenanceMap({ origins }: Props) {
         );
         marker.on("click", () => selectGroup(group));
         marker.addTo(map);
+        markersRef.current.set(group.country, marker);
       }
     });
 
@@ -195,8 +206,78 @@ export default function ProvenanceMap({ origins }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const search = countrySearch.toLowerCase().trim();
+    for (const group of groups) {
+      const marker = markersRef.current.get(group.country);
+      if (!marker) continue;
+      const speciesMatch = !selectedSpecies || group.allSpecies.includes(selectedSpecies);
+      const searchMatch = !search || group.country.toLowerCase().includes(search);
+      if (speciesMatch && searchMatch) {
+        if (!map.hasLayer(marker)) marker.addTo(map);
+      } else {
+        if (map.hasLayer(marker)) marker.remove();
+      }
+    }
+  }, [selectedSpecies, countrySearch]); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
     <div className="flex flex-col w-full h-full bg-[#1a1a2e]">
+      {/* Map filter bar */}
+      {(allSpecies.length > 0 || groups.length > 0) && (
+        <div className="shrink-0 flex flex-wrap items-center gap-2 px-4 py-2 bg-zinc-950 border-b border-zinc-800/60">
+          {/* Country search */}
+          <div className="relative">
+            <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
+            <input
+              value={countrySearch}
+              onChange={e => setCountrySearch(e.target.value)}
+              placeholder="Search country…"
+              className="w-36 rounded-md border border-zinc-700 bg-zinc-900 pl-7 pr-7 py-1 text-xs text-zinc-200 placeholder-zinc-600 outline-none focus:border-violet-500/60 focus:ring-1 focus:ring-violet-500/20"
+            />
+            {countrySearch && (
+              <button onClick={() => setCountrySearch("")} className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300">
+                <X size={11} />
+              </button>
+            )}
+          </div>
+
+          {/* Divider */}
+          {allSpecies.length > 0 && <div className="h-4 w-px bg-zinc-800" />}
+
+          {/* Species pills */}
+          {allSpecies.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1">
+              {allSpecies.map(sp => (
+                <button
+                  key={sp}
+                  onClick={() => setSelectedSpecies(selectedSpecies === sp ? null : sp)}
+                  className={`px-2 py-0.5 rounded-full text-[11px] font-medium transition-colors border ${
+                    selectedSpecies === sp
+                      ? "bg-violet-600 border-violet-500 text-white"
+                      : "bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-violet-500/60 hover:text-zinc-200"
+                  }`}
+                >
+                  {sp}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Clear filter */}
+          {(selectedSpecies || countrySearch) && (
+            <button
+              onClick={() => { setSelectedSpecies(null); setCountrySearch(""); }}
+              className="ml-auto flex items-center gap-1 text-[11px] text-zinc-500 hover:text-zinc-300 transition-colors"
+            >
+              <X size={11} /> Clear
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Stats strip — in flow, no absolute positioning = no gap */}
       <div className="shrink-0 flex items-center gap-5 px-5 py-3 bg-zinc-950 border-b border-zinc-800/80 text-sm">
         <div className="flex items-center gap-1.5 text-violet-400 font-semibold">
