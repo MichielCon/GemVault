@@ -3,6 +3,10 @@ using GemVault.Application.GemParcels.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
+using PdfUnit = QuestPDF.Infrastructure.Unit;
 
 namespace GemVault.Api.Controllers;
 
@@ -104,9 +108,18 @@ public class GemParcelsController(IMediator mediator) : ControllerBase
     }
 
     [HttpGet("export")]
-    public async Task<IActionResult> Export(CancellationToken ct)
+    public async Task<IActionResult> Export(
+        [FromQuery] string format = "csv",
+        CancellationToken ct = default)
     {
         var items = await mediator.Send(new ExportGemParcelsQuery(), ct);
+
+        if (format.Equals("pdf", StringComparison.OrdinalIgnoreCase))
+        {
+            var pdfBytes = GenerateParcelsPdf(items);
+            return File(pdfBytes, "application/pdf", "parcels.pdf");
+        }
+
         var csv = BuildCsv(
             "Name,Species,Variety,Quantity,Total Weight (ct),Color,Treatment,Purchase Price,Acquired On,Origin,Locality,Notes,Added On",
             items.Select(p => new[]
@@ -118,6 +131,91 @@ public class GemParcelsController(IMediator mediator) : ControllerBase
             }));
         var bytes = System.Text.Encoding.UTF8.GetBytes(csv);
         return File(bytes, "text/csv", "parcels-export.csv");
+    }
+
+    private static byte[] GenerateParcelsPdf(List<GemParcelExportDto> parcels)
+    {
+        QuestPDF.Settings.License = LicenseType.Community;
+
+        var headerBg  = Color.FromHex("#616161");
+        var rowAlt    = Color.FromHex("#F5F5F5");
+        var border    = Color.FromHex("#E0E0E0");
+        var textMuted = Color.FromHex("#9E9E9E");
+
+        return Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Size(PageSizes.A4.Landscape());
+                page.Margin(1.5f, PdfUnit.Centimetre);
+                page.DefaultTextStyle(x => x.FontSize(9));
+
+                page.Header()
+                    .PaddingBottom(8)
+                    .Text("GemVault — Parcel Inventory")
+                    .SemiBold().FontSize(14).FontColor(Colors.Grey.Darken2);
+
+                page.Content().Table(table =>
+                {
+                    table.ColumnsDefinition(cols =>
+                    {
+                        cols.RelativeColumn(3);   // Name
+                        cols.RelativeColumn(2);   // Species
+                        cols.RelativeColumn(2);   // Variety
+                        cols.RelativeColumn(1);   // Qty
+                        cols.RelativeColumn(1.5f); // Weight
+                        cols.RelativeColumn(1.5f); // Color
+                        cols.RelativeColumn(2);   // Origin
+                        cols.RelativeColumn(1.5f); // Price
+                    });
+
+                    table.Header(header =>
+                    {
+                        static IContainer H(IContainer c, string bg) =>
+                            c.Background(bg).Padding(4);
+
+                        var hStyle = TextStyle.Default.SemiBold().FontColor(Colors.White);
+                        header.Cell().Element(c => H(c, headerBg)).Text("Name").Style(hStyle);
+                        header.Cell().Element(c => H(c, headerBg)).Text("Species").Style(hStyle);
+                        header.Cell().Element(c => H(c, headerBg)).Text("Variety").Style(hStyle);
+                        header.Cell().Element(c => H(c, headerBg)).Text("Qty").Style(hStyle);
+                        header.Cell().Element(c => H(c, headerBg)).Text("Weight (ct)").Style(hStyle);
+                        header.Cell().Element(c => H(c, headerBg)).Text("Color").Style(hStyle);
+                        header.Cell().Element(c => H(c, headerBg)).Text("Origin").Style(hStyle);
+                        header.Cell().Element(c => H(c, headerBg)).Text("Purchase Price").Style(hStyle);
+                    });
+
+                    bool alt = false;
+                    foreach (var p in parcels)
+                    {
+                        var bg = alt ? rowAlt : Colors.White;
+                        alt = !alt;
+
+                        IContainer D(IContainer c) =>
+                            c.Background(bg).BorderBottom(1).BorderColor(border).Padding(4);
+
+                        table.Cell().Element(D).Text(p.Name);
+                        table.Cell().Element(D).Text(p.Species ?? "—");
+                        table.Cell().Element(D).Text(p.Variety ?? "—");
+                        table.Cell().Element(D).Text(p.Quantity.ToString());
+                        table.Cell().Element(D).Text(p.TotalWeightCarats.HasValue ? p.TotalWeightCarats.Value.ToString("0.00") : "—");
+                        table.Cell().Element(D).Text(p.Color ?? "—");
+                        table.Cell().Element(D).Text(p.OriginCountry ?? "—");
+                        table.Cell().Element(D).Text(p.PurchasePrice.HasValue ? $"${p.PurchasePrice.Value:0.00}" : "—");
+                    }
+                });
+
+                page.Footer().AlignRight().Text(text =>
+                {
+                    text.Span("Generated ").FontColor(textMuted);
+                    text.Span(DateTime.UtcNow.ToString("yyyy-MM-dd")).FontColor(textMuted);
+                    text.Span("  •  Page ").FontColor(textMuted);
+                    text.CurrentPageNumber().FontColor(textMuted);
+                    text.Span(" of ").FontColor(textMuted);
+                    text.TotalPages().FontColor(textMuted);
+                });
+            });
+        }).GeneratePdf();
     }
 
     private static string BuildCsv(string header, IEnumerable<string?[]> rows)

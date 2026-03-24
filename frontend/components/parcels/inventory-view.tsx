@@ -4,7 +4,7 @@ import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { LayoutGrid, List, Plus, Package, Search, X, Filter, ArrowUp, ArrowDown, CheckSquare, Check, Trash2, Download } from "lucide-react";
+import { LayoutGrid, List, Plus, Package, Search, X, Filter, ArrowUp, ArrowDown, CheckSquare, Check, Trash2, Download, ChevronDown, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MagicCard } from "@/components/magicui/magic-card";
@@ -72,6 +72,7 @@ export function ParcelInventoryView({
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [bulkError, setBulkError] = useState<string | null>(null);
+  const [exportOpen, setExportOpen] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -357,9 +358,41 @@ export function ParcelInventoryView({
 
           {/* Add button + Export */}
           <div className="ml-auto flex items-center gap-2">
-            <Button asChild size="sm" variant="outline">
-              <a href="/api/export/parcels" download><Download size={14} />Export CSV</a>
-            </Button>
+            <div className="relative">
+              <button
+                onClick={() => setExportOpen((o) => !o)}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+              >
+                <Download size={14} />
+                Export
+                <ChevronDown size={12} className="text-zinc-400" />
+              </button>
+              {exportOpen && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setExportOpen(false)} />
+                  <div className="absolute right-0 top-full z-20 mt-1 w-36 rounded-lg border border-zinc-200 bg-white py-1 shadow-lg">
+                    <a
+                      href="/api/export/parcels"
+                      download
+                      onClick={() => setExportOpen(false)}
+                      className="flex items-center gap-2 px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-50"
+                    >
+                      <FileText size={13} />
+                      CSV
+                    </a>
+                    <a
+                      href="/api/export/parcels-pdf"
+                      download
+                      onClick={() => setExportOpen(false)}
+                      className="flex items-center gap-2 px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-50"
+                    >
+                      <FileText size={13} />
+                      PDF
+                    </a>
+                  </div>
+                </>
+              )}
+            </div>
             <Button asChild size="sm" variant="violet">
               <Link href="/dashboard/parcels/new"><Plus size={15} />Add parcel</Link>
             </Button>

@@ -4,6 +4,10 @@ using GemVault.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
+using PdfUnit = QuestPDF.Infrastructure.Unit;
 
 namespace GemVault.Api.Controllers;
 
@@ -107,9 +111,19 @@ public class GemsController(IMediator mediator) : ControllerBase
     }
 
     [HttpGet("export")]
-    public async Task<IActionResult> Export(CancellationToken ct)
+    public async Task<IActionResult> Export(
+        [FromQuery] string format = "csv",
+        CancellationToken ct = default)
     {
         var items = await mediator.Send(new ExportGemsQuery(), ct);
+
+        if (format.Equals("pdf", StringComparison.OrdinalIgnoreCase))
+        {
+            var pdfBytes = GenerateGemsPdf(items);
+            return File(pdfBytes, "application/pdf", "gems.pdf");
+        }
+
+        // Default: CSV
         var csv = BuildCsv(
             "Name,Species,Variety,Weight (ct),Color,Clarity,Cut,Shape,Treatment,Purchase Price,Acquired On,Status,Origin,Locality,Notes,Added On",
             items.Select(g => new[]
@@ -121,6 +135,111 @@ public class GemsController(IMediator mediator) : ControllerBase
             }));
         var bytes = System.Text.Encoding.UTF8.GetBytes(csv);
         return File(bytes, "text/csv", "gems-export.csv");
+    }
+
+    private static byte[] GenerateGemsPdf(List<GemExportDto> gems)
+    {
+        QuestPDF.Settings.License = LicenseType.Community;
+
+        // Colour palette (Material Design greys expressed as hex)
+        var headerBg   = Color.FromHex("#616161"); // Grey 700
+        var rowAlt     = Color.FromHex("#F5F5F5"); // Grey 100
+        var rowEven    = Color.FromHex("#FFFFFF");
+        var borderLine = Color.FromHex("#E0E0E0"); // Grey 300
+        var textMuted  = Color.FromHex("#9E9E9E"); // Grey 500
+        var textHeader = Color.FromHex("#212121"); // Grey 900
+
+        return Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Size(PageSizes.A4.Landscape());
+                page.Margin(1.5f, PdfUnit.Centimetre);
+                page.DefaultTextStyle(x => x.FontSize(9));
+
+                page.Header()
+                    .PaddingBottom(8)
+                    .Text("GemVault — Gem Inventory")
+                    .SemiBold()
+                    .FontSize(14)
+                    .FontColor(textHeader);
+
+                page.Content().Table(table =>
+                {
+                    table.ColumnsDefinition(columns =>
+                    {
+                        columns.RelativeColumn(3f);   // Name
+                        columns.RelativeColumn(2f);   // Species
+                        columns.RelativeColumn(2f);   // Variety
+                        columns.RelativeColumn(1.5f); // Color
+                        columns.RelativeColumn(1.5f); // Weight (ct)
+                        columns.RelativeColumn(2f);   // Origin
+                        columns.RelativeColumn(1.5f); // Purchase Price
+                        columns.RelativeColumn(1.5f); // Status
+                    });
+
+                    table.Header(header =>
+                    {
+                        void HeaderCell(string label)
+                        {
+                            header.Cell()
+                                .Background(headerBg)
+                                .Padding(4)
+                                .Text(label)
+                                .SemiBold()
+                                .FontColor(Color.FromHex("#FFFFFF"));
+                        }
+
+                        HeaderCell("Name");
+                        HeaderCell("Species");
+                        HeaderCell("Variety");
+                        HeaderCell("Color");
+                        HeaderCell("Weight (ct)");
+                        HeaderCell("Origin");
+                        HeaderCell("Purchase Price");
+                        HeaderCell("Status");
+                    });
+
+                    bool alternate = false;
+                    foreach (var gem in gems)
+                    {
+                        var rowBg = alternate ? rowAlt : rowEven;
+                        alternate = !alternate;
+
+                        void DataCell(string text)
+                        {
+                            table.Cell()
+                                .Background(rowBg)
+                                .BorderBottom(1, PdfUnit.Point)
+                                .BorderColor(borderLine)
+                                .Padding(4)
+                                .Text(text)
+                                .FontColor(textHeader);
+                        }
+
+                        DataCell(gem.Name);
+                        DataCell(gem.Species ?? "—");
+                        DataCell(gem.Variety ?? "—");
+                        DataCell(gem.Color ?? "—");
+                        DataCell(gem.WeightCarats.HasValue ? gem.WeightCarats.Value.ToString("0.00") : "—");
+                        DataCell(gem.OriginCountry ?? "—");
+                        DataCell(gem.PurchasePrice.HasValue ? $"${gem.PurchasePrice.Value:0.00}" : "—");
+                        DataCell(gem.Status ?? "—");
+                    }
+                });
+
+                page.Footer()
+                    .AlignRight()
+                    .Text(text =>
+                    {
+                        text.Span($"Generated {DateTime.UtcNow:yyyy-MM-dd}  •  Page ")
+                            .FontColor(textMuted);
+                        text.CurrentPageNumber().FontColor(textMuted);
+                        text.Span(" of ").FontColor(textMuted);
+                        text.TotalPages().FontColor(textMuted);
+                    });
+            });
+        }).GeneratePdf();
     }
 
     private static string BuildCsv(string header, IEnumerable<string?[]> rows)
