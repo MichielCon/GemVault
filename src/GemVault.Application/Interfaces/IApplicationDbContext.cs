@@ -20,4 +20,7 @@ public interface IApplicationDbContext
     DbSet<GemVault.Domain.Entities.GemVocabulary> GemVocabularies { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>Executes a raw SQL command and returns the number of rows affected.</summary>
+    Task<int> ExecuteSqlRawAsync(string sql, CancellationToken cancellationToken = default, params object[] parameters);
 }

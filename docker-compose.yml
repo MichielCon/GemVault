@@ -1,3 +1,6 @@
+# WARNING: This file is for local development only.
+# Always use: docker compose -f docker-compose.yml -f docker-compose.prod.yml up
+# for production deployments.
 services:
   db:
     image: postgres:16-alpine
@@ -7,7 +10,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "5432:5432"
+      - "5432:5432" # Exposed for local dev only — not present in docker-compose.prod.yml
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -53,7 +56,8 @@ services:
       - Minio__SecretKey=${MINIO_ROOT_PASSWORD}
       - Minio__BucketName=${MINIO_BUCKET}
       - Minio__UseSSL=false
-      - ASPNETCORE_ENVIRONMENT=Development
+      # Override with docker-compose.dev.yml for local development
+      - ASPNETCORE_ENVIRONMENT=Production
     depends_on:
       db:
         condition: service_healthy

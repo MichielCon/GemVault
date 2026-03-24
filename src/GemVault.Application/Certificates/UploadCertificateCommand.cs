@@ -45,6 +45,13 @@ public class UploadCertificateCommandHandler(
         if (request.FileSize > 20 * 1024 * 1024)
             throw new Application.Common.Exceptions.ValidationException("File size must not exceed 20 MB.");
 
+        // Magic byte validation: %PDF = 0x25 0x50 0x44 0x46
+        var header = new byte[4];
+        var bytesRead = await request.FileStream.ReadAsync(header.AsMemory(0, 4), ct);
+        request.FileStream.Seek(0, System.IO.SeekOrigin.Begin);
+        if (bytesRead < 4 || header[0] != 0x25 || header[1] != 0x50 || header[2] != 0x44 || header[3] != 0x46)
+            throw new Application.Common.Exceptions.ValidationException("File does not appear to be a valid PDF.");
+
         // Load and authorise gem
         var gem = await context.Gems
             .FirstOrDefaultAsync(g => g.Id == request.GemId && !g.IsDeleted, ct)

@@ -1,3 +1,4 @@
+using FluentValidation;
 using GemVault.Application.Common.Exceptions;
 using GemVault.Application.Common.Models;
 using GemVault.Application.Interfaces;
@@ -9,6 +10,15 @@ using Microsoft.EntityFrameworkCore;
 namespace GemVault.Application.PurchaseOrders.Queries;
 
 public record GetPurchaseOrdersQuery(int Page = 1, int PageSize = 20, string? Search = null, Guid? SupplierId = null) : IRequest<PagedResult<PurchaseOrderSummaryDto>>;
+
+public class GetPurchaseOrdersQueryValidator : AbstractValidator<GetPurchaseOrdersQuery>
+{
+    public GetPurchaseOrdersQueryValidator()
+    {
+        RuleFor(x => x.Page).GreaterThanOrEqualTo(1);
+        RuleFor(x => x.PageSize).InclusiveBetween(1, 100);
+    }
+}
 
 public class GetPurchaseOrdersQueryHandler(
     IApplicationDbContext context,
@@ -38,10 +48,11 @@ public class GetPurchaseOrdersQueryHandler(
 
         var total = await query.CountAsync(ct);
 
+        var pageSize = Math.Min(request.PageSize, 100);
         var items = await query
             .OrderByDescending(o => o.OrderDate)
-            .Skip((request.Page - 1) * request.PageSize)
-            .Take(request.PageSize)
+            .Skip((request.Page - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync(ct);
 
         var dtos = items.Select(o => new PurchaseOrderSummaryDto(
@@ -53,6 +64,6 @@ public class GetPurchaseOrdersQueryHandler(
             o.Items.Count(i => !i.IsDeleted),
             o.CreatedAt)).ToList();
 
-        return new PagedResult<PurchaseOrderSummaryDto>(dtos, total, request.Page, request.PageSize);
+        return new PagedResult<PurchaseOrderSummaryDto>(dtos, total, request.Page, pageSize);
     }
 }

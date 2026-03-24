@@ -34,6 +34,7 @@ public class CreateGemCommandValidator : AbstractValidator<CreateGemCommand>
         RuleFor(x => x.Name).NotEmpty().MaximumLength(200);
         RuleFor(x => x.WeightCarats).GreaterThan(0).When(x => x.WeightCarats.HasValue);
         RuleFor(x => x.PurchasePrice).GreaterThanOrEqualTo(0).When(x => x.PurchasePrice.HasValue);
+        RuleFor(x => x.Notes).MaximumLength(5000).When(x => x.Notes != null);
         RuleFor(x => x.Attributes)
             .Must(BeValidJson)
             .WithMessage("Attributes must be a valid JSON object.")

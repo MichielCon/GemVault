@@ -1,3 +1,4 @@
+using FluentValidation;
 using GemVault.Application.Common.Exceptions;
 using GemVault.Application.Common.Models;
 using GemVault.Application.GemParcels.DTOs;
@@ -10,6 +11,15 @@ namespace GemVault.Application.GemParcels.Queries;
 
 public record GetMyGemParcelsQuery(int Page = 1, int PageSize = 20, string? Search = null, Guid? OriginId = null, string? Status = null)
     : IRequest<PagedResult<GemParcelSummaryDto>>;
+
+public class GetMyGemParcelsQueryValidator : AbstractValidator<GetMyGemParcelsQuery>
+{
+    public GetMyGemParcelsQueryValidator()
+    {
+        RuleFor(x => x.Page).GreaterThanOrEqualTo(1);
+        RuleFor(x => x.PageSize).InclusiveBetween(1, 100);
+    }
+}
 
 public class GetMyGemParcelsQueryHandler(
     IApplicationDbContext context,
@@ -46,14 +56,15 @@ public class GetMyGemParcelsQueryHandler(
 
         var total = await query.CountAsync(ct);
 
+        var pageSize = Math.Min(request.PageSize, 100);
         var items = await query
             .OrderByDescending(p => p.CreatedAt)
-            .Skip((request.Page - 1) * request.PageSize)
-            .Take(request.PageSize)
+            .Skip((request.Page - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync(ct);
 
         var dtos = items.Select(p => p.ToSummaryDto(storage, p.SaleItems.Any())).ToList();
 
-        return new PagedResult<GemParcelSummaryDto>(dtos, total, request.Page, request.PageSize);
+        return new PagedResult<GemParcelSummaryDto>(dtos, total, request.Page, pageSize);
     }
 }

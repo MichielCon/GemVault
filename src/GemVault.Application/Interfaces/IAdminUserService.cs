@@ -33,4 +33,8 @@ public interface IAdminUserService
     Task<int> RevokeAllUserSessionsAsync(Guid userId, CancellationToken ct = default);
 
     Task<List<Guid>> GetUserIdsByEmailAsync(string search, CancellationToken ct = default);
+
+    Task<string?> GetUserRoleAsync(Guid userId, CancellationToken ct = default);
+
+    Task<int> CountActiveAdminsAsync(CancellationToken ct = default);
 }

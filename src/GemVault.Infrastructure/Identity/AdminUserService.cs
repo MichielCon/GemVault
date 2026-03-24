@@ -169,4 +169,16 @@ public class AdminUserService(
             .Select(u => u.Id)
             .ToListAsync(ct);
     }
+
+    public async Task<string?> GetUserRoleAsync(Guid userId, CancellationToken ct = default)
+    {
+        var user = await userManager.FindByIdAsync(userId.ToString());
+        return user?.Role.ToString();
+    }
+
+    public async Task<int> CountActiveAdminsAsync(CancellationToken ct = default)
+    {
+        return await userManager.Users
+            .CountAsync(u => u.Role == UserRole.Admin && !u.IsDeleted, ct);
+    }
 }
