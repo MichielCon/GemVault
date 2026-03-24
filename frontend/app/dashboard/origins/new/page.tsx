@@ -35,7 +35,7 @@ export default function NewOriginPage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-xl">Add origin</CardTitle>
-          <CardDescription>Record a mine or locality to link gems to their source.</CardDescription>
+          <CardDescription>Record a locality to link gems to their source.</CardDescription>
         </CardHeader>
 
         <form action={formAction}>
@@ -59,24 +59,14 @@ export default function NewOriginPage() {
               />
             </div>
 
-            {/* Mine / Region */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="mine">Mine</Label>
-                <Input
-                  id="mine"
-                  name="mine"
-                  placeholder="e.g. Ratnapura mine"
-                />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="region">Region</Label>
-                <Input
-                  id="region"
-                  name="region"
-                  placeholder="e.g. Sabaragamuwa Province"
-                />
-              </div>
+            {/* Locality */}
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="locality">Locality</Label>
+              <Input
+                id="locality"
+                name="locality"
+                placeholder="e.g. Ratnapura mine"
+              />
             </div>
           </CardContent>
 

@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { ApiError } from "./api";
+import { ApiError, originsApi } from "./api";
 
 function baseUrl() {
   return (
@@ -46,8 +46,7 @@ export async function createOrigin(
 ): Promise<{ error: string | null }> {
   const raw = {
     country: formData.get("country") as string,
-    mine: (formData.get("mine") as string) || null,
-    region: (formData.get("region") as string) || null,
+    locality: (formData.get("locality") as string) || null,
   };
 
   try {
@@ -79,8 +78,7 @@ export async function updateOrigin(
   const id = formData.get("id") as string;
   const raw = {
     country: formData.get("country") as string,
-    mine: (formData.get("mine") as string) || null,
-    region: (formData.get("region") as string) || null,
+    locality: (formData.get("locality") as string) || null,
   };
 
   try {
@@ -129,4 +127,16 @@ export async function deleteOrigin(
   }
 
   redirect("/dashboard/origins");
+}
+
+export async function findOrCreateOrigin(
+  country: string,
+  locality: string | null
+): Promise<{ id: string | null; error: string | null }> {
+  try {
+    const result = await originsApi.findOrCreate({ country, locality });
+    return { id: result.id, error: null };
+  } catch (e) {
+    return { id: null, error: parseApiError(e) };
+  }
 }

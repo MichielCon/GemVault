@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createParcel } from "@/lib/parcel-actions";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
+import { OriginPicker } from "@/components/origins/origin-picker";
 import type { VocabularyItemDto, OriginDto } from "@/lib/types";
 
 interface Props {
@@ -28,15 +30,22 @@ interface Props {
   origins: OriginDto[];
 }
 
-const initialState = { error: null as string | null };
+const initialState = { error: null as string | null, id: null as string | null };
 
 export function ParcelCreateForm({ vocabulary, origins }: Props) {
+  const router = useRouter();
   const [state, formAction, pending] = useActionState(createParcel, initialState);
   const [species, setSpecies] = useState<string | null>(null);
   const [variety, setVariety] = useState<string | null>(null);
   const [color, setColor] = useState<string | null>(null);
   const [treatment, setTreatment] = useState<string | null>(null);
-  const [originId, setOriginId] = useState<string | null>(null);
+
+  // Navigate to the new parcel on success
+  useEffect(() => {
+    if (state.id) {
+      router.push(`/dashboard/parcels/${state.id}`);
+    }
+  }, [state.id, router]);
 
   const speciesOptions = vocabulary.species.map((v) => ({ value: v.value, label: v.value }));
 
@@ -48,11 +57,6 @@ export function ParcelCreateForm({ vocabulary, origins }: Props) {
 
   const colorOptions = vocabulary.color.map((v) => ({ value: v.value, label: v.value }));
   const treatmentOptions = vocabulary.treatment.map((v) => ({ value: v.value, label: v.value }));
-
-  const originOptions = origins.map((o) => ({
-    value: o.id,
-    label: [o.country, o.mine, o.region].filter(Boolean).join(" — "),
-  }));
 
   function handleSpeciesChange(val: string | null) {
     setSpecies(val);
@@ -176,16 +180,7 @@ export function ParcelCreateForm({ vocabulary, origins }: Props) {
             </div>
 
             {/* Origin */}
-            <div className="flex flex-col gap-1.5">
-              <Label>Origin</Label>
-              <Combobox
-                name="originId"
-                options={originOptions}
-                value={originId}
-                onChange={setOriginId}
-                placeholder="Select origin..."
-              />
-            </div>
+            <OriginPicker allOrigins={origins} />
 
             {/* Purchase price */}
             <div className="flex flex-col gap-1.5">

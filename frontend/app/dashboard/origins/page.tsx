@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { originsApi } from "@/lib/api";
+import { getSessionRole } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/ui/search-input";
 import { Plus, MapPin } from "lucide-react";
@@ -11,6 +12,8 @@ interface Props {
 
 export default async function OriginsPage({ searchParams }: Props) {
   const { search } = await searchParams;
+  const role = await getSessionRole();
+  const isAdmin = role === "Admin";
 
   let origins: OriginDto[];
   try {
@@ -32,25 +35,26 @@ export default async function OriginsPage({ searchParams }: Props) {
 
       <div className="shrink-0 mb-4 flex items-center gap-2">
         <SearchInput basePath="/dashboard/origins" placeholder="Search origins…" defaultValue={search} />
-        <Button asChild size="sm" variant="violet" className="ml-auto shrink-0">
-          <Link href="/dashboard/origins/new">
-            <Plus size={16} />
-            Add origin
-          </Link>
-        </Button>
+        {isAdmin && (
+          <Button asChild size="sm" variant="violet" className="ml-auto shrink-0">
+            <Link href="/dashboard/origins/new">
+              <Plus size={16} />
+              Add origin
+            </Link>
+          </Button>
+        )}
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto">
         {origins.length === 0 ? (
-          <EmptyState hasSearch={!!search} />
+          <EmptyState hasSearch={!!search} isAdmin={isAdmin} />
         ) : (
           <div className="overflow-hidden rounded-xl border border-zinc-200/80 bg-card shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-zinc-100 bg-zinc-50/60 text-left">
                   <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Country</th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Mine</th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Region</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Locality</th>
                   <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Gems</th>
                   <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Added</th>
                 </tr>
@@ -92,8 +96,7 @@ function OriginRow({ origin }: { origin: OriginDto }) {
           {origin.country}
         </Link>
       </td>
-      <td className="px-4 py-3 text-muted-foreground">{origin.mine ?? "—"}</td>
-      <td className="px-4 py-3 text-muted-foreground">{origin.region ?? "—"}</td>
+      <td className="px-4 py-3 text-muted-foreground">{origin.locality ?? "—"}</td>
       <td className="px-4 py-3">
         {total > 0 ? (
           <Link href={`/dashboard/origins/${origin.id}`} className="text-violet-600 hover:underline text-xs">
@@ -110,15 +113,15 @@ function OriginRow({ origin }: { origin: OriginDto }) {
   );
 }
 
-function EmptyState({ hasSearch }: { hasSearch: boolean }) {
+function EmptyState({ hasSearch, isAdmin }: { hasSearch: boolean; isAdmin: boolean }) {
   return (
     <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-200 bg-white py-16 text-center">
       <MapPin size={48} strokeWidth={1} className="mb-4 text-zinc-300" />
       <p className="font-medium">{hasSearch ? "No results" : "No origins yet"}</p>
       <p className="mt-1 text-sm text-muted-foreground">
-        {hasSearch ? "Try a different search term." : "Add mine and locality records to link gems to their source."}
+        {hasSearch ? "Try a different search term." : "Origins are created automatically when you add gems. Admins can also create them manually."}
       </p>
-      {!hasSearch && (
+      {!hasSearch && isAdmin && (
         <Button asChild size="sm" variant="violet" className="mt-4">
           <Link href="/dashboard/origins/new">
             <Plus size={16} />

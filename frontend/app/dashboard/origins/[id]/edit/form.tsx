@@ -40,7 +40,7 @@ export function OriginEditForm({ origin }: Props) {
       <Card>
         <CardHeader>
           <CardTitle className="text-xl">Edit origin</CardTitle>
-          <CardDescription>Update the mine or locality details.</CardDescription>
+          <CardDescription>Update the locality details.</CardDescription>
         </CardHeader>
 
         <form action={formAction}>
@@ -66,25 +66,14 @@ export function OriginEditForm({ origin }: Props) {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="mine">Mine</Label>
-                <Input
-                  id="mine"
-                  name="mine"
-                  placeholder="e.g. Ratnapura mine"
-                  defaultValue={origin.mine ?? ""}
-                />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="region">Region</Label>
-                <Input
-                  id="region"
-                  name="region"
-                  placeholder="e.g. Sabaragamuwa Province"
-                  defaultValue={origin.region ?? ""}
-                />
-              </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="locality">Locality</Label>
+              <Input
+                id="locality"
+                name="locality"
+                placeholder="e.g. Ratnapura mine"
+                defaultValue={origin.locality ?? ""}
+              />
             </div>
           </CardContent>
 

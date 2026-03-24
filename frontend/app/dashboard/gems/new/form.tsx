@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Combobox } from "@/components/ui/combobox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Gem, Globe, MapPin, DollarSign, StickyNote, Hexagon } from "lucide-react";
+import { OriginPicker } from "@/components/origins/origin-picker";
 import type { VocabularyItemDto, OriginDto } from "@/lib/types";
 
 interface Props {
@@ -35,8 +36,6 @@ export function GemCreateForm({ vocabulary, origins }: Props) {
   const [cut, setCut] = useState<string | null>(null);
   const [shape, setShape] = useState<string | null>(null);
   const [treatment, setTreatment] = useState<string | null>(null);
-  const [originId, setOriginId] = useState<string | null>(null);
-
   const speciesOptions = vocabulary.species.map((v) => ({ value: v.value, label: v.value }));
   const varietyOptions = species
     ? vocabulary.variety.filter((v) => v.parentValue === species).map((v) => ({ value: v.value, label: v.value }))
@@ -46,10 +45,6 @@ export function GemCreateForm({ vocabulary, origins }: Props) {
   const cutOptions = vocabulary.cut.map((v) => ({ value: v.value, label: v.value }));
   const shapeOptions = vocabulary.shape.map((v) => ({ value: v.value, label: v.value }));
   const treatmentOptions = vocabulary.treatment.map((v) => ({ value: v.value, label: v.value }));
-  const originOptions = origins.map((o) => ({
-    value: o.id,
-    label: [o.country, o.mine, o.region].filter(Boolean).join(" — "),
-  }));
 
   function handleSpeciesChange(val: string | null) {
     setSpecies(val);
@@ -173,18 +168,13 @@ export function GemCreateForm({ vocabulary, origins }: Props) {
               </CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <Label>Origin</Label>
-                  <Combobox name="originId" options={originOptions} value={originId} onChange={setOriginId} placeholder="Select origin…" />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="purchasePrice">
-                    <DollarSign size={12} className="inline mr-0.5" />
-                    Purchase price
-                  </Label>
-                  <Input id="purchasePrice" name="purchasePrice" type="number" min="0" step="0.01" placeholder="e.g. 1500.00" />
-                </div>
+              <OriginPicker allOrigins={origins} />
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="purchasePrice">
+                  <DollarSign size={12} className="inline mr-0.5" />
+                  Purchase price
+                </Label>
+                <Input id="purchasePrice" name="purchasePrice" type="number" min="0" step="0.01" placeholder="e.g. 1500.00" />
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="notes">

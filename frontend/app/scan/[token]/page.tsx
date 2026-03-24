@@ -34,7 +34,7 @@ export default async function PublicScanPage({ params }: Props) {
       ? `${gem.weightCarats} ct`
       : null;
 
-  const origin = [gem.originCountry, gem.originMine, gem.originRegion]
+  const origin = [gem.originCountry, gem.originLocality]
     .filter(Boolean)
     .join(", ");
 

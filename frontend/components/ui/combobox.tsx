@@ -17,6 +17,7 @@ interface ComboboxProps {
   name?: string;
   className?: string;
   disabled?: boolean;
+  allowFreeText?: boolean;
 }
 
 export function Combobox({
@@ -27,6 +28,7 @@ export function Combobox({
   name,
   className,
   disabled,
+  allowFreeText = false,
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false);
   const [search, setSearch] = React.useState("");
@@ -54,7 +56,9 @@ export function Combobox({
     ? options.filter((o) => o.label.toLowerCase().includes(search.toLowerCase()))
     : options;
 
-  const selectedLabel = options.find((o) => o.value === value)?.label;
+  // For free-text mode, check if the current value matches any option label
+  const matchedOption = options.find((o) => o.value === value);
+  const selectedLabel = matchedOption?.label ?? (allowFreeText && value ? value : undefined);
 
   function select(v: string | null) {
     onChange(v);
@@ -113,22 +117,36 @@ export function Combobox({
             />
           </div>
           <div className="max-h-56 overflow-y-auto py-1">
-            {filtered.length === 0 ? (
+            {filtered.length === 0 && !allowFreeText ? (
               <p className="px-3 py-2 text-sm text-muted-foreground">No results.</p>
             ) : (
-              filtered.map((opt) => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => select(opt.value)}
-                  className={cn(
-                    "flex w-full items-center px-3 py-1.5 text-sm hover:bg-muted text-left",
-                    opt.value === value && "bg-muted font-medium"
-                  )}
-                >
-                  {opt.label}
-                </button>
-              ))
+              <>
+                {filtered.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => select(opt.value)}
+                    className={cn(
+                      "flex w-full items-center px-3 py-1.5 text-sm hover:bg-muted text-left",
+                      opt.value === value && "bg-muted font-medium"
+                    )}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+                {allowFreeText && search && !filtered.some((o) => o.label.toLowerCase() === search.toLowerCase()) && (
+                  <button
+                    type="button"
+                    onClick={() => select(search)}
+                    className="flex w-full items-center px-3 py-1.5 text-sm hover:bg-muted text-left text-violet-600"
+                  >
+                    Add: &ldquo;{search}&rdquo;
+                  </button>
+                )}
+                {allowFreeText && !search && filtered.length === 0 && (
+                  <p className="px-3 py-2 text-sm text-muted-foreground">No results. Type to add new.</p>
+                )}
+              </>
             )}
           </div>
         </div>

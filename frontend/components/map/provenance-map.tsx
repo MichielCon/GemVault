@@ -5,6 +5,7 @@ import Link from "next/link";
 import { X, Gem, Package, MapPin, DollarSign } from "lucide-react";
 import type { OriginMapDto } from "@/lib/types";
 import { getCountryCoords } from "@/lib/country-coords";
+import { getLocalityCoords } from "@/lib/locality-coords";
 
 // Leaflet CSS must be imported client-side
 import "leaflet/dist/leaflet.css";
@@ -30,7 +31,15 @@ function buildCountryGroups(origins: OriginMapDto[]): CountryGroup[] {
 
   const groups: CountryGroup[] = [];
   for (const [country, list] of map.entries()) {
-    const coords = getCountryCoords(country);
+    // Use locality coords for the first origin that has a known locality, else fall back to country
+    let coords: [number, number] | null = null;
+    for (const o of list) {
+      if (o.locality) {
+        const lc = getLocalityCoords(o.country, o.locality);
+        if (lc) { coords = lc; break; }
+      }
+    }
+    if (!coords) coords = getCountryCoords(country);
     if (!coords) continue;
 
     groups.push({
@@ -307,11 +316,8 @@ export default function ProvenanceMap({ origins }: Props) {
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-white group-hover:text-violet-300 transition-colors truncate">
-                        {o.mine ?? o.region ?? o.country}
+                        {o.locality ?? o.country}
                       </p>
-                      {o.region && o.mine && (
-                        <p className="text-[11px] text-zinc-500 truncate">{o.region}</p>
-                      )}
                     </div>
                     <div className="text-right shrink-0">
                       <p className="text-xs font-medium text-zinc-300">{o.gemCount + o.parcelCount} items</p>

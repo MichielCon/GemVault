@@ -50,10 +50,8 @@ export default async function OriginDetailPage({ params }: Props) {
           <MapPin size={28} className="mt-1 shrink-0 text-muted-foreground" />
           <div>
             <h1 className="text-2xl font-bold tracking-tight">{origin.country}</h1>
-            {(origin.mine || origin.region) && (
-              <p className="mt-1 text-muted-foreground">
-                {[origin.mine, origin.region].filter(Boolean).join(" · ")}
-              </p>
+            {origin.locality && (
+              <p className="mt-1 text-muted-foreground">{origin.locality}</p>
             )}
           </div>
         </div>
