@@ -30,7 +30,7 @@ export function OrderEditForm({ order, suppliers }: Props) {
   const router = useRouter();
   const [state, formAction, pending] = useActionState(updatePurchaseOrder, initialState);
 
-  const [supplierId, setSupplierId] = useState<string | null>(order.supplierId);
+  const [supplierId, setSupplierId] = useState<string | null>(order.supplierId ?? null);
 
   const supplierOptions = suppliers.map((s) => ({ value: s.id, label: s.name }));
 
@@ -76,9 +76,7 @@ export function OrderEditForm({ order, suppliers }: Props) {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
-                <Label>
-                  Supplier <span className="text-red-500">*</span>
-                </Label>
+                <Label>Supplier <span className="text-xs font-normal text-muted-foreground">(optional)</span></Label>
                 <Combobox
                   name="supplierId"
                   options={supplierOptions}
@@ -86,6 +84,17 @@ export function OrderEditForm({ order, suppliers }: Props) {
                   onChange={setSupplierId}
                   placeholder="Select supplier…"
                 />
+                {!supplierId && (
+                  <div className="flex flex-col gap-1">
+                    <Label className="text-xs text-muted-foreground">Or bought from</Label>
+                    <Input
+                      name="boughtFrom"
+                      defaultValue={order.boughtFrom ?? ""}
+                      placeholder="e.g. Gem show, eBay, private sale…"
+                      className="text-sm"
+                    />
+                  </div>
+                )}
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="reference">Reference / Invoice #</Label>

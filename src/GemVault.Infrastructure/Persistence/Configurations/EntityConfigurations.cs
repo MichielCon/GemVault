@@ -165,10 +165,13 @@ public class PurchaseOrderConfiguration : IEntityTypeConfiguration<PurchaseOrder
         builder.HasQueryFilter(o => !o.IsDeleted);
         builder.Property(o => o.Reference).HasMaxLength(100);
 
+        builder.Property(o => o.BoughtFrom).HasMaxLength(200);
+
         builder.HasOne(o => o.Supplier)
             .WithMany(s => s.PurchaseOrders)
             .HasForeignKey(o => o.SupplierId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.SetNull);
 
         builder.HasIndex(o => o.OwnerId);
     }

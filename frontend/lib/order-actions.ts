@@ -59,7 +59,8 @@ export async function createPurchaseOrder(
   }));
 
   const raw = {
-    supplierId: formData.get("supplierId") as string,
+    supplierId: (formData.get("supplierId") as string) || null,
+    boughtFrom: (formData.get("boughtFrom") as string) || null,
     reference: (formData.get("reference") as string) || null,
     orderDate: formData.get("orderDate") as string,
     notes: (formData.get("notes") as string) || null,
@@ -94,7 +95,8 @@ export async function updatePurchaseOrder(
 ): Promise<{ error: string | null; id: string | null }> {
   const id = formData.get("id") as string;
   const raw = {
-    supplierId: formData.get("supplierId") as string,
+    supplierId: (formData.get("supplierId") as string) || null,
+    boughtFrom: (formData.get("boughtFrom") as string) || null,
     reference: (formData.get("reference") as string) || null,
     orderDate: formData.get("orderDate") as string,
     notes: (formData.get("notes") as string) || null,

@@ -145,9 +145,7 @@ export function PurchaseOrderCreateForm({ suppliers, gems, parcels }: Props) {
             <div className="flex flex-col gap-2">
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
-                  <Label>
-                    Supplier <span className="text-red-500">*</span>
-                  </Label>
+                  <Label>Supplier <span className="text-xs font-normal text-muted-foreground">(optional)</span></Label>
                   {localSuppliers.length > 0 && !showNewSupplier && (
                     <Combobox
                       name="supplierId"
@@ -159,6 +157,16 @@ export function PurchaseOrderCreateForm({ suppliers, gems, parcels }: Props) {
                   )}
                   {localSuppliers.length === 0 && !showNewSupplier && (
                     <p className="text-sm text-muted-foreground italic">No suppliers yet — create one below.</p>
+                  )}
+                  {!supplierId && !showNewSupplier && (
+                    <div className="flex flex-col gap-1">
+                      <Label className="text-xs text-muted-foreground">Or bought from</Label>
+                      <Input
+                        name="boughtFrom"
+                        placeholder="e.g. Gem show, eBay, private sale…"
+                        className="text-sm"
+                      />
+                    </div>
                   )}
                 </div>
                 <div className="flex flex-col gap-1.5">

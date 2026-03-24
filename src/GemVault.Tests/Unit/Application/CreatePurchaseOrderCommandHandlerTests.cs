@@ -42,6 +42,7 @@ public class CreatePurchaseOrderCommandHandlerTests
 
         var command = new CreatePurchaseOrderCommand(
             SupplierId: supplierId,
+            BoughtFrom: null,
             Reference: "INV-001",
             OrderDate: new DateTime(2026, 3, 8),
             Notes: "Test notes",
@@ -73,7 +74,7 @@ public class CreatePurchaseOrderCommandHandlerTests
 
         var handler = new CreatePurchaseOrderCommandHandler(ctxMock.Object, userMock.Object);
         var command = new CreatePurchaseOrderCommand(
-            Guid.NewGuid(), null, DateTime.UtcNow, null, new List<CreateOrderItemCommand>());
+            Guid.NewGuid(), null, null, DateTime.UtcNow, null, new List<CreateOrderItemCommand>());
 
         // Act & Assert
         await Assert.ThrowsAsync<ForbiddenException>(() =>
@@ -93,7 +94,7 @@ public class CreatePurchaseOrderCommandHandlerTests
         var handler = new CreatePurchaseOrderCommandHandler(ctxMock.Object, userMock.Object);
 
         var command = new CreatePurchaseOrderCommand(
-            supplierId, null, DateTime.UtcNow, null, new List<CreateOrderItemCommand>());
+            supplierId, null, null, DateTime.UtcNow, null, new List<CreateOrderItemCommand>());
 
         // Act & Assert
         await Assert.ThrowsAsync<NotFoundException>(() =>
@@ -113,7 +114,7 @@ public class CreatePurchaseOrderCommandHandlerTests
 
         var unspecifiedDate = DateTime.SpecifyKind(new DateTime(2026, 3, 8), DateTimeKind.Unspecified);
         var command = new CreatePurchaseOrderCommand(
-            supplierId, null, unspecifiedDate, null, new List<CreateOrderItemCommand>());
+            supplierId, null, null, unspecifiedDate, null, new List<CreateOrderItemCommand>());
 
         // Act — should NOT throw (was throwing before the fix)
         var result = await handler.Handle(command, CancellationToken.None);
@@ -134,7 +135,7 @@ public class CreatePurchaseOrderCommandHandlerTests
         var handler = new CreatePurchaseOrderCommandHandler(ctxMock.Object, userMock.Object);
 
         var command = new CreatePurchaseOrderCommand(
-            supplierId, null, DateTime.UtcNow, null,
+            supplierId, null, null, DateTime.UtcNow, null,
             new List<CreateOrderItemCommand>
             {
                 new(null, null, 100m, "Item 1"),

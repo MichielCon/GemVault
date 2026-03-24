@@ -43,7 +43,8 @@ public class GetPurchaseOrdersQueryHandler(
             var search = request.Search.ToLower();
             query = query.Where(o =>
                 (o.Reference != null && o.Reference.ToLower().Contains(search)) ||
-                o.Supplier.Name.ToLower().Contains(search));
+                (o.Supplier != null && o.Supplier.Name.ToLower().Contains(search)) ||
+                (o.BoughtFrom != null && o.BoughtFrom.ToLower().Contains(search)));
         }
 
         var total = await query.CountAsync(ct);
@@ -59,7 +60,8 @@ public class GetPurchaseOrdersQueryHandler(
             o.Id,
             o.Reference,
             o.OrderDate,
-            o.Supplier.Name,
+            o.Supplier?.Name,
+            o.BoughtFrom,
             o.Items.Where(i => !i.IsDeleted).Sum(i => i.CostPrice),
             o.Items.Count(i => !i.IsDeleted),
             o.CreatedAt)).ToList();

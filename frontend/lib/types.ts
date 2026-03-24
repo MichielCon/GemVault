@@ -201,8 +201,9 @@ export interface PurchaseOrderDto {
   id: string;
   reference: string | null;
   orderDate: string;
-  supplierId: string;
-  supplierName: string;
+  supplierId: string | null;
+  supplierName: string | null;
+  boughtFrom: string | null;
   notes: string | null;
   items: OrderItemDto[];
   totalCost: number;
@@ -213,7 +214,8 @@ export interface PurchaseOrderSummaryDto {
   id: string;
   reference: string | null;
   orderDate: string;
-  supplierName: string;
+  supplierName: string | null;
+  boughtFrom: string | null;
   totalCost: number;
   itemCount: number;
   createdAt: string;

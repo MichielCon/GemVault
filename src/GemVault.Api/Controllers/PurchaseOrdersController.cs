@@ -43,7 +43,7 @@ public class PurchaseOrdersController(IMediator mediator) : ControllerBase
         [FromBody] UpdatePurchaseOrderCommandBody body,
         CancellationToken ct)
     {
-        var command = new UpdatePurchaseOrderCommand(id, body.SupplierId, body.Reference, body.OrderDate, body.Notes);
+        var command = new UpdatePurchaseOrderCommand(id, body.SupplierId, body.BoughtFrom, body.Reference, body.OrderDate, body.Notes);
         var result = await mediator.Send(command, ct);
         return Ok(result);
     }
@@ -56,4 +56,4 @@ public class PurchaseOrdersController(IMediator mediator) : ControllerBase
     }
 }
 
-public record UpdatePurchaseOrderCommandBody(Guid SupplierId, string? Reference, DateTime OrderDate, string? Notes);
+public record UpdatePurchaseOrderCommandBody(Guid? SupplierId, string? BoughtFrom, string? Reference, DateTime OrderDate, string? Notes);

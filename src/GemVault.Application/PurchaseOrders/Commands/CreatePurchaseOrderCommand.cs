@@ -12,7 +12,8 @@ namespace GemVault.Application.PurchaseOrders.Commands;
 public record CreateOrderItemCommand(Guid? GemId, Guid? GemParcelId, decimal CostPrice, string? Notes);
 
 public record CreatePurchaseOrderCommand(
-    Guid SupplierId,
+    Guid? SupplierId,
+    string? BoughtFrom,
     string? Reference,
     DateTime OrderDate,
     string? Notes,
@@ -22,7 +23,6 @@ public class CreatePurchaseOrderCommandValidator : AbstractValidator<CreatePurch
 {
     public CreatePurchaseOrderCommandValidator()
     {
-        RuleFor(x => x.SupplierId).NotEmpty();
         RuleFor(x => x.OrderDate).NotEmpty();
         RuleForEach(x => x.Items).ChildRules(item =>
         {
@@ -41,16 +41,21 @@ public class CreatePurchaseOrderCommandHandler(
         if (currentUser.UserId is null)
             throw new ForbiddenException();
 
-        var supplier = await context.Suppliers
-            .FirstOrDefaultAsync(s => s.Id == request.SupplierId && !s.IsDeleted, ct)
-            ?? throw new NotFoundException("Supplier", request.SupplierId);
+        Supplier? supplier = null;
+        if (request.SupplierId.HasValue)
+        {
+            supplier = await context.Suppliers
+                .FirstOrDefaultAsync(s => s.Id == request.SupplierId && !s.IsDeleted, ct)
+                ?? throw new NotFoundException("Supplier", request.SupplierId);
 
-        if (supplier.OwnerId != currentUser.UserId)
-            throw new NotFoundException("Supplier", request.SupplierId);
+            if (supplier.OwnerId != currentUser.UserId)
+                throw new NotFoundException("Supplier", request.SupplierId);
+        }
 
         var order = new PurchaseOrder
         {
             SupplierId = request.SupplierId,
+            BoughtFrom = request.BoughtFrom,
             Reference = request.Reference,
             OrderDate = DateTime.SpecifyKind(request.OrderDate, DateTimeKind.Utc),
             Notes = request.Notes,
@@ -85,7 +90,8 @@ public class CreatePurchaseOrderCommandHandler(
             order.Reference,
             order.OrderDate,
             order.SupplierId,
-            supplier.Name,
+            supplier?.Name,
+            order.BoughtFrom,
             order.Notes,
             itemDtos,
             itemDtos.Sum(i => i.CostPrice),

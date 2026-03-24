@@ -39,7 +39,7 @@ export default async function OrderDetailPage({ params }: Props) {
             {order.reference ?? "Purchase Order"}
           </h1>
           <p className="mt-0.5 text-sm text-zinc-500">
-            {order.supplierName} · {new Date(order.orderDate).toLocaleDateString()}
+            {order.supplierName ?? order.boughtFrom ?? "No supplier"} · {new Date(order.orderDate).toLocaleDateString()}
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -62,9 +62,13 @@ export default async function OrderDetailPage({ params }: Props) {
             <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2.5 text-sm">
               <dt className="text-zinc-400 text-xs font-medium uppercase tracking-wide">Supplier</dt>
               <dd className="font-medium text-zinc-800">
-                <Link href={`/dashboard/suppliers/${order.supplierId}`} className="text-violet-600 hover:underline">
-                  {order.supplierName}
-                </Link>
+                {order.supplierId ? (
+                  <Link href={`/dashboard/suppliers/${order.supplierId}`} className="text-violet-600 hover:underline">
+                    {order.supplierName}
+                  </Link>
+                ) : (
+                  order.boughtFrom ?? <span className="text-zinc-400 italic">None specified</span>
+                )}
               </dd>
               <dt className="text-zinc-400 text-xs font-medium uppercase tracking-wide">Date</dt>
               <dd className="font-medium text-zinc-800">{new Date(order.orderDate).toLocaleDateString()}</dd>

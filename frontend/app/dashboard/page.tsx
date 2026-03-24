@@ -2,7 +2,8 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { dashboardApi } from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
-import { Gem, Package, DollarSign, TrendingUp, Building2, ShoppingCart, ArrowUpRight, AlertTriangle, BarChart3 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Gem, Package, TrendingUp, Building2, ShoppingCart, ArrowUpRight, AlertTriangle, BarChart3, Sparkles } from "lucide-react";
 import type { DashboardStatsDto } from "@/lib/types";
 import { RevenueChart } from "@/components/dashboard/revenue-chart";
 import { SpeciesDonut } from "@/components/dashboard/species-donut";
@@ -46,6 +47,32 @@ export default async function DashboardPage() {
         <div className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
           <AlertTriangle size={16} className="shrink-0" />
           <span>Dashboard statistics are temporarily unavailable. Showing placeholder data.</span>
+        </div>
+      )}
+
+      {/* Welcome card — shown only when collection is empty */}
+      {!statsError && s.gemCount === 0 && s.parcelCount === 0 && s.purchaseOrderCount === 0 && (
+        <div className="relative overflow-hidden rounded-xl border border-violet-200/60 bg-gradient-to-br from-violet-50 to-white p-6">
+          <div className="flex items-start gap-4">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-600">
+              <Sparkles size={18} />
+            </div>
+            <div className="flex-1">
+              <h2 className="font-semibold text-zinc-900">Welcome to GemVault</h2>
+              <p className="mt-0.5 text-sm text-zinc-500">Get started by adding your first items to the collection.</p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Button asChild size="sm" variant="violet">
+                  <Link href="/dashboard/gems/new"><Gem size={14} />Add a gem</Link>
+                </Button>
+                <Button asChild size="sm" variant="outline">
+                  <Link href="/dashboard/parcels/new"><Package size={14} />Add a parcel</Link>
+                </Button>
+                <Button asChild size="sm" variant="outline">
+                  <Link href="/dashboard/orders/new"><ShoppingCart size={14} />Record a purchase</Link>
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

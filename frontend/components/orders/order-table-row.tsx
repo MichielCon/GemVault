@@ -20,7 +20,9 @@ export function OrderTableRow({ order }: { order: PurchaseOrderSummaryDto }) {
           {order.reference ?? <span className="text-muted-foreground">—</span>}
         </Link>
       </td>
-      <td className="px-4 py-3 text-muted-foreground">{order.supplierName}</td>
+      <td className="px-4 py-3 text-muted-foreground">
+        {order.supplierName ?? order.boughtFrom ?? <span className="italic">—</span>}
+      </td>
       <td className="px-4 py-3 text-muted-foreground">{new Date(order.orderDate).toLocaleDateString()}</td>
       <td className="px-4 py-3 text-muted-foreground">{order.itemCount}</td>
       <td className="px-4 py-3 font-medium">

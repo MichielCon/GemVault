@@ -2,19 +2,19 @@ using FluentValidation;
 using GemVault.Application.Common.Exceptions;
 using GemVault.Application.Interfaces;
 using GemVault.Application.PurchaseOrders.DTOs;
+using GemVault.Domain.Entities;
 using GemVault.Domain.Interfaces;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace GemVault.Application.PurchaseOrders.Commands;
 
-public record UpdatePurchaseOrderCommand(Guid Id, Guid SupplierId, string? Reference, DateTime OrderDate, string? Notes) : IRequest<PurchaseOrderDto>;
+public record UpdatePurchaseOrderCommand(Guid Id, Guid? SupplierId, string? BoughtFrom, string? Reference, DateTime OrderDate, string? Notes) : IRequest<PurchaseOrderDto>;
 
 public class UpdatePurchaseOrderCommandValidator : AbstractValidator<UpdatePurchaseOrderCommand>
 {
     public UpdatePurchaseOrderCommandValidator()
     {
-        RuleFor(x => x.SupplierId).NotEmpty();
         RuleFor(x => x.OrderDate).NotEmpty();
     }
 }
@@ -41,14 +41,19 @@ public class UpdatePurchaseOrderCommandHandler(
         if (order.OwnerId != currentUser.UserId)
             throw new NotFoundException("PurchaseOrder", request.Id);
 
-        var supplier = await context.Suppliers
-            .FirstOrDefaultAsync(s => s.Id == request.SupplierId && !s.IsDeleted, ct)
-            ?? throw new NotFoundException("Supplier", request.SupplierId);
+        Supplier? supplier = null;
+        if (request.SupplierId.HasValue)
+        {
+            supplier = await context.Suppliers
+                .FirstOrDefaultAsync(s => s.Id == request.SupplierId && !s.IsDeleted, ct)
+                ?? throw new NotFoundException("Supplier", request.SupplierId);
 
-        if (supplier.OwnerId != currentUser.UserId)
-            throw new NotFoundException("Supplier", request.SupplierId);
+            if (supplier.OwnerId != currentUser.UserId)
+                throw new NotFoundException("Supplier", request.SupplierId);
+        }
 
         order.SupplierId = request.SupplierId;
+        order.BoughtFrom = request.BoughtFrom;
         order.Reference = request.Reference;
         order.OrderDate = DateTime.SpecifyKind(request.OrderDate, DateTimeKind.Utc);
         order.Notes = request.Notes;
@@ -73,7 +78,8 @@ public class UpdatePurchaseOrderCommandHandler(
             order.Reference,
             order.OrderDate,
             order.SupplierId,
-            supplier.Name,
+            supplier?.Name,
+            order.BoughtFrom,
             order.Notes,
             itemDtos,
             itemDtos.Sum(i => i.CostPrice),
