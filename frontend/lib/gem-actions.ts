@@ -74,6 +74,7 @@ export async function createGem(
       : null,
     acquiredAt: (formData.get("acquiredAt") as string) || null,
     notes: (formData.get("notes") as string) || null,
+    status: (formData.get("status") as string) || "Available",
     isPublic: formData.get("isPublic") === "on",
     originId: resolvedOriginId,
   };
@@ -136,6 +137,7 @@ export async function updateGem(
       : null,
     acquiredAt: (formData.get("acquiredAt") as string) || null,
     notes: (formData.get("notes") as string) || null,
+    status: (formData.get("status") as string) || "Available",
     isPublic: formData.get("isPublic") === "on",
     originId: resolvedOriginId,
   };

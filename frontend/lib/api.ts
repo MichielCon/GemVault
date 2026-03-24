@@ -159,11 +159,12 @@ export const authApi = {
 // ─── Gems ─────────────────────────────────────────────────────────────────────
 
 export const gemsApi = {
-  list: (page = 1, pageSize = 20, search?: string, originId?: string, status?: string) => {
+  list: (page = 1, pageSize = 20, search?: string, originId?: string, status?: string, gemStatus?: string) => {
     const q = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
     if (search) q.set("search", search);
     if (originId) q.set("originId", originId);
     if (status && status !== "All") q.set("status", status);
+    if (gemStatus && gemStatus !== "All") q.set("gemStatusFilter", gemStatus);
     return get<PagedResult<GemSummaryDto>>(`/api/v1/gems?${q}`);
   },
   get: (id: string) => get<GemDto>(`/api/v1/gems/${id}`),

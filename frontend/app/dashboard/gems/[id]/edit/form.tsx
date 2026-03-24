@@ -239,6 +239,23 @@ export function GemEditForm({ gem, vocabulary, origins }: Props) {
               />
             </div>
 
+            {/* Status */}
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="status">Status</Label>
+              <select
+                id="status"
+                name="status"
+                defaultValue={gem.status ?? "Available"}
+                className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/20 focus-visible:border-zinc-300"
+              >
+                <option value="Available">Available</option>
+                <option value="Reserved">Reserved</option>
+                <option value="OnConsignment">On Consignment</option>
+                <option value="InRepair">In Repair</option>
+                <option value="Lost">Lost</option>
+              </select>
+            </div>
+
             {/* Is Public */}
             <div className="flex items-center gap-2">
               <input

@@ -15,22 +15,33 @@ const STORAGE_KEY = "gem-view";
 const STATUS_OPTIONS = ["All", "InStock", "Sold"] as const;
 type Status = (typeof STATUS_OPTIONS)[number];
 
+const GEM_STATUS_OPTIONS = [
+  { value: "All", label: "All" },
+  { value: "Available", label: "Available" },
+  { value: "Reserved", label: "Reserved" },
+  { value: "OnConsignment", label: "Consignment" },
+  { value: "InRepair", label: "In Repair" },
+  { value: "Lost", label: "Lost" },
+] as const;
+
 interface Props {
   result: PagedResult<GemSummaryDto>;
   page: number;
   pageSize: number;
   search?: string;
   status?: string;
+  gemStatus?: string;
 }
 
-function paginationUrl(p: number, pageSize: number, search?: string, status?: string) {
+function paginationUrl(p: number, pageSize: number, search?: string, status?: string, gemStatus?: string) {
   const q = new URLSearchParams({ page: String(p), pageSize: String(pageSize) });
   if (search) q.set("search", search);
   if (status && status !== "All") q.set("status", status);
+  if (gemStatus && gemStatus !== "All") q.set("gemStatus", gemStatus);
   return `/dashboard/gems?${q}`;
 }
 
-export function GemInventoryView({ result, page, pageSize, search, status }: Props) {
+export function GemInventoryView({ result, page, pageSize, search, status, gemStatus }: Props) {
   const [view, setView] = useState<"grid" | "list">("grid");
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -79,6 +90,7 @@ export function GemInventoryView({ result, page, pageSize, search, status }: Pro
       const q = new URLSearchParams({ page: "1", pageSize: String(ideal) });
       if (search)                 q.set("search", search);
       if (activeStatus !== "All") q.set("status", activeStatus);
+      if (gemStatus && gemStatus !== "All") q.set("gemStatus", gemStatus);
       router.replace(`/dashboard/gems?${q}`);
     }
 
@@ -99,12 +111,14 @@ export function GemInventoryView({ result, page, pageSize, search, status }: Pro
     const q = new URLSearchParams({ page: "1" });
     if (value) q.set("search", value);
     if (activeStatus !== "All") q.set("status", activeStatus);
+    if (gemStatus && gemStatus !== "All") q.set("gemStatus", gemStatus);
     router.push(`/dashboard/gems?${q}`);
   }
 
   function clearSearch() {
     const q = new URLSearchParams({ page: "1" });
     if (activeStatus !== "All") q.set("status", activeStatus);
+    if (gemStatus && gemStatus !== "All") q.set("gemStatus", gemStatus);
     router.push(`/dashboard/gems?${q}`);
   }
 
@@ -112,6 +126,15 @@ export function GemInventoryView({ result, page, pageSize, search, status }: Pro
     const q = new URLSearchParams({ page: "1" });
     if (search) q.set("search", search);
     if (s !== "All") q.set("status", s);
+    if (gemStatus && gemStatus !== "All") q.set("gemStatus", gemStatus);
+    router.push(`/dashboard/gems?${q}`);
+  }
+
+  function handleGemStatus(gs: string) {
+    const q = new URLSearchParams({ page: "1" });
+    if (search) q.set("search", search);
+    if (activeStatus !== "All") q.set("status", activeStatus);
+    if (gs !== "All") q.set("gemStatus", gs);
     router.push(`/dashboard/gems?${q}`);
   }
 
@@ -124,67 +147,89 @@ export function GemInventoryView({ result, page, pageSize, search, status }: Pro
       </div>
 
       {/* Toolbar */}
-      <div ref={toolbarRef} className="shrink-0 flex flex-wrap items-center gap-2 mb-4">
-        {/* Search */}
-        <form onSubmit={handleSearch} className="relative flex-1 min-w-[180px] max-w-xs">
-          <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-          <input
-            ref={inputRef}
-            defaultValue={search ?? ""}
-            placeholder="Search gems…"
-            className="w-full rounded-lg border border-zinc-200 bg-white pl-8 pr-8 py-1.5 text-sm outline-none transition-shadow focus:ring-2 focus:ring-violet-500/20 focus:border-zinc-300"
-          />
-          {search && (
-            <button type="button" onClick={clearSearch} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-              <X size={13} />
-            </button>
-          )}
-        </form>
+      <div ref={toolbarRef} className="shrink-0 flex flex-col gap-2 mb-4">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Search */}
+          <form onSubmit={handleSearch} className="relative flex-1 min-w-[180px] max-w-xs">
+            <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+            <input
+              ref={inputRef}
+              defaultValue={search ?? ""}
+              placeholder="Search gems…"
+              className="w-full rounded-lg border border-zinc-200 bg-white pl-8 pr-8 py-1.5 text-sm outline-none transition-shadow focus:ring-2 focus:ring-violet-500/20 focus:border-zinc-300"
+            />
+            {search && (
+              <button type="button" onClick={clearSearch} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                <X size={13} />
+              </button>
+            )}
+          </form>
 
-        {/* Status filter */}
-        <div className="flex rounded-lg border border-zinc-200 bg-white overflow-hidden">
-          {STATUS_OPTIONS.map((s) => (
+          {/* Sold/InStock filter */}
+          <div className="flex rounded-lg border border-zinc-200 bg-white overflow-hidden">
+            {STATUS_OPTIONS.map((s) => (
+              <button
+                key={s}
+                onClick={() => handleStatus(s)}
+                className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                  activeStatus === s
+                    ? "bg-zinc-900 text-white"
+                    : "text-muted-foreground hover:text-foreground hover:bg-zinc-50"
+                }`}
+              >
+                {s === "InStock" ? "In Stock" : s}
+              </button>
+            ))}
+          </div>
+
+          {/* View toggle */}
+          <div className="flex rounded-lg border border-zinc-200 bg-white overflow-hidden">
             <button
-              key={s}
-              onClick={() => handleStatus(s)}
-              className={`px-3 py-1.5 text-xs font-medium transition-colors ${
-                activeStatus === s
-                  ? "bg-zinc-900 text-white"
-                  : "text-muted-foreground hover:text-foreground hover:bg-zinc-50"
+              onClick={() => toggle("grid")}
+              className={`flex items-center px-2.5 py-1.5 text-sm transition-colors ${
+                view === "grid" ? "bg-zinc-900 text-white" : "text-muted-foreground hover:text-foreground hover:bg-zinc-50"
               }`}
+              title="Grid view"
             >
-              {s === "InStock" ? "In Stock" : s}
+              <LayoutGrid size={15} />
             </button>
-          ))}
+            <button
+              onClick={() => toggle("list")}
+              className={`flex items-center px-2.5 py-1.5 text-sm transition-colors ${
+                view === "list" ? "bg-zinc-900 text-white" : "text-muted-foreground hover:text-foreground hover:bg-zinc-50"
+              }`}
+              title="List view"
+            >
+              <List size={15} />
+            </button>
+          </div>
+
+          {/* Add button */}
+          <div className="ml-auto">
+            <Button asChild size="sm" variant="violet">
+              <Link href="/dashboard/gems/new"><Plus size={15} />Add gem</Link>
+            </Button>
+          </div>
         </div>
 
-        {/* View toggle */}
-        <div className="flex rounded-lg border border-zinc-200 bg-white overflow-hidden">
-          <button
-            onClick={() => toggle("grid")}
-            className={`flex items-center px-2.5 py-1.5 text-sm transition-colors ${
-              view === "grid" ? "bg-zinc-900 text-white" : "text-muted-foreground hover:text-foreground hover:bg-zinc-50"
-            }`}
-            title="Grid view"
-          >
-            <LayoutGrid size={15} />
-          </button>
-          <button
-            onClick={() => toggle("list")}
-            className={`flex items-center px-2.5 py-1.5 text-sm transition-colors ${
-              view === "list" ? "bg-zinc-900 text-white" : "text-muted-foreground hover:text-foreground hover:bg-zinc-50"
-            }`}
-            title="List view"
-          >
-            <List size={15} />
-          </button>
-        </div>
-
-        {/* Add button */}
-        <div className="ml-auto">
-          <Button asChild size="sm" variant="violet">
-            <Link href="/dashboard/gems/new"><Plus size={15} />Add gem</Link>
-          </Button>
+        {/* Gem status filter pills */}
+        <div className="flex flex-wrap items-center gap-1.5">
+          {GEM_STATUS_OPTIONS.map((opt) => {
+            const isActive = (gemStatus ?? "All") === opt.value;
+            return (
+              <button
+                key={opt.value}
+                onClick={() => handleGemStatus(opt.value)}
+                className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
+                  isActive
+                    ? "bg-zinc-900 text-white border-zinc-900"
+                    : "bg-white text-zinc-500 border-zinc-200 hover:text-zinc-800 hover:border-zinc-300"
+                }`}
+              >
+                {opt.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -201,7 +246,7 @@ export function GemInventoryView({ result, page, pageSize, search, status }: Pro
 
       {/* Pagination — shrink-0 so it's always pinned at the bottom */}
       <div ref={paginationRef} className="shrink-0 py-4">
-        <Pagination page={page} totalPages={result.totalPages} pageSize={pageSize} search={search} status={status} />
+        <Pagination page={page} totalPages={result.totalPages} pageSize={pageSize} search={search} status={status} gemStatus={gemStatus} />
       </div>
     </div>
   );
@@ -348,7 +393,7 @@ function EmptyState({ search }: { search?: string }) {
   );
 }
 
-function Pagination({ page, totalPages, pageSize, search, status }: { page: number; totalPages: number; pageSize: number; search?: string; status?: string }) {
+function Pagination({ page, totalPages, pageSize, search, status, gemStatus }: { page: number; totalPages: number; pageSize: number; search?: string; status?: string; gemStatus?: string }) {
   if (totalPages <= 1) return null;
   return (
     <div className="flex items-center justify-center gap-2">
@@ -356,7 +401,7 @@ function Pagination({ page, totalPages, pageSize, search, status }: { page: numb
         <Button variant="outline" size="sm" disabled>Previous</Button>
       ) : (
         <Button asChild variant="outline" size="sm">
-          <Link href={paginationUrl(page - 1, pageSize, search, status)}>Previous</Link>
+          <Link href={paginationUrl(page - 1, pageSize, search, status, gemStatus)}>Previous</Link>
         </Button>
       )}
       <span className="text-sm text-muted-foreground">{page} / {totalPages}</span>
@@ -364,7 +409,7 @@ function Pagination({ page, totalPages, pageSize, search, status }: { page: numb
         <Button variant="outline" size="sm" disabled>Next</Button>
       ) : (
         <Button asChild variant="outline" size="sm">
-          <Link href={paginationUrl(page + 1, pageSize, search, status)}>Next</Link>
+          <Link href={paginationUrl(page + 1, pageSize, search, status, gemStatus)}>Next</Link>
         </Button>
       )}
     </div>

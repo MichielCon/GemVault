@@ -3,6 +3,7 @@ using GemVault.Application.Common.Exceptions;
 using GemVault.Application.Interfaces;
 using GemVault.Application.Gems.DTOs;
 using GemVault.Domain.Entities;
+using GemVault.Domain.Enums;
 using GemVault.Domain.Interfaces;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -28,7 +29,8 @@ public record UpdateGemCommand(
     string? Notes,
     bool IsPublic,
     Guid? OriginId,
-    string? Attributes) : IRequest<GemDto>;
+    string? Attributes,
+    GemStatus Status = GemStatus.Available) : IRequest<GemDto>;
 
 public class UpdateGemCommandValidator : AbstractValidator<UpdateGemCommand>
 {
@@ -89,6 +91,7 @@ public class UpdateGemCommandHandler(
         gem.Notes = request.Notes;
         gem.OriginId = request.OriginId;
         gem.Attributes = request.Attributes;
+        gem.Status = request.Status;
 
         // Manage public token
         if (request.IsPublic)

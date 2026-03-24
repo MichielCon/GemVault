@@ -3,6 +3,7 @@ using GemVault.Application.Common.Exceptions;
 using GemVault.Application.Interfaces;
 using GemVault.Application.Gems.DTOs;
 using GemVault.Domain.Entities;
+using GemVault.Domain.Enums;
 using GemVault.Domain.Interfaces;
 using MediatR;
 
@@ -26,7 +27,8 @@ public record CreateGemCommand(
     string? Notes,
     bool IsPublic,
     Guid? OriginId,
-    string? Attributes) : IRequest<GemDto>;
+    string? Attributes,
+    GemStatus Status = GemStatus.Available) : IRequest<GemDto>;
 
 public class CreateGemCommandValidator : AbstractValidator<CreateGemCommand>
 {
@@ -84,6 +86,7 @@ public class CreateGemCommandHandler(
             OwnerId = currentUser.UserId.Value,
             OriginId = request.OriginId,
             Attributes = request.Attributes,
+            Status = request.Status,
         };
 
         if (request.IsPublic)

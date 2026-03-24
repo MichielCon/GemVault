@@ -1,4 +1,5 @@
 using GemVault.Application.Certificates;
+using GemVault.Domain.Enums;
 
 namespace GemVault.Application.Gems.DTOs;
 
@@ -33,6 +34,7 @@ public record GemDto(
     Guid? OriginId,
     string? OriginCountry,
     string? Attributes,
+    GemStatus Status,
     string? PublicToken,
     DateTime CreatedAt,
     DateTime UpdatedAt,
@@ -50,4 +52,5 @@ public record GemSummaryDto(
     bool IsPublic,
     string? CoverPhotoUrl,
     DateTime CreatedAt,
-    bool IsSold);
+    bool IsSold,
+    GemStatus Status);

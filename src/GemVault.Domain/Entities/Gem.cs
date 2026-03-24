@@ -1,4 +1,5 @@
 using GemVault.Domain.Common;
+using GemVault.Domain.Enums;
 using GemVault.Domain.Interfaces;
 
 namespace GemVault.Domain.Entities;
@@ -24,6 +25,7 @@ public class Gem : BaseEntity, IGemRecord
     public Guid OwnerId { get; set; }
     public Guid? OriginId { get; set; }
     public string? Attributes { get; set; } // JSONB — flexible gem-type-specific data
+    public GemStatus Status { get; set; } = GemStatus.Available;
 
     public Origin? Origin { get; set; }
     public ICollection<GemPhoto> Photos { get; set; } = new List<GemPhoto>();

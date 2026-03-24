@@ -3,13 +3,14 @@ using GemVault.Application.Common.Exceptions;
 using GemVault.Application.Common.Models;
 using GemVault.Application.Interfaces;
 using GemVault.Application.Gems.DTOs;
+using GemVault.Domain.Enums;
 using GemVault.Domain.Interfaces;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace GemVault.Application.Gems.Queries;
 
-public record GetMyGemsQuery(int Page = 1, int PageSize = 20, string? Search = null, Guid? OriginId = null, string? Status = null)
+public record GetMyGemsQuery(int Page = 1, int PageSize = 20, string? Search = null, Guid? OriginId = null, string? Status = null, GemStatus? GemStatusFilter = null)
     : IRequest<PagedResult<GemSummaryDto>>;
 
 public class GetMyGemsQueryValidator : AbstractValidator<GetMyGemsQuery>
@@ -54,6 +55,9 @@ public class GetMyGemsQueryHandler(
         else if (request.Status == "InStock")
             query = query.Where(g => !g.SaleItems.Any(si => !si.IsDeleted));
 
+        if (request.GemStatusFilter.HasValue)
+            query = query.Where(g => g.Status == request.GemStatusFilter.Value);
+
         var total = await query.CountAsync(ct);
 
         var pageSize = Math.Min(request.PageSize, 100);
@@ -70,7 +74,7 @@ public class GetMyGemsQueryHandler(
             return new GemSummaryDto(
                 g.Id, g.Name, g.Species, g.Variety, g.WeightCarats, g.Color, g.IsPublic,
                 cover != null ? storage.GetPublicUrl(cover.ObjectKey) : null,
-                g.CreatedAt, isSold);
+                g.CreatedAt, isSold, g.Status);
         }).ToList();
 
         return new PagedResult<GemSummaryDto>(dtos, total, request.Page, pageSize);

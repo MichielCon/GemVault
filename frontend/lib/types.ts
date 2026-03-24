@@ -67,6 +67,7 @@ export interface GemDto {
   purchasePrice: number | null;
   acquiredAt: string | null;
   notes: string | null;
+  status: string;
   isPublic: boolean;
   ownerId: string;
   originId: string | null;
@@ -87,6 +88,7 @@ export interface GemSummaryDto {
   variety: string | null;
   weightCarats: number | null;
   color: string | null;
+  status: string;
   isPublic: boolean;
   coverPhotoUrl: string | null;
   createdAt: string;

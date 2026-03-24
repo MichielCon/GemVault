@@ -1,5 +1,6 @@
 using GemVault.Application.Gems.Commands;
 using GemVault.Application.Gems.Queries;
+using GemVault.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -48,7 +49,8 @@ public class GemsController(IMediator mediator) : ControllerBase
             id, body.Name, body.Species, body.Variety, body.WeightCarats,
             body.Color, body.Clarity, body.Cut, body.Treatment, body.Shape,
             body.LengthMm, body.WidthMm, body.HeightMm, body.PurchasePrice,
-            body.AcquiredAt, body.Notes, body.IsPublic, body.OriginId, body.Attributes);
+            body.AcquiredAt, body.Notes, body.IsPublic, body.OriginId, body.Attributes,
+            body.Status);
 
         var result = await mediator.Send(command, ct);
         return Ok(result);
@@ -107,4 +109,5 @@ public record UpdateGemCommandBody(
     string? Notes,
     bool IsPublic,
     Guid? OriginId,
-    string? Attributes);
+    string? Attributes,
+    GemStatus Status = GemStatus.Available);

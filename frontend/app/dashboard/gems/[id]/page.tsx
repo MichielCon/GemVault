@@ -12,6 +12,22 @@ import {
 } from "@/components/ui/card";
 import { ArrowLeft, Globe, Lock, Pencil, ShoppingCart, Tag, ExternalLink } from "lucide-react";
 import type { GemDto } from "@/lib/types";
+
+const GEM_STATUS_STYLES: Record<string, string> = {
+  Available: "bg-green-100 text-green-700",
+  Reserved: "bg-yellow-100 text-yellow-700",
+  OnConsignment: "bg-blue-100 text-blue-700",
+  InRepair: "bg-orange-100 text-orange-700",
+  Lost: "bg-red-100 text-red-700",
+};
+
+const GEM_STATUS_LABELS: Record<string, string> = {
+  Available: "Available",
+  Reserved: "Reserved",
+  OnConsignment: "On Consignment",
+  InRepair: "In Repair",
+  Lost: "Lost",
+};
 import { PhotoGallery } from "@/components/gems/photo-gallery";
 import { DeleteGemButton } from "@/components/gems/delete-gem-button";
 import { QrCodeButton } from "@/components/gems/qr-code-button";
@@ -51,6 +67,11 @@ export default async function GemDetailPage({ params }: Props) {
         <div>
           <div className="flex items-center gap-2.5 flex-wrap">
             <h1 className="text-2xl font-bold tracking-tight">{gem.name}</h1>
+            {gem.status && (
+              <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${GEM_STATUS_STYLES[gem.status] ?? "bg-zinc-100 text-zinc-700"}`}>
+                {GEM_STATUS_LABELS[gem.status] ?? gem.status}
+              </span>
+            )}
             {gem.soldInfo && (
               <Badge className="bg-amber-100 text-amber-700 border border-amber-200">
                 <Tag size={11} className="mr-1" />

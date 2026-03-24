@@ -39,6 +39,7 @@ internal static class GemMappingExtensions
             gem.OriginId,
             gem.Origin?.Country,
             gem.Attributes,
+            gem.Status,
             gem.PublicToken?.Token,
             gem.CreatedAt,
             gem.UpdatedAt,

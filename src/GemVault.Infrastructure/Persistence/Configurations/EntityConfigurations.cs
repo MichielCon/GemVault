@@ -29,6 +29,8 @@ public class GemConfiguration : IEntityTypeConfiguration<Gem>
         // JSONB column
         builder.Property(g => g.Attributes).HasColumnType("jsonb");
 
+        builder.Property(g => g.Status).HasConversion<string>().HasMaxLength(50);
+
         builder.HasOne(g => g.Origin)
             .WithMany(o => o.Gems)
             .HasForeignKey(g => g.OriginId)
