@@ -182,17 +182,23 @@ export function ParcelCreateForm({ vocabulary, origins }: Props) {
             {/* Origin */}
             <OriginPicker allOrigins={origins} />
 
-            {/* Purchase price */}
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="purchasePrice">Purchase price</Label>
-              <Input
-                id="purchasePrice"
-                name="purchasePrice"
-                type="number"
-                min="0"
-                step="0.01"
-                placeholder="e.g. 3500.00"
-              />
+            {/* Purchase price / Acquired on */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="purchasePrice">Purchase price</Label>
+                <Input
+                  id="purchasePrice"
+                  name="purchasePrice"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="e.g. 3500.00"
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="acquiredAt">Acquired on</Label>
+                <Input id="acquiredAt" name="acquiredAt" type="date" />
+              </div>
             </div>
 
             {/* Notes */}

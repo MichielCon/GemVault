@@ -113,6 +113,11 @@ export default async function PublicScanPage({ params }: Props) {
         <p className="mt-6 text-center text-xs text-muted-foreground">
           Scanned via GemVault · {new Date(gem.createdAt).toLocaleDateString()}
         </p>
+        {gem.scanCount > 0 && (
+          <p className="mt-1 text-center text-xs text-muted-foreground/60">
+            Viewed {gem.scanCount} {gem.scanCount === 1 ? "time" : "times"}
+          </p>
+        )}
       </div>
     </div>
   );

@@ -203,17 +203,28 @@ export function GemEditForm({ gem, vocabulary, origins }: Props) {
             {/* Origin */}
             <OriginPicker allOrigins={origins} initialOriginId={gem.originId} />
 
-            {/* Purchase price */}
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="purchasePrice">Purchase price</Label>
-              <Input
-                id="purchasePrice"
-                name="purchasePrice"
-                type="number"
-                min="0"
-                step="0.01"
-                defaultValue={gem.purchasePrice ?? ""}
-              />
+            {/* Purchase price / Acquired on */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="purchasePrice">Purchase price</Label>
+                <Input
+                  id="purchasePrice"
+                  name="purchasePrice"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  defaultValue={gem.purchasePrice ?? ""}
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="acquiredAt">Acquired on</Label>
+                <Input
+                  id="acquiredAt"
+                  name="acquiredAt"
+                  type="date"
+                  defaultValue={gem.acquiredAt ? gem.acquiredAt.split("T")[0] : ""}
+                />
+              </div>
             </div>
 
             {/* Notes */}

@@ -62,6 +62,7 @@ export async function createSale(
     saleDate: formData.get("saleDate") as string,
     buyerName: (formData.get("buyerName") as string) || null,
     buyerEmail: (formData.get("buyerEmail") as string) || null,
+    buyerPhone: (formData.get("buyerPhone") as string) || null,
     notes: (formData.get("notes") as string) || null,
     items,
   };
@@ -97,6 +98,7 @@ export async function updateSale(
     saleDate: formData.get("saleDate") as string,
     buyerName: (formData.get("buyerName") as string) || null,
     buyerEmail: (formData.get("buyerEmail") as string) || null,
+    buyerPhone: (formData.get("buyerPhone") as string) || null,
     notes: (formData.get("notes") as string) || null,
   };
   try {

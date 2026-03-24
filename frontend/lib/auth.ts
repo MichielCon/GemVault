@@ -87,6 +87,28 @@ export async function logout() {
   redirect("/auth/login");
 }
 
+export async function forgotPassword(email: string): Promise<{ error: string | null }> {
+  try {
+    await authApi.forgotPassword(email);
+    return { error: null };
+  } catch (e) {
+    return { error: parseApiError(e) };
+  }
+}
+
+export async function resetPassword(
+  email: string,
+  token: string,
+  newPassword: string
+): Promise<{ error: string | null }> {
+  try {
+    await authApi.resetPassword(email, token, newPassword);
+    return { error: null };
+  } catch (e) {
+    return { error: parseApiError(e) };
+  }
+}
+
 export async function getSession() {
   const store = await cookies();
   const token = store.get(ACCESS_TOKEN_COOKIE)?.value;

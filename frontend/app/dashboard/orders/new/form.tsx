@@ -93,7 +93,7 @@ export function PurchaseOrderCreateForm({ suppliers, gems, parcels }: Props) {
     } else if (result.supplier) {
       setLocalSuppliers((prev) => [
         ...prev,
-        { ...result.supplier!, email: null, phone: null, address: null, notes: null, orderCount: 0, createdAt: new Date().toISOString() },
+        { ...result.supplier!, email: null, phone: null, website: null, address: null, notes: null, orderCount: 0, createdAt: new Date().toISOString() },
       ]);
       setSupplierId(result.supplier.id);
       setShowNewSupplier(false);

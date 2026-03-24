@@ -65,6 +65,7 @@ export interface GemDto {
   widthMm: number | null;
   heightMm: number | null;
   purchasePrice: number | null;
+  acquiredAt: string | null;
   notes: string | null;
   isPublic: boolean;
   ownerId: string;
@@ -117,6 +118,7 @@ export interface GemParcelDto {
   color: string | null;
   treatment: string | null;
   purchasePrice: number | null;
+  acquiredAt: string | null;
   notes: string | null;
   isPublic: boolean;
   ownerId: string;
@@ -176,6 +178,7 @@ export interface SupplierDto {
   name: string;
   email: string | null;
   phone: string | null;
+  website: string | null;
   address: string | null;
   notes: string | null;
   orderCount: number;
@@ -233,6 +236,7 @@ export interface SaleDto {
   saleDate: string;
   buyerName: string | null;
   buyerEmail: string | null;
+  buyerPhone: string | null;
   notes: string | null;
   items: SaleItemDto[];
   totalSaleValue: number;
@@ -452,5 +456,6 @@ export interface PublicGemDto {
   originCountry: string | null;
   originLocality: string | null;
   createdAt: string;
+  scanCount: number;
   photos: PublicPhotoDto[];
 }

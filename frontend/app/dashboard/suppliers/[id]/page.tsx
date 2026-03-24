@@ -4,7 +4,7 @@ import { suppliersApi, purchaseOrdersApi } from "@/lib/api";
 import { ApiError } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Pencil, ShoppingCart } from "lucide-react";
+import { ArrowLeft, Pencil, ShoppingCart, ExternalLink, Mail, Phone, Globe } from "lucide-react";
 import { DeleteSupplierButton } from "@/components/suppliers/delete-supplier-button";
 
 interface Props {
@@ -61,8 +61,38 @@ export default async function SupplierDetailPage({ params }: Props) {
           </CardHeader>
           <CardContent>
             <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
-              <Detail label="Email" value={supplier.email} />
-              <Detail label="Phone" value={supplier.phone} />
+              {supplier.email && (
+                <>
+                  <dt className="text-muted-foreground flex items-center gap-1"><Mail size={12} />Email</dt>
+                  <dd className="font-medium">
+                    <a href={`mailto:${supplier.email}`} className="text-violet-600 hover:underline underline-offset-2">
+                      {supplier.email}
+                    </a>
+                  </dd>
+                </>
+              )}
+              {supplier.phone && (
+                <>
+                  <dt className="text-muted-foreground flex items-center gap-1"><Phone size={12} />Phone</dt>
+                  <dd className="font-medium">{supplier.phone}</dd>
+                </>
+              )}
+              {supplier.website && (
+                <>
+                  <dt className="text-muted-foreground flex items-center gap-1"><Globe size={12} />Website</dt>
+                  <dd className="font-medium">
+                    <a
+                      href={supplier.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-violet-600 hover:underline underline-offset-2 inline-flex items-center gap-1"
+                    >
+                      {supplier.website.replace(/^https?:\/\//, "")}
+                      <ExternalLink size={11} className="opacity-60" />
+                    </a>
+                  </dd>
+                </>
+              )}
               <Detail label="Address" value={supplier.address} />
             </dl>
             {supplier.notes && (

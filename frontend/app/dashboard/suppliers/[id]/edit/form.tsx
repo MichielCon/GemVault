@@ -86,6 +86,17 @@ export function SupplierEditForm({ supplier }: Props) {
             </div>
 
             <div className="flex flex-col gap-1.5">
+              <Label htmlFor="website">Website</Label>
+              <Input
+                id="website"
+                name="website"
+                type="url"
+                defaultValue={supplier.website ?? ""}
+                placeholder="https://supplier.com"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
               <Label htmlFor="address">Address</Label>
               <Input
                 id="address"

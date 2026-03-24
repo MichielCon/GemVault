@@ -79,7 +79,7 @@ export function SaleEditForm({ sale }: Props) {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="buyerName">Buyer name</Label>
                 <Input
@@ -97,6 +97,15 @@ export function SaleEditForm({ sale }: Props) {
                   type="email"
                   placeholder="jane@example.com"
                   defaultValue={sale.buyerEmail ?? ""}
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="buyerPhone">Buyer phone</Label>
+                <Input
+                  id="buyerPhone"
+                  name="buyerPhone"
+                  placeholder="+1 555 000 0000"
+                  defaultValue={sale.buyerPhone ?? ""}
                 />
               </div>
             </div>

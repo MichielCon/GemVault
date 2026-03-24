@@ -150,6 +150,10 @@ export const authApi = {
   register: (email: string, password: string, role: string) =>
     post<AuthResponse>("/api/v1/auth/register", { email, password, role }, false),
   logout: () => post<void>("/api/v1/auth/logout", {}).catch(() => {}),
+  forgotPassword: (email: string) =>
+    post<void>("/api/v1/auth/forgot-password", { email }, false),
+  resetPassword: (email: string, token: string, newPassword: string) =>
+    post<void>("/api/v1/auth/reset-password", { email, token, newPassword }, false),
 };
 
 // ─── Gems ─────────────────────────────────────────────────────────────────────

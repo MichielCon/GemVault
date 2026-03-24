@@ -72,6 +72,7 @@ export async function createGem(
     purchasePrice: formData.get("purchasePrice")
       ? Number(formData.get("purchasePrice"))
       : null,
+    acquiredAt: (formData.get("acquiredAt") as string) || null,
     notes: (formData.get("notes") as string) || null,
     isPublic: formData.get("isPublic") === "on",
     originId: resolvedOriginId,
@@ -133,6 +134,7 @@ export async function updateGem(
     purchasePrice: formData.get("purchasePrice")
       ? Number(formData.get("purchasePrice"))
       : null,
+    acquiredAt: (formData.get("acquiredAt") as string) || null,
     notes: (formData.get("notes") as string) || null,
     isPublic: formData.get("isPublic") === "on",
     originId: resolvedOriginId,

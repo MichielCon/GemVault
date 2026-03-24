@@ -71,7 +71,17 @@ export default async function SaleDetailPage({ params }: Props) {
               {sale.buyerEmail && (
                 <>
                   <dt className="text-zinc-400 text-xs font-medium uppercase tracking-wide">Email</dt>
-                  <dd className="font-medium text-zinc-800">{sale.buyerEmail}</dd>
+                  <dd className="font-medium text-zinc-800">
+                    <a href={`mailto:${sale.buyerEmail}`} className="text-violet-600 hover:underline underline-offset-2">
+                      {sale.buyerEmail}
+                    </a>
+                  </dd>
+                </>
+              )}
+              {sale.buyerPhone && (
+                <>
+                  <dt className="text-zinc-400 text-xs font-medium uppercase tracking-wide">Phone</dt>
+                  <dd className="font-medium text-zinc-800">{sale.buyerPhone}</dd>
                 </>
               )}
               <dt className="text-zinc-400 text-xs font-medium uppercase tracking-wide">Total</dt>
