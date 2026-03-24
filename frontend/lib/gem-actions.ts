@@ -103,6 +103,57 @@ export async function createGem(
   redirect(`/dashboard/gems/${gem.id}`);
 }
 
+export async function createGemDirect(data: {
+  name: string;
+  species?: string | null;
+  variety?: string | null;
+  weightCarats?: number | null;
+  color?: string | null;
+  treatment?: string | null;
+  purchasePrice?: number | null;
+  acquiredAt?: string | null;
+  originId?: string | null;
+  sourceParcelId?: string | null;
+  isPublic?: boolean;
+}): Promise<{ id: string | null; error: string | null }> {
+  const raw = {
+    name: data.name,
+    species: data.species ?? null,
+    variety: data.variety ?? null,
+    weightCarats: data.weightCarats ?? null,
+    color: data.color ?? null,
+    treatment: data.treatment ?? null,
+    purchasePrice: data.purchasePrice ?? null,
+    acquiredAt: data.acquiredAt ?? null,
+    notes: null,
+    status: "Available",
+    isPublic: data.isPublic ?? false,
+    originId: data.originId ?? null,
+    sourceParcelId: data.sourceParcelId ?? null,
+  };
+
+  try {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...(await authHeader()),
+    };
+    const res = await fetch(`${baseUrl()}/api/v1/gems`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(raw),
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new ApiError(res.status, text);
+    }
+    const gem = (await res.json()) as { id: string };
+    return { id: gem.id, error: null };
+  } catch (e) {
+    return { id: null, error: parseApiError(e) };
+  }
+}
+
 export async function updateGem(
   _prev: { error: string | null },
   formData: FormData

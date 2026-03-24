@@ -59,6 +59,8 @@ internal static class GemMappingExtensions
                     c.ObjectKey != null ? storage.GetPublicUrl(c.ObjectKey) : null,
                     c.GemId,
                     c.CreatedAt))
-                .ToList());
+                .ToList(),
+            gem.SourceParcelId,
+            gem.SourceParcel?.Name);
     }
 }

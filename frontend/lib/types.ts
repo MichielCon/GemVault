@@ -79,6 +79,8 @@ export interface GemDto {
   photos: GemPhotoDto[];
   soldInfo: GemSoldInfoDto | null;
   certificates: CertificateDto[];
+  sourceParcelId: string | null;
+  sourceParcelName: string | null;
 }
 
 export interface GemSummaryDto {
@@ -131,6 +133,7 @@ export interface GemParcelDto {
   updatedAt: string;
   photos: GemParcelPhotoDto[];
   soldInfo: GemParcelSoldInfoDto | null;
+  splitGemCount: number;
 }
 
 export interface GemParcelSummaryDto {

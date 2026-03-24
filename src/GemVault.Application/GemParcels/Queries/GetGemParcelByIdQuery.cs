@@ -29,6 +29,9 @@ public class GetGemParcelByIdQueryHandler(
         if (parcel.OwnerId != currentUser.UserId)
             throw new NotFoundException("GemParcel", request.Id);
 
-        return parcel.ToDto(storage);
+        var splitGemCount = await context.Gems
+            .CountAsync(g => g.SourceParcelId == parcel.Id && !g.IsDeleted, ct);
+
+        return parcel.ToDto(storage, splitGemCount);
     }
 }

@@ -24,7 +24,8 @@ public record GemParcelDto(
     DateTime CreatedAt,
     DateTime UpdatedAt,
     List<GemParcelPhotoDto> Photos,
-    GemParcelSoldInfoDto? SoldInfo);
+    GemParcelSoldInfoDto? SoldInfo,
+    int SplitGemCount);
 
 public record GemParcelSummaryDto(
     Guid Id,

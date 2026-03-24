@@ -5,7 +5,7 @@ namespace GemVault.Application.GemParcels.DTOs;
 
 internal static class GemParcelMappingExtensions
 {
-    internal static GemParcelDto ToDto(this GemParcel p, IStorageService storage)
+    internal static GemParcelDto ToDto(this GemParcel p, IStorageService storage, int splitGemCount = 0)
     {
         var soldItem = p.SaleItems
             .Where(si => !si.IsDeleted && si.Sale != null)
@@ -38,7 +38,8 @@ internal static class GemParcelMappingExtensions
                 .Where(ph => !ph.IsDeleted)
                 .Select(ph => new GemParcelPhotoDto(ph.Id, storage.GetPublicUrl(ph.ObjectKey), ph.IsCover, ph.CreatedAt))
                 .ToList(),
-            soldInfo);
+            soldInfo,
+            splitGemCount);
     }
 
     internal static GemParcelSummaryDto ToSummaryDto(this GemParcel p, IStorageService storage, bool isSold = false)

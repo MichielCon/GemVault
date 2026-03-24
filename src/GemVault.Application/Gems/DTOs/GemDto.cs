@@ -40,7 +40,9 @@ public record GemDto(
     DateTime UpdatedAt,
     List<GemPhotoDto> Photos,
     GemSoldInfoDto? SoldInfo,
-    List<CertificateDto> Certificates);
+    List<CertificateDto> Certificates,
+    Guid? SourceParcelId,
+    string? SourceParcelName);
 
 public record GemSummaryDto(
     Guid Id,

@@ -27,7 +27,10 @@ public class Gem : BaseEntity, IGemRecord
     public string? Attributes { get; set; } // JSONB — flexible gem-type-specific data
     public GemStatus Status { get; set; } = GemStatus.Available;
 
+    public Guid? SourceParcelId { get; set; }
+
     public Origin? Origin { get; set; }
+    public GemParcel? SourceParcel { get; set; }
     public ICollection<GemPhoto> Photos { get; set; } = new List<GemPhoto>();
     public PublicToken? PublicToken { get; set; }
     public ICollection<Certificate> Certificates { get; set; } = new List<Certificate>();

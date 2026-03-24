@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ArrowLeft, Globe, Lock, Pencil, ShoppingCart, Tag, ExternalLink } from "lucide-react";
+import { ArrowLeft, Globe, Lock, Pencil, ShoppingCart, Tag, ExternalLink, Package } from "lucide-react";
 import type { GemDto } from "@/lib/types";
 
 const GEM_STATUS_STYLES: Record<string, string> = {
@@ -181,6 +181,23 @@ export default async function GemDetailPage({ params }: Props) {
                   label="Added"
                   value={new Date(gem.createdAt).toLocaleDateString()}
                 />
+                {gem.sourceParcelId && (
+                  <>
+                    <dt className="text-zinc-400 text-xs font-medium uppercase tracking-wide flex items-center gap-1">
+                      <Package size={10} />
+                      Split from parcel
+                    </dt>
+                    <dd className="font-medium text-zinc-800">
+                      <Link
+                        href={`/dashboard/parcels/${gem.sourceParcelId}`}
+                        className="text-zinc-700 hover:text-violet-600 hover:underline underline-offset-2 transition-colors"
+                      >
+                        {gem.sourceParcelName ?? "View parcel"}
+                        <ExternalLink size={11} className="inline ml-1 opacity-50" />
+                      </Link>
+                    </dd>
+                  </>
+                )}
               </dl>
               {gem.notes && (
                 <p className="mt-3 text-sm text-zinc-500 leading-relaxed">{gem.notes}</p>

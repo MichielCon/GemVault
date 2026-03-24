@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ArrowLeft, Globe, Lock, Pencil, ShoppingCart, Tag, ExternalLink } from "lucide-react";
+import { ArrowLeft, Globe, Lock, Pencil, ShoppingCart, Tag, ExternalLink, Scissors, Gem } from "lucide-react";
 import type { GemParcelDto } from "@/lib/types";
 import { PhotoGallery } from "@/components/gems/photo-gallery";
 import { DeleteParcelButton } from "@/components/parcels/delete-parcel-button";
@@ -72,6 +72,12 @@ export default async function ParcelDetailPage({ params }: Props) {
               </Link>
             </Button>
           )}
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/dashboard/parcels/${parcel.id}/split`}>
+              <Scissors size={14} />
+              Split into gems
+            </Link>
+          </Button>
           <Button asChild variant="violet" size="sm">
             <Link href={`/dashboard/parcels/${parcel.id}/edit`}>
               <Pencil size={14} />
@@ -167,6 +173,33 @@ export default async function ParcelDetailPage({ params }: Props) {
               )}
             </CardContent>
           </Card>
+
+          {parcel.splitGemCount > 0 && (
+            <Card hoverable>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-semibold text-zinc-500 uppercase tracking-wide flex items-center gap-1.5">
+                  <Gem size={13} />
+                  Split Gems
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-zinc-700">
+                  <span className="font-semibold">{parcel.splitGemCount}</span>{" "}
+                  {parcel.splitGemCount === 1 ? "gem has" : "gems have"} been split from this parcel.
+                </p>
+                <p className="mt-1 text-xs text-zinc-400">
+                  View them in your{" "}
+                  <Link
+                    href={`/dashboard/gems`}
+                    className="text-violet-600 hover:underline underline-offset-2"
+                  >
+                    gem inventory
+                  </Link>
+                  .
+                </p>
+              </CardContent>
+            </Card>
+          )}
 
           {parcel.soldInfo && (
             <Card className="border-amber-200/80 bg-amber-50/60">

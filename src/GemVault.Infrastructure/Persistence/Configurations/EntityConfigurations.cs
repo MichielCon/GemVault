@@ -41,6 +41,11 @@ public class GemConfiguration : IEntityTypeConfiguration<Gem>
             .HasForeignKey<PublicToken>(t => t.GemId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        builder.HasOne(g => g.SourceParcel)
+            .WithMany()
+            .HasForeignKey(g => g.SourceParcelId)
+            .OnDelete(DeleteBehavior.SetNull);
+
         builder.HasIndex(g => g.OwnerId);
         builder.HasIndex(g => g.IsDeleted);
     }

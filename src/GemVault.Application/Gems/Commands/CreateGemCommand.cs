@@ -28,7 +28,8 @@ public record CreateGemCommand(
     bool IsPublic,
     Guid? OriginId,
     string? Attributes,
-    GemStatus Status = GemStatus.Available) : IRequest<GemDto>;
+    GemStatus Status = GemStatus.Available,
+    Guid? SourceParcelId = null) : IRequest<GemDto>;
 
 public class CreateGemCommandValidator : AbstractValidator<CreateGemCommand>
 {
@@ -87,6 +88,7 @@ public class CreateGemCommandHandler(
             OriginId = request.OriginId,
             Attributes = request.Attributes,
             Status = request.Status,
+            SourceParcelId = request.SourceParcelId,
         };
 
         if (request.IsPublic)
