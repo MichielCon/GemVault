@@ -11,7 +11,7 @@ function cookieOpts(maxAge: number) {
   return {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax" as const,
+    sameSite: "strict" as const,
     path: "/",
     maxAge,
   };
@@ -81,7 +81,7 @@ export async function register(
 
 export async function logout() {
   const store = await cookies();
-  await authApi.logout().catch(() => {});
+  await authApi.logout().catch((err) => { console.error("Failed to revoke refresh token on logout:", err); });
   store.delete(ACCESS_TOKEN_COOKIE);
   store.delete(REFRESH_TOKEN_COOKIE);
   redirect("/auth/login");
