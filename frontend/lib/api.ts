@@ -256,7 +256,13 @@ export const salesApi = {
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
 export const dashboardApi = {
-  stats: () => get<DashboardStatsDto>(`/api/v1/dashboard/stats`),
+  stats: (params?: { from?: string; to?: string }) => {
+    const qs = new URLSearchParams();
+    if (params?.from) qs.set("from", params.from);
+    if (params?.to) qs.set("to", params.to);
+    const query = qs.toString() ? `?${qs.toString()}` : "";
+    return get<DashboardStatsDto>(`/api/v1/dashboard/stats${query}`);
+  },
 };
 
 // ─── Public scan ──────────────────────────────────────────────────────────────

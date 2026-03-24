@@ -9,7 +9,6 @@ import { RevenueChart } from "@/components/dashboard/revenue-chart";
 import { SpeciesDonut } from "@/components/dashboard/species-donut";
 import { NumberTicker } from "@/components/magicui/number-ticker";
 import { BorderBeam } from "@/components/magicui/border-beam";
-import { DotPattern } from "@/components/magicui/dot-pattern";
 
 function fmt(value: number) {
   return value.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
@@ -24,23 +23,90 @@ const EMPTY_STATS: DashboardStatsDto = {
   monthlyRevenue: [], inventoryBySpecies: [], recentSales: [], recentItems: [],
 };
 
-export default async function DashboardPage() {
+type DateRange = "week" | "month" | "quarter" | "year" | "all";
+
+const DATE_RANGE_LABELS: Record<DateRange, string> = {
+  week: "This week",
+  month: "This month",
+  quarter: "This quarter",
+  year: "This year",
+  all: "All time",
+};
+
+function computeDateRange(range: DateRange): { from?: string; to?: string } {
+  if (range === "all") return {};
+  const now = new Date();
+  const from = new Date(now);
+  if (range === "week") {
+    const day = now.getDay();
+    from.setDate(now.getDate() - day);
+  } else if (range === "month") {
+    from.setDate(1);
+  } else if (range === "quarter") {
+    const month = now.getMonth();
+    from.setMonth(month - (month % 3), 1);
+  } else if (range === "year") {
+    from.setMonth(0, 1);
+  }
+  from.setHours(0, 0, 0, 0);
+  return {
+    from: from.toISOString().slice(0, 10),
+    to: now.toISOString().slice(0, 10),
+  };
+}
+
+interface Props {
+  searchParams: Promise<{ range?: string }>;
+}
+
+export default async function DashboardPage({ searchParams }: Props) {
+  const { range: rawRange } = await searchParams;
+  const activeRange: DateRange =
+    rawRange === "week" || rawRange === "month" || rawRange === "quarter" || rawRange === "year"
+      ? rawRange
+      : "all";
+
+  const dateParams = computeDateRange(activeRange);
+
   let stats: DashboardStatsDto | null = null;
   let statsError = false;
   try {
-    stats = await dashboardApi.stats();
+    stats = await dashboardApi.stats(dateParams);
   } catch {
     statsError = true;
   }
 
   const s = stats ?? EMPTY_STATS;
   const profitPositive = s.netProfit >= 0;
+  const revenueSubtitle =
+    activeRange === "all"
+      ? "Last 6 months"
+      : DATE_RANGE_LABELS[activeRange];
 
   return (
     <div className="flex flex-col gap-4">
-      <div>
-        <h1 className="text-xl font-semibold tracking-tight">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">Collection and business overview</p>
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight">Dashboard</h1>
+          <p className="text-sm text-muted-foreground">Collection and business overview</p>
+        </div>
+
+        {/* Date range filter pills */}
+        <div className="flex items-center gap-1 rounded-lg border border-zinc-200 bg-zinc-50 p-1">
+          {(["all", "week", "month", "quarter", "year"] as DateRange[]).map((r) => (
+            <Link
+              key={r}
+              href={r === "all" ? "/dashboard" : `/dashboard?range=${r}`}
+              className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                activeRange === r
+                  ? "bg-white text-zinc-900 shadow-sm"
+                  : "text-zinc-500 hover:text-zinc-700"
+              }`}
+            >
+              {DATE_RANGE_LABELS[r]}
+            </Link>
+          ))}
+        </div>
       </div>
 
       {statsError && (
@@ -117,7 +183,7 @@ export default async function DashboardPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-semibold">Revenue</p>
-              <p className="text-xs text-muted-foreground">Last 6 months</p>
+              <p className="text-xs text-muted-foreground">{revenueSubtitle}</p>
             </div>
             <Link href="/dashboard/sales" className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
               View sales <ArrowUpRight size={12} />
