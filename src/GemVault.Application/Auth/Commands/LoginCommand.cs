@@ -37,7 +37,8 @@ public class LoginCommandHandler(
         if (!success)
             throw new ValidationException("Invalid email or password.");
 
-        var accessToken = jwtService.GenerateAccessToken(userId, email, role);
+        var emailConfirmed = await identityService.IsEmailConfirmedAsync(userId, ct);
+        var accessToken = jwtService.GenerateAccessToken(userId, email, role, emailConfirmed);
         var rawRefresh = jwtService.GenerateRefreshToken();
 
         context.RefreshTokens.Add(new RefreshToken

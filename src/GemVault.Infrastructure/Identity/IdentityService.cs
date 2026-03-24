@@ -143,4 +143,32 @@ public class IdentityService(UserManager<ApplicationUser> userManager) : IIdenti
             ? Array.Empty<string>()
             : result.Errors.Select(e => e.Description).ToList();
     }
+
+    public async Task<(bool Found, string Token)> GenerateEmailConfirmationTokenAsync(
+        Guid userId, CancellationToken ct = default)
+    {
+        var user = await userManager.FindByIdAsync(userId.ToString());
+        if (user is null || user.IsDeleted)
+            return (false, string.Empty);
+        var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+        return (true, token);
+    }
+
+    public async Task<IReadOnlyList<string>> ConfirmEmailAsync(
+        string email, string token, CancellationToken ct = default)
+    {
+        var user = await userManager.FindByEmailAsync(email);
+        if (user is null || user.IsDeleted)
+            return ["User not found."];
+        var result = await userManager.ConfirmEmailAsync(user, token);
+        return result.Succeeded
+            ? Array.Empty<string>()
+            : result.Errors.Select(e => e.Description).ToList();
+    }
+
+    public async Task<bool> IsEmailConfirmedAsync(Guid userId, CancellationToken ct = default)
+    {
+        var user = await userManager.FindByIdAsync(userId.ToString());
+        return user is not null && !user.IsDeleted && user.EmailConfirmed;
+    }
 }

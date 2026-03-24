@@ -14,7 +14,7 @@ public class JwtService(IOptions<GemVault.Application.Common.Options.JwtOptions>
 {
     private readonly GemVault.Application.Common.Options.JwtOptions _opts = options.Value;
 
-    public string GenerateAccessToken(Guid userId, string email, UserRole role)
+    public string GenerateAccessToken(Guid userId, string email, UserRole role, bool emailConfirmed = false)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_opts.Secret));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -25,6 +25,7 @@ public class JwtService(IOptions<GemVault.Application.Common.Options.JwtOptions>
             new Claim(JwtRegisteredClaimNames.Email, email),
             new Claim(ClaimTypes.Role, role.ToString()),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim("email_confirmed", emailConfirmed ? "true" : "false"),
         };
 
         var token = new JwtSecurityToken(

@@ -25,4 +25,8 @@ public interface IIdentityService
 
     Task<(bool Found, string Token)> GeneratePasswordResetTokenAsync(string email, CancellationToken ct = default);
     Task<IReadOnlyList<string>> ResetPasswordAsync(string email, string token, string newPassword, CancellationToken ct = default);
+
+    Task<(bool Found, string Token)> GenerateEmailConfirmationTokenAsync(Guid userId, CancellationToken ct = default);
+    Task<IReadOnlyList<string>> ConfirmEmailAsync(string email, string token, CancellationToken ct = default);
+    Task<bool> IsEmailConfirmedAsync(Guid userId, CancellationToken ct = default);
 }

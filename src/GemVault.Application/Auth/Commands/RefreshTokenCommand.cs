@@ -55,7 +55,8 @@ public class RefreshTokenCommandHandler(
         });
         await context.SaveChangesAsync(ct);
 
-        var newAccessToken = jwtService.GenerateAccessToken(stored.UserId, email, role);
+        var emailConfirmed = await identityService.IsEmailConfirmedAsync(stored.UserId, ct);
+        var newAccessToken = jwtService.GenerateAccessToken(stored.UserId, email, role, emailConfirmed);
         return new AuthResponseDto(newAccessToken, newRawRefresh, stored.UserId, email, role);
     }
 }

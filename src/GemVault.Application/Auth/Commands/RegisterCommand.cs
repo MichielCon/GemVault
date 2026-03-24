@@ -6,6 +6,7 @@ using GemVault.Domain.Entities;
 using GemVault.Domain.Enums;
 using GemVault.Domain.Interfaces;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
 using System.Text;
@@ -32,7 +33,8 @@ public class RegisterCommandHandler(
     IIdentityService identityService,
     IJwtService jwtService,
     IApplicationDbContext context,
-    IOptions<JwtOptions> jwtOptions)
+    IOptions<JwtOptions> jwtOptions,
+    ILogger<RegisterCommandHandler> logger)
     : IRequestHandler<RegisterCommand, AuthResponseDto>
 {
     public async Task<AuthResponseDto> Handle(RegisterCommand request, CancellationToken ct)
@@ -46,13 +48,18 @@ public class RegisterCommandHandler(
         if (errors.Count > 0)
             throw new ValidationException(string.Join("; ", errors));
 
+        // Generate email confirmation token (log for dev; replace with SMTP when configured)
+        var (_, confirmToken) = await identityService.GenerateEmailConfirmationTokenAsync(userId, ct);
+        logger.LogInformation(
+            "Email confirmation token for {Email}: {Token}", request.Email, confirmToken);
+
         return await IssueTokensAsync(userId, request.Email, request.Role, ct);
     }
 
     private async Task<AuthResponseDto> IssueTokensAsync(
         Guid userId, string email, UserRole role, CancellationToken ct)
     {
-        var accessToken = jwtService.GenerateAccessToken(userId, email, role);
+        var accessToken = jwtService.GenerateAccessToken(userId, email, role, false);
         var rawRefresh = jwtService.GenerateRefreshToken();
 
         context.RefreshTokens.Add(new RefreshToken

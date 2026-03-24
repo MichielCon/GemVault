@@ -109,6 +109,39 @@ export async function resetPassword(
   }
 }
 
+export async function verifyEmail(email: string, token: string): Promise<{ error: string | null }> {
+  try {
+    await authApi.verifyEmail(email, token);
+    return { error: null };
+  } catch (e) {
+    return { error: parseApiError(e) };
+  }
+}
+
+export async function resendVerification(): Promise<{ error: string | null }> {
+  try {
+    await authApi.resendVerification();
+    return { error: null };
+  } catch (e) {
+    return { error: parseApiError(e) };
+  }
+}
+
+/** Decode the JWT payload and return whether the user's email is confirmed. */
+export async function getEmailConfirmed(): Promise<boolean> {
+  const store = await cookies();
+  const token = store.get(ACCESS_TOKEN_COOKIE)?.value;
+  if (!token) return true; // no token = not logged in, no banner needed
+  try {
+    const payload = JSON.parse(
+      Buffer.from(token.split(".")[1], "base64url").toString("utf8")
+    ) as Record<string, unknown>;
+    return payload["email_confirmed"] === "true";
+  } catch {
+    return true;
+  }
+}
+
 export async function getSession() {
   const store = await cookies();
   const token = store.get(ACCESS_TOKEN_COOKIE)?.value;

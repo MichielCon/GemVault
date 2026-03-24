@@ -154,6 +154,10 @@ export const authApi = {
     post<void>("/api/v1/auth/forgot-password", { email }, false),
   resetPassword: (email: string, token: string, newPassword: string) =>
     post<void>("/api/v1/auth/reset-password", { email, token, newPassword }, false),
+  verifyEmail: (email: string, token: string) =>
+    post<void>("/api/v1/auth/verify-email", { email, token }, false),
+  resendVerification: () =>
+    post<void>("/api/v1/auth/resend-verification", {}),
 };
 
 // ─── Gems ─────────────────────────────────────────────────────────────────────

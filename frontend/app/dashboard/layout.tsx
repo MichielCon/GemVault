@@ -1,6 +1,11 @@
 import Sidebar from "@/components/dashboard/sidebar";
+import { EmailVerifyBanner } from "@/components/dashboard/email-verify-banner";
+import { PasswordBanner } from "@/components/dashboard/password-banner";
+import { getEmailConfirmed } from "@/lib/auth";
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const emailConfirmed = await getEmailConfirmed();
+
   return (
     <div className="gem-bg-pattern relative flex h-screen overflow-hidden" style={{ backgroundColor: "var(--background)" }}>
       {/* Ambient background glow */}
@@ -9,9 +14,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="absolute -bottom-40 left-40 h-[500px] w-[500px] rounded-full bg-indigo-400/[0.04] blur-3xl" />
       </div>
       <Sidebar />
-      <main className="relative flex-1 h-full overflow-y-auto overflow-x-hidden p-5">
-        {children}
-      </main>
+      <div className="relative flex-1 flex flex-col h-full overflow-hidden">
+        {!emailConfirmed && <EmailVerifyBanner />}
+        <PasswordBanner />
+        <main className="flex-1 h-full overflow-y-auto overflow-x-hidden p-5">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

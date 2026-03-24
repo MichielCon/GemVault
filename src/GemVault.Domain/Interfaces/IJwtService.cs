@@ -4,6 +4,6 @@ namespace GemVault.Domain.Interfaces;
 
 public interface IJwtService
 {
-    string GenerateAccessToken(Guid userId, string email, UserRole role);
+    string GenerateAccessToken(Guid userId, string email, UserRole role, bool emailConfirmed = false);
     string GenerateRefreshToken();
 }
