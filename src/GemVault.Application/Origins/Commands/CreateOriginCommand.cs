@@ -7,13 +7,14 @@ using MediatR;
 
 namespace GemVault.Application.Origins.Commands;
 
-public record CreateOriginCommand(string Country, string? Mine, string? Region) : IRequest<OriginDto>;
+public record CreateOriginCommand(string Country, string? Locality) : IRequest<OriginDto>;
 
 public class CreateOriginCommandValidator : AbstractValidator<CreateOriginCommand>
 {
     public CreateOriginCommandValidator()
     {
         RuleFor(x => x.Country).NotEmpty().MaximumLength(100);
+        RuleFor(x => x.Locality).MaximumLength(200);
     }
 }
 
@@ -30,13 +31,12 @@ public class CreateOriginCommandHandler(
         var origin = new Origin
         {
             Country = request.Country,
-            Mine = request.Mine,
-            Region = request.Region,
+            Locality = request.Locality,
         };
 
         context.Origins.Add(origin);
         await context.SaveChangesAsync(ct);
 
-        return new OriginDto(origin.Id, origin.Country, origin.Mine, origin.Region, origin.CreatedAt);
+        return new OriginDto(origin.Id, origin.Country, origin.Locality, origin.CreatedAt);
     }
 }

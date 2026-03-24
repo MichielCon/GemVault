@@ -37,6 +37,7 @@ public class DatabaseFixture : IAsyncLifetime
             [
                 new Respawn.Graph.Table("__EFMigrationsHistory"),
                 new Respawn.Graph.Table("GemVocabularies"),
+                new Respawn.Graph.Table("Origins"),
             ],
         });
     }

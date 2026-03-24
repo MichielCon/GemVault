@@ -6,7 +6,7 @@ namespace GemVault.Tests.Integration.Tests;
 
 public class OriginsTests(DatabaseFixture fixture) : IntegrationTestBase(fixture)
 {
-    private record OriginResult(Guid Id, string Country, string? Mine, string? Region, int GemCount, int ParcelCount);
+    private record OriginResult(Guid Id, string Country, string? Locality, int GemCount, int ParcelCount);
 
     [Fact]
     public async Task GetOrigins_Unauthenticated_Returns200()
@@ -25,14 +25,13 @@ public class OriginsTests(DatabaseFixture fixture) : IntegrationTestBase(fixture
         await AuthenticateAsync();
 
         var res = await Client.PostAsJsonAsync("/api/v1/origins",
-            new { country = "Colombia", mine = "Muzo", region = "Boyacá" });
+            new { country = "Colombia", locality = "Muzo" });
 
         Assert.Equal(HttpStatusCode.Created, res.StatusCode);
         var origin = await res.Content.ReadFromJsonAsync<OriginResult>(JsonOptions);
         Assert.NotNull(origin);
         Assert.Equal("Colombia", origin.Country);
-        Assert.Equal("Muzo", origin.Mine);
-        Assert.Equal("Boyacá", origin.Region);
+        Assert.Equal("Muzo", origin.Locality);
         Assert.NotEqual(Guid.Empty, origin.Id);
     }
 
@@ -62,13 +61,73 @@ public class OriginsTests(DatabaseFixture fixture) : IntegrationTestBase(fixture
         await AuthenticateAsync();
 
         await Client.PostAsJsonAsync("/api/v1/origins",
-            new { country = "Sri Lanka", mine = "Ratnapura" });
+            new { country = "Sri Lanka", locality = "Ratnapura" });
 
         var res = await Client.GetAsync("/api/v1/origins");
         Assert.Equal(HttpStatusCode.OK, res.StatusCode);
         var list = await res.Content.ReadFromJsonAsync<List<OriginResult>>(JsonOptions);
         Assert.NotNull(list);
-        Assert.Contains(list, o => o.Country == "Sri Lanka" && o.Mine == "Ratnapura");
+        Assert.Contains(list, o => o.Country == "Sri Lanka" && o.Locality == "Ratnapura");
+    }
+
+    [Fact]
+    public async Task GetByCountry_ReturnsMatchingOrigins()
+    {
+        // Sri Lanka is seeded — should be in the list
+        var res = await Client.GetAsync("/api/v1/origins/by-country?country=Sri+Lanka");
+        Assert.Equal(HttpStatusCode.OK, res.StatusCode);
+        var list = await res.Content.ReadFromJsonAsync<List<OriginResult>>(JsonOptions);
+        Assert.NotNull(list);
+        Assert.All(list, o => Assert.Equal("Sri Lanka", o.Country));
+        // Seeded localities include Ratnapura and Elahera
+        Assert.Contains(list, o => o.Locality == "Ratnapura");
+        Assert.Contains(list, o => o.Locality == "Elahera");
+    }
+
+    [Fact]
+    public async Task FindOrCreate_ExistingOrigin_ReturnsSame()
+    {
+        await AuthenticateAsync();
+
+        // Colombia / Muzo is seeded
+        var res1 = await Client.PostAsJsonAsync("/api/v1/origins/find-or-create",
+            new { country = "Colombia", locality = "Muzo" });
+        Assert.Equal(HttpStatusCode.OK, res1.StatusCode);
+        var o1 = await res1.Content.ReadFromJsonAsync<OriginResult>(JsonOptions);
+
+        var res2 = await Client.PostAsJsonAsync("/api/v1/origins/find-or-create",
+            new { country = "Colombia", locality = "Muzo" });
+        Assert.Equal(HttpStatusCode.OK, res2.StatusCode);
+        var o2 = await res2.Content.ReadFromJsonAsync<OriginResult>(JsonOptions);
+
+        Assert.NotNull(o1);
+        Assert.NotNull(o2);
+        Assert.Equal(o1.Id, o2.Id);
+    }
+
+    [Fact]
+    public async Task FindOrCreate_NewOrigin_CreatesIt()
+    {
+        await AuthenticateAsync();
+
+        var res = await Client.PostAsJsonAsync("/api/v1/origins/find-or-create",
+            new { country = "France", locality = "Provence" });
+
+        Assert.Equal(HttpStatusCode.OK, res.StatusCode);
+        var origin = await res.Content.ReadFromJsonAsync<OriginResult>(JsonOptions);
+        Assert.NotNull(origin);
+        Assert.Equal("France", origin.Country);
+        Assert.Equal("Provence", origin.Locality);
+        Assert.NotEqual(Guid.Empty, origin.Id);
+    }
+
+    [Fact]
+    public async Task FindOrCreate_Unauthenticated_Returns401()
+    {
+        var res = await Client.PostAsJsonAsync("/api/v1/origins/find-or-create",
+            new { country = "Myanmar" });
+
+        Assert.Equal(HttpStatusCode.Unauthorized, res.StatusCode);
     }
 
     [Fact]

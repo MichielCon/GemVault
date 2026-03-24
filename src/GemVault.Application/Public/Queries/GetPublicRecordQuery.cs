@@ -70,8 +70,7 @@ public class GetPublicRecordQueryHandler(
         null,
         gem.Notes,
         gem.Origin?.Country,
-        gem.Origin?.Mine,
-        gem.Origin?.Region,
+        gem.Origin?.Locality,
         gem.CreatedAt,
         gem.Photos
             .Where(p => !p.IsDeleted)
@@ -94,8 +93,7 @@ public class GetPublicRecordQueryHandler(
         parcel.Quantity,
         parcel.Notes,
         parcel.Origin?.Country,
-        parcel.Origin?.Mine,
-        parcel.Origin?.Region,
+        parcel.Origin?.Locality,
         parcel.CreatedAt,
         parcel.Photos
             .Where(p => !p.IsDeleted)

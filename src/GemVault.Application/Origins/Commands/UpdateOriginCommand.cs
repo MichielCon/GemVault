@@ -7,13 +7,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GemVault.Application.Origins.Commands;
 
-public record UpdateOriginCommand(Guid Id, string Country, string? Mine, string? Region) : IRequest<OriginDto>;
+public record UpdateOriginCommand(Guid Id, string Country, string? Locality) : IRequest<OriginDto>;
 
 public class UpdateOriginCommandValidator : AbstractValidator<UpdateOriginCommand>
 {
     public UpdateOriginCommandValidator()
     {
         RuleFor(x => x.Country).NotEmpty().MaximumLength(100);
+        RuleFor(x => x.Locality).MaximumLength(200);
     }
 }
 
@@ -32,11 +33,10 @@ public class UpdateOriginCommandHandler(
             ?? throw new NotFoundException("Origin", request.Id);
 
         origin.Country = request.Country;
-        origin.Mine = request.Mine;
-        origin.Region = request.Region;
+        origin.Locality = request.Locality;
 
         await context.SaveChangesAsync(ct);
 
-        return new OriginDto(origin.Id, origin.Country, origin.Mine, origin.Region, origin.CreatedAt);
+        return new OriginDto(origin.Id, origin.Country, origin.Locality, origin.CreatedAt);
     }
 }

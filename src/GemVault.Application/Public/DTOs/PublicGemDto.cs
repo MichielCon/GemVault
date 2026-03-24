@@ -22,7 +22,6 @@ public record PublicGemDto(
     int? Quantity,             // Parcel only (null for gems)
     string? Notes,
     string? OriginCountry,
-    string? OriginMine,
-    string? OriginRegion,
+    string? OriginLocality,
     DateTime CreatedAt,
     List<PublicPhotoDto> Photos);

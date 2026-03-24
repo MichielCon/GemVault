@@ -47,8 +47,7 @@ public class GetOriginsMapDataQueryHandler(
                 return new OriginMapDto(
                     o.Id,
                     o.Country,
-                    o.Mine,
-                    o.Region,
+                    o.Locality,
                     oGems.Count,
                     oParcels.Count,
                     oGems.Sum(g => g.WeightCarats ?? 0) + oParcels.Sum(p => p.TotalWeightCarats ?? 0),

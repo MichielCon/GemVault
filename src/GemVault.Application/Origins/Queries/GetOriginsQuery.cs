@@ -19,14 +19,14 @@ public class GetOriginsQueryHandler(IApplicationDbContext context)
             var search = request.Search.ToLower();
             query = query.Where(o =>
                 o.Country.ToLower().Contains(search) ||
-                (o.Mine != null && o.Mine.ToLower().Contains(search)) ||
-                (o.Region != null && o.Region.ToLower().Contains(search)));
+                (o.Locality != null && o.Locality.ToLower().Contains(search)));
         }
 
         return await query
             .OrderBy(o => o.Country)
+            .ThenBy(o => o.Locality)
             .Select(o => new OriginDto(
-                o.Id, o.Country, o.Mine, o.Region, o.CreatedAt))
+                o.Id, o.Country, o.Locality, o.CreatedAt))
             .ToListAsync(ct);
     }
 }

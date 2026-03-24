@@ -1,4 +1,5 @@
 using GemVault.Domain.Entities;
+using GemVault.Infrastructure.Persistence.Seed;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -106,8 +107,9 @@ public class OriginConfiguration : IEntityTypeConfiguration<Origin>
     {
         builder.HasQueryFilter(o => !o.IsDeleted);
         builder.Property(o => o.Country).IsRequired().HasMaxLength(100);
-        builder.Property(o => o.Mine).HasMaxLength(200);
-        builder.Property(o => o.Region).HasMaxLength(200);
+        builder.Property(o => o.Locality).HasMaxLength(200);
+        builder.HasIndex(o => new { o.Country, o.Locality });
+        builder.HasData(OriginSeedData.GetAll());
     }
 }
 

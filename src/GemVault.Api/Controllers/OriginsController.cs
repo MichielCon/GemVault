@@ -26,6 +26,14 @@ public class OriginsController(IMediator mediator) : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("by-country")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetByCountry([FromQuery] string country, CancellationToken ct)
+    {
+        var result = await mediator.Send(new GetOriginsByCountryQuery(country), ct);
+        return Ok(result);
+    }
+
     [HttpGet("{id:guid}")]
     [AllowAnonymous]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
@@ -41,10 +49,18 @@ public class OriginsController(IMediator mediator) : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 
+    [HttpPost("find-or-create")]
+    [Authorize]
+    public async Task<IActionResult> FindOrCreate([FromBody] FindOrCreateOriginBody body, CancellationToken ct)
+    {
+        var result = await mediator.Send(new FindOrCreateOriginCommand(body.Country, body.Locality), ct);
+        return Ok(result);
+    }
+
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateOriginBody body, CancellationToken ct)
     {
-        var command = new UpdateOriginCommand(id, body.Country, body.Mine, body.Region);
+        var command = new UpdateOriginCommand(id, body.Country, body.Locality);
         var result = await mediator.Send(command, ct);
         return Ok(result);
     }
@@ -57,4 +73,5 @@ public class OriginsController(IMediator mediator) : ControllerBase
     }
 }
 
-public record UpdateOriginBody(string Country, string? Mine, string? Region);
+public record UpdateOriginBody(string Country, string? Locality);
+public record FindOrCreateOriginBody(string Country, string? Locality);

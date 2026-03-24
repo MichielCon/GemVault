@@ -17,6 +17,6 @@ public class GetOriginByIdQueryHandler(IApplicationDbContext context)
             .FirstOrDefaultAsync(o => o.Id == request.Id, ct)
             ?? throw new NotFoundException("Origin", request.Id);
 
-        return new OriginDto(origin.Id, origin.Country, origin.Mine, origin.Region, origin.CreatedAt);
+        return new OriginDto(origin.Id, origin.Country, origin.Locality, origin.CreatedAt);
     }
 }

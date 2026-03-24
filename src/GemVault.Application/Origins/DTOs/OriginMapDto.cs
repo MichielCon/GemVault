@@ -3,8 +3,7 @@ namespace GemVault.Application.Origins.DTOs;
 public record OriginMapDto(
     Guid Id,
     string Country,
-    string? Mine,
-    string? Region,
+    string? Locality,
     int GemCount,
     int ParcelCount,
     decimal TotalCarats,
