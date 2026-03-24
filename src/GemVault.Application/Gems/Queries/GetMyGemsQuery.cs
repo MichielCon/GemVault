@@ -10,7 +10,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GemVault.Application.Gems.Queries;
 
-public record GetMyGemsQuery(int Page = 1, int PageSize = 20, string? Search = null, Guid? OriginId = null, string? Status = null, GemStatus? GemStatusFilter = null)
+public record GetMyGemsQuery(
+    int Page = 1,
+    int PageSize = 20,
+    string? Search = null,
+    Guid? OriginId = null,
+    string? Status = null,
+    GemStatus? GemStatusFilter = null,
+    string? Species = null,
+    string? Color = null,
+    decimal? MinPrice = null,
+    decimal? MaxPrice = null,
+    string? SortBy = "date",
+    string? SortDir = "desc")
     : IRequest<PagedResult<GemSummaryDto>>;
 
 public class GetMyGemsQueryValidator : AbstractValidator<GetMyGemsQuery>
@@ -58,11 +70,34 @@ public class GetMyGemsQueryHandler(
         if (request.GemStatusFilter.HasValue)
             query = query.Where(g => g.Status == request.GemStatusFilter.Value);
 
+        if (!string.IsNullOrWhiteSpace(request.Species))
+            query = query.Where(g => g.Species != null && g.Species.ToLower() == request.Species.ToLower());
+
+        if (!string.IsNullOrWhiteSpace(request.Color))
+            query = query.Where(g => g.Color != null && g.Color.ToLower() == request.Color.ToLower());
+
+        if (request.MinPrice.HasValue)
+            query = query.Where(g => g.PurchasePrice >= request.MinPrice.Value);
+
+        if (request.MaxPrice.HasValue)
+            query = query.Where(g => g.PurchasePrice <= request.MaxPrice.Value);
+
         var total = await query.CountAsync(ct);
 
         var pageSize = Math.Min(request.PageSize, 100);
+
+        query = (request.SortBy, request.SortDir?.ToLower()) switch
+        {
+            ("name", "asc")   => query.OrderBy(g => g.Name),
+            ("name", _)       => query.OrderByDescending(g => g.Name),
+            ("price", "asc")  => query.OrderBy(g => g.PurchasePrice),
+            ("price", _)      => query.OrderByDescending(g => g.PurchasePrice),
+            ("weight", "asc") => query.OrderBy(g => g.WeightCarats),
+            ("weight", _)     => query.OrderByDescending(g => g.WeightCarats),
+            _                 => query.OrderByDescending(g => g.CreatedAt),
+        };
+
         var items = await query
-            .OrderByDescending(g => g.CreatedAt)
             .Skip((request.Page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(ct);

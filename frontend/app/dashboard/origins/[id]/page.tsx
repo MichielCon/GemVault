@@ -28,8 +28,8 @@ export default async function OriginDetailPage({ params }: Props) {
   }
 
   const [gemsResult, parcelsResult] = await Promise.allSettled([
-    gemsApi.list(1, 100, undefined, id),
-    parcelsApi.list(1, 100, undefined, id),
+    gemsApi.list({ page: 1, pageSize: 100, originId: id }),
+    parcelsApi.list({ page: 1, pageSize: 100, originId: id }),
   ]);
 
   const gems = gemsResult.status === "fulfilled" ? gemsResult.value.items : [];

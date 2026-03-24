@@ -159,12 +159,26 @@ export const authApi = {
 // ─── Gems ─────────────────────────────────────────────────────────────────────
 
 export const gemsApi = {
-  list: (page = 1, pageSize = 20, search?: string, originId?: string, status?: string, gemStatus?: string) => {
+  list: (opts: {
+    page?: number; pageSize?: number;
+    search?: string; originId?: string;
+    status?: string; gemStatus?: string;
+    species?: string; color?: string;
+    minPrice?: number; maxPrice?: number;
+    sortBy?: string; sortDir?: string;
+  } = {}) => {
+    const { page = 1, pageSize = 20, search, originId, status, gemStatus, species, color, minPrice, maxPrice, sortBy, sortDir } = opts;
     const q = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
     if (search) q.set("search", search);
     if (originId) q.set("originId", originId);
     if (status && status !== "All") q.set("status", status);
     if (gemStatus && gemStatus !== "All") q.set("gemStatusFilter", gemStatus);
+    if (species) q.set("species", species);
+    if (color) q.set("color", color);
+    if (minPrice != null) q.set("minPrice", String(minPrice));
+    if (maxPrice != null) q.set("maxPrice", String(maxPrice));
+    if (sortBy) q.set("sortBy", sortBy);
+    if (sortDir) q.set("sortDir", sortDir);
     return get<PagedResult<GemSummaryDto>>(`/api/v1/gems?${q}`);
   },
   get: (id: string) => get<GemDto>(`/api/v1/gems/${id}`),
@@ -210,11 +224,25 @@ export const originsApi = {
 // ─── GemParcels ───────────────────────────────────────────────────────────────
 
 export const parcelsApi = {
-  list: (page = 1, pageSize = 20, search?: string, originId?: string, status?: string) => {
+  list: (opts: {
+    page?: number; pageSize?: number;
+    search?: string; originId?: string;
+    status?: string;
+    species?: string; color?: string;
+    minPrice?: number; maxPrice?: number;
+    sortBy?: string; sortDir?: string;
+  } = {}) => {
+    const { page = 1, pageSize = 20, search, originId, status, species, color, minPrice, maxPrice, sortBy, sortDir } = opts;
     const q = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
     if (search) q.set("search", search);
     if (originId) q.set("originId", originId);
     if (status && status !== "All") q.set("status", status);
+    if (species) q.set("species", species);
+    if (color) q.set("color", color);
+    if (minPrice != null) q.set("minPrice", String(minPrice));
+    if (maxPrice != null) q.set("maxPrice", String(maxPrice));
+    if (sortBy) q.set("sortBy", sortBy);
+    if (sortDir) q.set("sortDir", sortDir);
     return get<PagedResult<GemParcelSummaryDto>>(`/api/v1/gem-parcels?${q}`);
   },
   get: (id: string) => get<GemParcelDto>(`/api/v1/gem-parcels/${id}`),

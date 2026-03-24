@@ -19,9 +19,17 @@ public class GemsController(IMediator mediator) : ControllerBase
         [FromQuery] string? search = null,
         [FromQuery] Guid? originId = null,
         [FromQuery] string? status = null,
+        [FromQuery] string? species = null,
+        [FromQuery] string? color = null,
+        [FromQuery] decimal? minPrice = null,
+        [FromQuery] decimal? maxPrice = null,
+        [FromQuery] string? sortBy = "date",
+        [FromQuery] string? sortDir = "desc",
         CancellationToken ct = default)
     {
-        var result = await mediator.Send(new GetMyGemsQuery(page, pageSize, search, originId, status), ct);
+        var result = await mediator.Send(
+            new GetMyGemsQuery(page, pageSize, search, originId, status, null, species, color, minPrice, maxPrice, sortBy, sortDir),
+            ct);
         return Ok(result);
     }
 

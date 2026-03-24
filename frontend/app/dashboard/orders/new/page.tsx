@@ -4,8 +4,8 @@ import { PurchaseOrderCreateForm } from "./form";
 export default async function NewOrderPage() {
   const [suppliersResult, gemsResult, parcelsResult] = await Promise.allSettled([
     suppliersApi.list(),
-    gemsApi.list(1, 200),
-    parcelsApi.list(1, 200),
+    gemsApi.list({ page: 1, pageSize: 200 }),
+    parcelsApi.list({ page: 1, pageSize: 200 }),
   ]);
 
   const suppliers = suppliersResult.status === "fulfilled" ? suppliersResult.value : [];

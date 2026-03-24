@@ -9,8 +9,8 @@ export default async function NewSalePage({ searchParams }: Props) {
   const { gemId, parcelId } = await searchParams;
 
   const [gemsResult, parcelsResult] = await Promise.allSettled([
-    gemsApi.list(1, 200),
-    parcelsApi.list(1, 200),
+    gemsApi.list({ page: 1, pageSize: 200 }),
+    parcelsApi.list({ page: 1, pageSize: 200 }),
   ]);
 
   const gems = gemsResult.status === "fulfilled" ? gemsResult.value.items : [];

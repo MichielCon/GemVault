@@ -4,7 +4,7 @@ import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { LayoutGrid, List, Plus, Gem, Search, X } from "lucide-react";
+import { LayoutGrid, List, Plus, Gem, Search, X, Filter, ArrowUp, ArrowDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MagicCard } from "@/components/magicui/magic-card";
@@ -31,17 +31,36 @@ interface Props {
   search?: string;
   status?: string;
   gemStatus?: string;
+  species?: string;
+  color?: string;
+  minPrice?: string;
+  maxPrice?: string;
+  sortBy?: string;
+  sortDir?: string;
 }
 
-function paginationUrl(p: number, pageSize: number, search?: string, status?: string, gemStatus?: string) {
+function paginationUrl(
+  p: number, pageSize: number, search?: string, status?: string, gemStatus?: string,
+  species?: string, color?: string, minPrice?: string, maxPrice?: string,
+  sortBy?: string, sortDir?: string,
+) {
   const q = new URLSearchParams({ page: String(p), pageSize: String(pageSize) });
   if (search) q.set("search", search);
   if (status && status !== "All") q.set("status", status);
   if (gemStatus && gemStatus !== "All") q.set("gemStatus", gemStatus);
+  if (species) q.set("species", species);
+  if (color) q.set("color", color);
+  if (minPrice) q.set("minPrice", minPrice);
+  if (maxPrice) q.set("maxPrice", maxPrice);
+  if (sortBy && sortBy !== "date") q.set("sortBy", sortBy);
+  if (sortDir && sortDir !== "desc") q.set("sortDir", sortDir);
   return `/dashboard/gems?${q}`;
 }
 
-export function GemInventoryView({ result, page, pageSize, search, status, gemStatus }: Props) {
+export function GemInventoryView({
+  result, page, pageSize, search, status, gemStatus,
+  species, color, minPrice, maxPrice, sortBy, sortDir,
+}: Props) {
   const [view, setView] = useState<"grid" | "list">("grid");
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -50,6 +69,15 @@ export function GemInventoryView({ result, page, pageSize, search, status, gemSt
   const toolbarRef    = useRef<HTMLDivElement>(null);
   const paginationRef = useRef<HTMLDivElement>(null);
   const activeStatus: Status = (STATUS_OPTIONS.includes(status as Status) ? status : "All") as Status;
+
+  const hasActiveFilters = !!(species || color || minPrice || maxPrice);
+  const activeFilterCount = [species, color, minPrice || maxPrice].filter(Boolean).length;
+
+  const [filtersOpen, setFiltersOpen] = useState(hasActiveFilters);
+  const [speciesInput, setSpeciesInput] = useState(species ?? "");
+  const [colorInput, setColorInput] = useState(color ?? "");
+  const [minPriceInput, setMinPriceInput] = useState(minPrice ?? "");
+  const [maxPriceInput, setMaxPriceInput] = useState(maxPrice ?? "");
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -91,6 +119,12 @@ export function GemInventoryView({ result, page, pageSize, search, status, gemSt
       if (search)                 q.set("search", search);
       if (activeStatus !== "All") q.set("status", activeStatus);
       if (gemStatus && gemStatus !== "All") q.set("gemStatus", gemStatus);
+      if (species) q.set("species", species);
+      if (color) q.set("color", color);
+      if (minPrice) q.set("minPrice", minPrice);
+      if (maxPrice) q.set("maxPrice", maxPrice);
+      if (sortBy && sortBy !== "date") q.set("sortBy", sortBy);
+      if (sortDir && sortDir !== "desc") q.set("sortDir", sortDir);
       router.replace(`/dashboard/gems?${q}`);
     }
 
@@ -112,6 +146,12 @@ export function GemInventoryView({ result, page, pageSize, search, status, gemSt
     if (value) q.set("search", value);
     if (activeStatus !== "All") q.set("status", activeStatus);
     if (gemStatus && gemStatus !== "All") q.set("gemStatus", gemStatus);
+    if (species) q.set("species", species);
+    if (color) q.set("color", color);
+    if (minPrice) q.set("minPrice", minPrice);
+    if (maxPrice) q.set("maxPrice", maxPrice);
+    if (sortBy && sortBy !== "date") q.set("sortBy", sortBy);
+    if (sortDir && sortDir !== "desc") q.set("sortDir", sortDir);
     router.push(`/dashboard/gems?${q}`);
   }
 
@@ -119,6 +159,12 @@ export function GemInventoryView({ result, page, pageSize, search, status, gemSt
     const q = new URLSearchParams({ page: "1" });
     if (activeStatus !== "All") q.set("status", activeStatus);
     if (gemStatus && gemStatus !== "All") q.set("gemStatus", gemStatus);
+    if (species) q.set("species", species);
+    if (color) q.set("color", color);
+    if (minPrice) q.set("minPrice", minPrice);
+    if (maxPrice) q.set("maxPrice", maxPrice);
+    if (sortBy && sortBy !== "date") q.set("sortBy", sortBy);
+    if (sortDir && sortDir !== "desc") q.set("sortDir", sortDir);
     router.push(`/dashboard/gems?${q}`);
   }
 
@@ -127,6 +173,12 @@ export function GemInventoryView({ result, page, pageSize, search, status, gemSt
     if (search) q.set("search", search);
     if (s !== "All") q.set("status", s);
     if (gemStatus && gemStatus !== "All") q.set("gemStatus", gemStatus);
+    if (species) q.set("species", species);
+    if (color) q.set("color", color);
+    if (minPrice) q.set("minPrice", minPrice);
+    if (maxPrice) q.set("maxPrice", maxPrice);
+    if (sortBy && sortBy !== "date") q.set("sortBy", sortBy);
+    if (sortDir && sortDir !== "desc") q.set("sortDir", sortDir);
     router.push(`/dashboard/gems?${q}`);
   }
 
@@ -135,6 +187,52 @@ export function GemInventoryView({ result, page, pageSize, search, status, gemSt
     if (search) q.set("search", search);
     if (activeStatus !== "All") q.set("status", activeStatus);
     if (gs !== "All") q.set("gemStatus", gs);
+    if (species) q.set("species", species);
+    if (color) q.set("color", color);
+    if (minPrice) q.set("minPrice", minPrice);
+    if (maxPrice) q.set("maxPrice", maxPrice);
+    if (sortBy && sortBy !== "date") q.set("sortBy", sortBy);
+    if (sortDir && sortDir !== "desc") q.set("sortDir", sortDir);
+    router.push(`/dashboard/gems?${q}`);
+  }
+
+  function handleSort(by: string, dir: string) {
+    const q = new URLSearchParams({ page: "1" });
+    if (search) q.set("search", search);
+    if (activeStatus !== "All") q.set("status", activeStatus);
+    if (gemStatus && gemStatus !== "All") q.set("gemStatus", gemStatus);
+    if (species) q.set("species", species);
+    if (color) q.set("color", color);
+    if (minPrice) q.set("minPrice", minPrice);
+    if (maxPrice) q.set("maxPrice", maxPrice);
+    if (by !== "date") q.set("sortBy", by);
+    if (dir !== "desc") q.set("sortDir", dir);
+    router.push(`/dashboard/gems?${q}`);
+  }
+
+  function applyFilters() {
+    const q = new URLSearchParams({ page: "1" });
+    if (inputRef.current?.value.trim()) q.set("search", inputRef.current.value.trim());
+    if (activeStatus !== "All") q.set("status", activeStatus);
+    if (gemStatus && gemStatus !== "All") q.set("gemStatus", gemStatus);
+    if (speciesInput.trim()) q.set("species", speciesInput.trim());
+    if (colorInput.trim()) q.set("color", colorInput.trim());
+    if (minPriceInput) q.set("minPrice", minPriceInput);
+    if (maxPriceInput) q.set("maxPrice", maxPriceInput);
+    if (sortBy && sortBy !== "date") q.set("sortBy", sortBy);
+    if (sortDir && sortDir !== "desc") q.set("sortDir", sortDir);
+    router.push(`/dashboard/gems?${q}`);
+  }
+
+  function clearFilters() {
+    setSpeciesInput("");
+    setColorInput("");
+    setMinPriceInput("");
+    setMaxPriceInput("");
+    const q = new URLSearchParams({ page: "1" });
+    if (inputRef.current?.value.trim()) q.set("search", inputRef.current.value.trim());
+    if (activeStatus !== "All") q.set("status", activeStatus);
+    if (gemStatus && gemStatus !== "All") q.set("gemStatus", gemStatus);
     router.push(`/dashboard/gems?${q}`);
   }
 
@@ -148,6 +246,7 @@ export function GemInventoryView({ result, page, pageSize, search, status, gemSt
 
       {/* Toolbar */}
       <div ref={toolbarRef} className="shrink-0 flex flex-col gap-2 mb-4">
+        {/* Row 1: search + status toggle + filters button + view toggle + add */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Search */}
           <form onSubmit={handleSearch} className="relative flex-1 min-w-[180px] max-w-xs">
@@ -182,6 +281,43 @@ export function GemInventoryView({ result, page, pageSize, search, status, gemSt
             ))}
           </div>
 
+          {/* Filters toggle */}
+          <button
+            onClick={() => setFiltersOpen(v => !v)}
+            className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors ${
+              filtersOpen || hasActiveFilters
+                ? "border-violet-300 bg-violet-50 text-violet-700"
+                : "border-zinc-200 bg-white text-zinc-600 hover:text-zinc-800"
+            }`}
+          >
+            <Filter size={12} />
+            Filters
+            {hasActiveFilters && (
+              <span className="ml-1 rounded-full bg-violet-600 text-white px-1.5 py-0 text-[10px]">{activeFilterCount}</span>
+            )}
+          </button>
+
+          {/* Sort */}
+          <div className="flex items-center gap-2">
+            <select
+              value={sortBy ?? "date"}
+              onChange={(e) => handleSort(e.target.value, sortDir ?? "desc")}
+              className="rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs text-zinc-700 outline-none focus:ring-2 focus:ring-violet-500/20"
+            >
+              <option value="date">Date added</option>
+              <option value="name">Name</option>
+              <option value="price">Price</option>
+              <option value="weight">Weight</option>
+            </select>
+            <button
+              onClick={() => handleSort(sortBy ?? "date", (sortDir ?? "desc") === "asc" ? "desc" : "asc")}
+              className="flex items-center gap-1 rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs text-zinc-700 hover:bg-zinc-50"
+              title={(sortDir ?? "desc") === "asc" ? "Ascending" : "Descending"}
+            >
+              {(sortDir ?? "desc") === "asc" ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
+            </button>
+          </div>
+
           {/* View toggle */}
           <div className="flex rounded-lg border border-zinc-200 bg-white overflow-hidden">
             <button
@@ -212,7 +348,7 @@ export function GemInventoryView({ result, page, pageSize, search, status, gemSt
           </div>
         </div>
 
-        {/* Gem status filter pills */}
+        {/* Row 2: Gem status filter pills */}
         <div className="flex flex-wrap items-center gap-1.5">
           {GEM_STATUS_OPTIONS.map((opt) => {
             const isActive = (gemStatus ?? "All") === opt.value;
@@ -231,6 +367,54 @@ export function GemInventoryView({ result, page, pageSize, search, status, gemSt
             );
           })}
         </div>
+
+        {/* Row 3: Filters panel */}
+        {filtersOpen && (
+          <div className="flex flex-wrap items-end gap-3 rounded-lg border border-zinc-100 bg-zinc-50 px-3 py-2.5">
+            <FilterInput
+              label="Species"
+              value={speciesInput}
+              onChange={setSpeciesInput}
+              onClear={() => setSpeciesInput("")}
+              placeholder="e.g. Corundum"
+            />
+            <FilterInput
+              label="Color"
+              value={colorInput}
+              onChange={setColorInput}
+              onClear={() => setColorInput("")}
+              placeholder="e.g. Blue"
+            />
+            <div className="flex flex-col gap-1">
+              <label className="text-[11px] font-medium text-zinc-500 uppercase tracking-wide">Price range</label>
+              <div className="flex items-center gap-1.5">
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="Min"
+                  value={minPriceInput}
+                  onChange={e => setMinPriceInput(e.target.value)}
+                  className="w-20 rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs outline-none focus:ring-2 focus:ring-violet-500/20"
+                />
+                <span className="text-zinc-400 text-xs">–</span>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="Max"
+                  value={maxPriceInput}
+                  onChange={e => setMaxPriceInput(e.target.value)}
+                  className="w-20 rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs outline-none focus:ring-2 focus:ring-violet-500/20"
+                />
+              </div>
+            </div>
+            <Button type="button" size="sm" variant="violet" onClick={applyFilters}>Apply</Button>
+            {hasActiveFilters && (
+              <Button type="button" size="sm" variant="ghost" onClick={clearFilters} className="text-zinc-500">Clear all</Button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Content */}
@@ -246,7 +430,12 @@ export function GemInventoryView({ result, page, pageSize, search, status, gemSt
 
       {/* Pagination — shrink-0 so it's always pinned at the bottom */}
       <div ref={paginationRef} className="shrink-0 py-4">
-        <Pagination page={page} totalPages={result.totalPages} pageSize={pageSize} search={search} status={status} gemStatus={gemStatus} />
+        <Pagination
+          page={page} totalPages={result.totalPages} pageSize={pageSize}
+          search={search} status={status} gemStatus={gemStatus}
+          species={species} color={color} minPrice={minPrice} maxPrice={maxPrice}
+          sortBy={sortBy} sortDir={sortDir}
+        />
       </div>
     </div>
   );
@@ -393,7 +582,15 @@ function EmptyState({ search }: { search?: string }) {
   );
 }
 
-function Pagination({ page, totalPages, pageSize, search, status, gemStatus }: { page: number; totalPages: number; pageSize: number; search?: string; status?: string; gemStatus?: string }) {
+function Pagination({
+  page, totalPages, pageSize, search, status, gemStatus,
+  species, color, minPrice, maxPrice, sortBy, sortDir,
+}: {
+  page: number; totalPages: number; pageSize: number;
+  search?: string; status?: string; gemStatus?: string;
+  species?: string; color?: string; minPrice?: string; maxPrice?: string;
+  sortBy?: string; sortDir?: string;
+}) {
   if (totalPages <= 1) return null;
   return (
     <div className="flex items-center justify-center gap-2">
@@ -401,7 +598,7 @@ function Pagination({ page, totalPages, pageSize, search, status, gemStatus }: {
         <Button variant="outline" size="sm" disabled>Previous</Button>
       ) : (
         <Button asChild variant="outline" size="sm">
-          <Link href={paginationUrl(page - 1, pageSize, search, status, gemStatus)}>Previous</Link>
+          <Link href={paginationUrl(page - 1, pageSize, search, status, gemStatus, species, color, minPrice, maxPrice, sortBy, sortDir)}>Previous</Link>
         </Button>
       )}
       <span className="text-sm text-muted-foreground">{page} / {totalPages}</span>
@@ -409,9 +606,38 @@ function Pagination({ page, totalPages, pageSize, search, status, gemStatus }: {
         <Button variant="outline" size="sm" disabled>Next</Button>
       ) : (
         <Button asChild variant="outline" size="sm">
-          <Link href={paginationUrl(page + 1, pageSize, search, status, gemStatus)}>Next</Link>
+          <Link href={paginationUrl(page + 1, pageSize, search, status, gemStatus, species, color, minPrice, maxPrice, sortBy, sortDir)}>Next</Link>
         </Button>
       )}
+    </div>
+  );
+}
+
+function FilterInput({
+  label, value, onChange, onClear, placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  onClear: () => void;
+  placeholder?: string;
+}) {
+  return (
+    <div className="flex flex-col gap-1">
+      <label className="text-[11px] font-medium text-zinc-500 uppercase tracking-wide">{label}</label>
+      <div className="relative">
+        <input
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          placeholder={placeholder}
+          className="w-32 rounded-lg border border-zinc-200 bg-white px-2.5 py-1 text-xs outline-none focus:ring-2 focus:ring-violet-500/20 pr-6"
+        />
+        {value && (
+          <button type="button" onClick={onClear} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600">
+            <X size={11} />
+          </button>
+        )}
+      </div>
     </div>
   );
 }
