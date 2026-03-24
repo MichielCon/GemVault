@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ArrowLeft, Globe, Lock, Pencil, ShoppingCart, Tag } from "lucide-react";
+import { ArrowLeft, Globe, Lock, Pencil, ShoppingCart, Tag, ExternalLink } from "lucide-react";
 import type { GemParcelDto } from "@/lib/types";
 import { PhotoGallery } from "@/components/gems/photo-gallery";
 import { DeleteParcelButton } from "@/components/parcels/delete-parcel-button";
@@ -113,9 +113,30 @@ export default async function ParcelDetailPage({ params }: Props) {
                   label="Total weight"
                   value={parcel.totalWeightCarats ? `${parcel.totalWeightCarats} ct` : null}
                 />
+                {parcel.totalWeightCarats != null && parcel.quantity > 1 && (
+                  <Detail
+                    label="Avg per stone"
+                    value={`${(parcel.totalWeightCarats / parcel.quantity).toFixed(2)} ct`}
+                  />
+                )}
                 <Detail label="Color" value={parcel.color} />
                 <Detail label="Treatment" value={parcel.treatment} />
-                <Detail label="Origin" value={parcel.originCountry} />
+                {parcel.originId && parcel.originCountry ? (
+                  <>
+                    <dt className="text-zinc-400 text-xs font-medium uppercase tracking-wide">Origin</dt>
+                    <dd className="font-medium text-zinc-800">
+                      <Link
+                        href={`/dashboard/origins/${parcel.originId}`}
+                        className="text-zinc-700 hover:text-violet-600 hover:underline underline-offset-2 transition-colors"
+                      >
+                        {parcel.originCountry}
+                        <ExternalLink size={11} className="inline ml-1 opacity-50" />
+                      </Link>
+                    </dd>
+                  </>
+                ) : (
+                  <Detail label="Origin" value={parcel.originCountry} />
+                )}
               </dl>
             </CardContent>
           </Card>
@@ -131,9 +152,15 @@ export default async function ParcelDetailPage({ params }: Props) {
                   value={parcel.purchasePrice != null ? `$${parcel.purchasePrice.toFixed(2)}` : null}
                 />
                 <Detail
+                  label="Acquired on"
+                  value={parcel.acquiredAt ? new Date(parcel.acquiredAt).toLocaleDateString() : null}
+                />
+                <Detail
                   label="Added"
                   value={new Date(parcel.createdAt).toLocaleDateString()}
                 />
+                <dt className="text-zinc-400 text-xs font-medium uppercase tracking-wide">Linked order</dt>
+                <dd className="font-medium text-zinc-800">—</dd>
               </dl>
               {parcel.notes && (
                 <p className="mt-3 text-sm text-zinc-500 leading-relaxed">{parcel.notes}</p>

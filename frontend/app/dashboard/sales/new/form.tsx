@@ -115,7 +115,7 @@ export function SaleCreateForm({ gems, parcels, preselectedItem }: Props) {
               <Input id="saleDate" name="saleDate" type="date" defaultValue={today} required />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="buyerName">Buyer name</Label>
                 <Input id="buyerName" name="buyerName" placeholder="Jane Smith" />
@@ -123,6 +123,10 @@ export function SaleCreateForm({ gems, parcels, preselectedItem }: Props) {
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="buyerEmail">Buyer email</Label>
                 <Input id="buyerEmail" name="buyerEmail" type="email" placeholder="jane@example.com" />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="buyerPhone">Buyer phone</Label>
+                <Input id="buyerPhone" name="buyerPhone" placeholder="+1 555 000 0000" />
               </div>
             </div>
 

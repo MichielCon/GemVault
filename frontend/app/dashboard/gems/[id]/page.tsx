@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ArrowLeft, Globe, Lock, Pencil, ShoppingCart, Tag } from "lucide-react";
+import { ArrowLeft, Globe, Lock, Pencil, ShoppingCart, Tag, ExternalLink } from "lucide-react";
 import type { GemDto } from "@/lib/types";
 import { PhotoGallery } from "@/components/gems/photo-gallery";
 import { DeleteGemButton } from "@/components/gems/delete-gem-button";
@@ -121,7 +121,22 @@ export default async function GemDetailPage({ params }: Props) {
                     value={`${gem.lengthMm} × ${gem.widthMm}${gem.heightMm ? ` × ${gem.heightMm}` : ""} mm`}
                   />
                 )}
-                <Detail label="Origin" value={gem.originCountry} />
+                {gem.originId && gem.originCountry ? (
+                  <>
+                    <dt className="text-zinc-400 text-xs font-medium uppercase tracking-wide">Origin</dt>
+                    <dd className="font-medium text-zinc-800">
+                      <Link
+                        href={`/dashboard/origins/${gem.originId}`}
+                        className="text-zinc-700 hover:text-violet-600 hover:underline underline-offset-2 transition-colors"
+                      >
+                        {gem.originCountry}
+                        <ExternalLink size={11} className="inline ml-1 opacity-50" />
+                      </Link>
+                    </dd>
+                  </>
+                ) : (
+                  <Detail label="Origin" value={gem.originCountry} />
+                )}
               </dl>
             </CardContent>
           </Card>
@@ -135,6 +150,10 @@ export default async function GemDetailPage({ params }: Props) {
                 <Detail
                   label="Purchase price"
                   value={gem.purchasePrice != null ? `$${gem.purchasePrice.toFixed(2)}` : null}
+                />
+                <Detail
+                  label="Acquired on"
+                  value={gem.acquiredAt ? new Date(gem.acquiredAt).toLocaleDateString() : null}
                 />
                 <Detail
                   label="Added"

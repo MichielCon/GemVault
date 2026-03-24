@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { dashboardApi } from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
-import { Gem, Package, DollarSign, TrendingUp, Building2, ShoppingCart, ArrowUpRight, AlertTriangle } from "lucide-react";
+import { Gem, Package, DollarSign, TrendingUp, Building2, ShoppingCart, ArrowUpRight, AlertTriangle, BarChart3 } from "lucide-react";
 import type { DashboardStatsDto } from "@/lib/types";
 import { RevenueChart } from "@/components/dashboard/revenue-chart";
 import { SpeciesDonut } from "@/components/dashboard/species-donut";
@@ -99,6 +99,31 @@ export default async function DashboardPage() {
           <div className="h-40 flex-1">
             <RevenueChart data={s.monthlyRevenue} />
           </div>
+        </div>
+
+        {/* Inventory vs Revenue — col 6 */}
+        <div className="relative overflow-hidden rounded-xl border border-zinc-200/80 bg-card p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] sm:col-span-6">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">Inventory vs Revenue</span>
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-indigo-100 text-indigo-600">
+              <BarChart3 size={14} />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <p className="text-xs text-muted-foreground mb-0.5">Unsold cost</p>
+              <p className="text-lg font-bold tracking-tight text-zinc-800">{fmt(s.unsoldInventoryValue)}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-0.5">Total revenue</p>
+              <p className="text-lg font-bold tracking-tight text-green-700">{fmt(s.totalSalesValue)}</p>
+            </div>
+          </div>
+          {s.totalSalesValue > 0 && s.unsoldInventoryValue > 0 && (
+            <p className="mt-2 text-xs text-muted-foreground">
+              {Math.round((s.totalSalesValue / (s.totalSalesValue + s.unsoldInventoryValue)) * 100)}% of total value realized
+            </p>
+          )}
         </div>
 
         {/* Net Profit — col 6 with BorderBeam */}

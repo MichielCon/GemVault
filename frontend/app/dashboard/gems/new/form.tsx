@@ -169,12 +169,18 @@ export function GemCreateForm({ vocabulary, origins }: Props) {
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
               <OriginPicker allOrigins={origins} />
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="purchasePrice">
-                  <DollarSign size={12} className="inline mr-0.5" />
-                  Purchase price
-                </Label>
-                <Input id="purchasePrice" name="purchasePrice" type="number" min="0" step="0.01" placeholder="e.g. 1500.00" />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="purchasePrice">
+                    <DollarSign size={12} className="inline mr-0.5" />
+                    Purchase price
+                  </Label>
+                  <Input id="purchasePrice" name="purchasePrice" type="number" min="0" step="0.01" placeholder="e.g. 1500.00" />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="acquiredAt">Acquired on</Label>
+                  <Input id="acquiredAt" name="acquiredAt" type="date" />
+                </div>
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="notes">

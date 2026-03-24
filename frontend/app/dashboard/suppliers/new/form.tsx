@@ -65,6 +65,11 @@ export function SupplierCreateForm() {
             </div>
 
             <div className="flex flex-col gap-1.5">
+              <Label htmlFor="website">Website</Label>
+              <Input id="website" name="website" type="url" placeholder="https://supplier.com" />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
               <Label htmlFor="address">Address</Label>
               <Input id="address" name="address" placeholder="123 Gem Street, Colombo" />
             </div>

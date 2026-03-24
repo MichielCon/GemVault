@@ -49,6 +49,7 @@ export async function createSupplier(
     name: formData.get("name") as string,
     email: (formData.get("email") as string) || null,
     phone: (formData.get("phone") as string) || null,
+    website: (formData.get("website") as string) || null,
     address: (formData.get("address") as string) || null,
     notes: (formData.get("notes") as string) || null,
   };
@@ -117,6 +118,7 @@ export async function updateSupplier(
     name: formData.get("name") as string,
     email: (formData.get("email") as string) || null,
     phone: (formData.get("phone") as string) || null,
+    website: (formData.get("website") as string) || null,
     address: (formData.get("address") as string) || null,
     notes: (formData.get("notes") as string) || null,
   };
