@@ -26,6 +26,7 @@ public record GemDto(
     decimal? WidthMm,
     decimal? HeightMm,
     decimal? PurchasePrice,
+    DateTime? AcquiredAt,
     string? Notes,
     bool IsPublic,
     Guid OwnerId,

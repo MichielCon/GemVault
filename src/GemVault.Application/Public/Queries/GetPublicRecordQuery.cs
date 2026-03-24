@@ -39,7 +39,9 @@ public class GetPublicRecordQueryHandler(
             if (!token.Gem.IsPublic)
                 throw new NotFoundException("Record", request.Token);
 
-            return MapGem(token.Gem);
+            token.ScanCount++;
+            await context.SaveChangesAsync(ct);
+            return MapGem(token.Gem, token.ScanCount);
         }
 
         // Parcel record
@@ -48,13 +50,15 @@ public class GetPublicRecordQueryHandler(
             if (!token.GemParcel.IsPublic)
                 throw new NotFoundException("Record", request.Token);
 
-            return MapParcel(token.GemParcel);
+            token.ScanCount++;
+            await context.SaveChangesAsync(ct);
+            return MapParcel(token.GemParcel, token.ScanCount);
         }
 
         throw new NotFoundException("Record", request.Token);
     }
 
-    private PublicGemDto MapGem(Domain.Entities.Gem gem) => new(
+    private PublicGemDto MapGem(Domain.Entities.Gem gem, int scanCount) => new(
         gem.Id,
         "Gem",
         gem.Name,
@@ -75,9 +79,10 @@ public class GetPublicRecordQueryHandler(
         gem.Photos
             .Where(p => !p.IsDeleted)
             .Select(p => new PublicPhotoDto(p.Id, storage.GetPublicUrl(p.ObjectKey), p.IsCover))
-            .ToList());
+            .ToList(),
+        scanCount);
 
-    private PublicGemDto MapParcel(Domain.Entities.GemParcel parcel) => new(
+    private PublicGemDto MapParcel(Domain.Entities.GemParcel parcel, int scanCount) => new(
         parcel.Id,
         "Parcel",
         parcel.Name,
@@ -98,5 +103,6 @@ public class GetPublicRecordQueryHandler(
         parcel.Photos
             .Where(p => !p.IsDeleted)
             .Select(p => new PublicPhotoDto(p.Id, storage.GetPublicUrl(p.ObjectKey), p.IsCover))
-            .ToList());
+            .ToList(),
+        scanCount);
 }

@@ -47,6 +47,7 @@ public class GetSaleByIdQueryHandler(
             sale.SaleDate,
             sale.BuyerName,
             sale.BuyerEmail,
+            sale.BuyerPhone,
             sale.Notes,
             itemDtos,
             itemDtos.Sum(i => i.SalePrice * i.Quantity),

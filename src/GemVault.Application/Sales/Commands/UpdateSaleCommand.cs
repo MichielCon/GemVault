@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GemVault.Application.Sales.Commands;
 
-public record UpdateSaleCommand(Guid Id, DateTime SaleDate, string? BuyerName, string? BuyerEmail, string? Notes) : IRequest<SaleDto>;
+public record UpdateSaleCommand(Guid Id, DateTime SaleDate, string? BuyerName, string? BuyerEmail, string? BuyerPhone, string? Notes) : IRequest<SaleDto>;
 
 public class UpdateSaleCommandValidator : AbstractValidator<UpdateSaleCommand>
 {
@@ -42,6 +42,7 @@ public class UpdateSaleCommandHandler(
         sale.SaleDate = DateTime.SpecifyKind(request.SaleDate, DateTimeKind.Utc);
         sale.BuyerName = request.BuyerName;
         sale.BuyerEmail = request.BuyerEmail;
+        sale.BuyerPhone = request.BuyerPhone;
         sale.Notes = request.Notes;
         sale.UpdatedAt = DateTime.UtcNow;
 
@@ -64,6 +65,7 @@ public class UpdateSaleCommandHandler(
             sale.SaleDate,
             sale.BuyerName,
             sale.BuyerEmail,
+            sale.BuyerPhone,
             sale.Notes,
             itemDtos,
             itemDtos.Sum(i => i.SalePrice * i.Quantity),

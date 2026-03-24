@@ -32,6 +32,7 @@ internal static class GemMappingExtensions
             gem.WidthMm,
             gem.HeightMm,
             gem.PurchasePrice,
+            gem.AcquiredAt,
             gem.Notes,
             gem.IsPublic,
             gem.OwnerId,

@@ -24,6 +24,7 @@ public class CreateGemCommandHandlerTests
         WidthMm: null,
         HeightMm: null,
         PurchasePrice: null,
+        AcquiredAt: null,
         Notes: null,
         IsPublic: false,
         OriginId: null,

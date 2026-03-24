@@ -18,6 +18,7 @@ public class Gem : BaseEntity, IGemRecord
     public decimal? WidthMm { get; set; }
     public decimal? HeightMm { get; set; }
     public decimal? PurchasePrice { get; set; }
+    public DateTime? AcquiredAt { get; set; }
     public string? Notes { get; set; }
     public bool IsPublic { get; set; }
     public Guid OwnerId { get; set; }

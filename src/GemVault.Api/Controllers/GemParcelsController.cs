@@ -47,7 +47,7 @@ public class GemParcelsController(IMediator mediator) : ControllerBase
         var command = new UpdateGemParcelCommand(
             id, body.Name, body.Species, body.Variety, body.Quantity,
             body.TotalWeightCarats, body.Color, body.Treatment,
-            body.PurchasePrice, body.Notes, body.IsPublic, body.OriginId);
+            body.PurchasePrice, body.AcquiredAt, body.Notes, body.IsPublic, body.OriginId);
 
         var result = await mediator.Send(command, ct);
         return Ok(result);
@@ -97,6 +97,7 @@ public record UpdateGemParcelCommandBody(
     string? Color,
     string? Treatment,
     decimal? PurchasePrice,
+    DateTime? AcquiredAt,
     string? Notes,
     bool IsPublic,
     Guid? OriginId);

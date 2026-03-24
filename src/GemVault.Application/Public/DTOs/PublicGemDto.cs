@@ -24,4 +24,5 @@ public record PublicGemDto(
     string? OriginCountry,
     string? OriginLocality,
     DateTime CreatedAt,
-    List<PublicPhotoDto> Photos);
+    List<PublicPhotoDto> Photos,
+    int ScanCount);

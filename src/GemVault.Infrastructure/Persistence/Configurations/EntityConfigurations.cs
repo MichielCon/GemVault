@@ -21,6 +21,7 @@ public class GemConfiguration : IEntityTypeConfiguration<Gem>
         builder.Property(g => g.Shape).HasMaxLength(100);
         builder.Property(g => g.WeightCarats).HasPrecision(10, 4);
         builder.Property(g => g.PurchasePrice).HasPrecision(18, 2);
+        builder.Property(g => g.AcquiredAt);
         builder.Property(g => g.LengthMm).HasPrecision(8, 2);
         builder.Property(g => g.WidthMm).HasPrecision(8, 2);
         builder.Property(g => g.HeightMm).HasPrecision(8, 2);
@@ -56,6 +57,7 @@ public class GemParcelConfiguration : IEntityTypeConfiguration<GemParcel>
         builder.Property(g => g.Treatment).HasMaxLength(200);
         builder.Property(g => g.TotalWeightCarats).HasPrecision(10, 4);
         builder.Property(g => g.PurchasePrice).HasPrecision(18, 2);
+        builder.Property(g => g.AcquiredAt);
 
         builder.HasOne(g => g.Origin)
             .WithMany(o => o.GemParcels)
@@ -92,6 +94,7 @@ public class PublicTokenConfiguration : IEntityTypeConfiguration<PublicToken>
     public void Configure(EntityTypeBuilder<PublicToken> builder)
     {
         builder.Property(t => t.Token).IsRequired().HasMaxLength(64);
+        builder.Property(t => t.ScanCount).HasDefaultValue(0);
         builder.HasIndex(t => t.Token).IsUnique();
 
         builder.HasOne(t => t.GemParcel)
@@ -119,8 +122,9 @@ public class SupplierConfiguration : IEntityTypeConfiguration<Supplier>
     {
         builder.HasQueryFilter(s => !s.IsDeleted);
         builder.Property(s => s.Name).IsRequired().HasMaxLength(200);
-        builder.Property(s => s.Email).HasMaxLength(256);
+        builder.Property(s => s.Email).HasMaxLength(200);
         builder.Property(s => s.Phone).HasMaxLength(50);
+        builder.Property(s => s.Website).HasMaxLength(500);
         builder.HasIndex(s => s.OwnerId);
     }
 }
@@ -195,7 +199,8 @@ public class SaleConfiguration : IEntityTypeConfiguration<Sale>
     {
         builder.HasQueryFilter(s => !s.IsDeleted);
         builder.Property(s => s.BuyerName).HasMaxLength(200);
-        builder.Property(s => s.BuyerEmail).HasMaxLength(256);
+        builder.Property(s => s.BuyerEmail).HasMaxLength(200);
+        builder.Property(s => s.BuyerPhone).HasMaxLength(50);
         builder.HasIndex(s => s.OwnerId);
     }
 }

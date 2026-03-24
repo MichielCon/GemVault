@@ -40,4 +40,23 @@ public class AuthController(IMediator mediator) : ControllerBase
         await mediator.Send(command, ct);
         return NoContent();
     }
+
+    [HttpPost("forgot-password")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordBody body, CancellationToken ct)
+    {
+        await mediator.Send(new ForgotPasswordCommand(body.Email), ct);
+        return Ok();
+    }
+
+    [HttpPost("reset-password")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordBody body, CancellationToken ct)
+    {
+        await mediator.Send(new ResetPasswordCommand(body.Email, body.Token, body.NewPassword), ct);
+        return Ok();
+    }
 }
+
+public record ForgotPasswordBody(string Email);
+public record ResetPasswordBody(string Email, string Token, string NewPassword);

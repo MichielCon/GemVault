@@ -22,6 +22,7 @@ public record CreateGemCommand(
     decimal? WidthMm,
     decimal? HeightMm,
     decimal? PurchasePrice,
+    DateTime? AcquiredAt,
     string? Notes,
     bool IsPublic,
     Guid? OriginId,
@@ -75,6 +76,9 @@ public class CreateGemCommandHandler(
             WidthMm = request.WidthMm,
             HeightMm = request.HeightMm,
             PurchasePrice = request.PurchasePrice,
+            AcquiredAt = request.AcquiredAt.HasValue
+                ? DateTime.SpecifyKind(request.AcquiredAt.Value, DateTimeKind.Utc)
+                : null,
             Notes = request.Notes,
             IsPublic = request.IsPublic,
             OwnerId = currentUser.UserId.Value,

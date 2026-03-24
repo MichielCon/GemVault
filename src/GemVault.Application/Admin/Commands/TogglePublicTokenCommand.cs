@@ -33,6 +33,7 @@ public class TogglePublicTokenCommandHandler(
             token.Id,
             token.Token,
             token.IsActive,
+            token.ScanCount,
             token.GemId,
             token.Gem?.Name,
             token.GemParcelId,

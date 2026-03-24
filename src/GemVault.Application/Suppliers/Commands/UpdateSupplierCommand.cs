@@ -8,14 +8,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GemVault.Application.Suppliers.Commands;
 
-public record UpdateSupplierCommand(Guid Id, string Name, string? Email, string? Phone, string? Address, string? Notes) : IRequest<SupplierDto>;
+public record UpdateSupplierCommand(Guid Id, string Name, string? Email, string? Phone, string? Website, string? Address, string? Notes) : IRequest<SupplierDto>;
 
 public class UpdateSupplierCommandValidator : AbstractValidator<UpdateSupplierCommand>
 {
     public UpdateSupplierCommandValidator()
     {
         RuleFor(x => x.Name).NotEmpty().MaximumLength(200);
-        RuleFor(x => x.Email).MaximumLength(200).When(x => x.Email != null);
+        RuleFor(x => x.Email).MaximumLength(200).EmailAddress().When(x => x.Email != null);
+        RuleFor(x => x.Phone).MaximumLength(50).When(x => x.Phone != null);
+        RuleFor(x => x.Website).MaximumLength(500).When(x => x.Website != null);
         RuleFor(x => x.Notes).MaximumLength(5000).When(x => x.Notes != null);
     }
 }
@@ -41,6 +43,7 @@ public class UpdateSupplierCommandHandler(
         supplier.Name = request.Name;
         supplier.Email = request.Email;
         supplier.Phone = request.Phone;
+        supplier.Website = request.Website;
         supplier.Address = request.Address;
         supplier.Notes = request.Notes;
         supplier.UpdatedAt = DateTime.UtcNow;
@@ -52,6 +55,7 @@ public class UpdateSupplierCommandHandler(
             supplier.Name,
             supplier.Email,
             supplier.Phone,
+            supplier.Website,
             supplier.Address,
             supplier.Notes,
             supplier.PurchaseOrders.Count(o => !o.IsDeleted),

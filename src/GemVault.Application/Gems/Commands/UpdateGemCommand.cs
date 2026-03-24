@@ -24,6 +24,7 @@ public record UpdateGemCommand(
     decimal? WidthMm,
     decimal? HeightMm,
     decimal? PurchasePrice,
+    DateTime? AcquiredAt,
     string? Notes,
     bool IsPublic,
     Guid? OriginId,
@@ -82,6 +83,9 @@ public class UpdateGemCommandHandler(
         gem.WidthMm = request.WidthMm;
         gem.HeightMm = request.HeightMm;
         gem.PurchasePrice = request.PurchasePrice;
+        gem.AcquiredAt = request.AcquiredAt.HasValue
+            ? DateTime.SpecifyKind(request.AcquiredAt.Value, DateTimeKind.Utc)
+            : null;
         gem.Notes = request.Notes;
         gem.OriginId = request.OriginId;
         gem.Attributes = request.Attributes;

@@ -22,4 +22,7 @@ public interface IIdentityService
     Task<IReadOnlyList<string>> UpdateEmailAsync(Guid userId, string newEmail, CancellationToken ct = default);
     Task<IReadOnlyList<string>> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword, CancellationToken ct = default);
     Task<IReadOnlyList<string>> SoftDeleteUserAsync(Guid userId, CancellationToken ct = default);
+
+    Task<(bool Found, string Token)> GeneratePasswordResetTokenAsync(string email, CancellationToken ct = default);
+    Task<IReadOnlyList<string>> ResetPasswordAsync(string email, string token, string newPassword, CancellationToken ct = default);
 }

@@ -25,6 +25,7 @@ internal static class GemParcelMappingExtensions
             p.Color,
             p.Treatment,
             p.PurchasePrice,
+            p.AcquiredAt,
             p.Notes,
             p.IsPublic,
             p.OwnerId,

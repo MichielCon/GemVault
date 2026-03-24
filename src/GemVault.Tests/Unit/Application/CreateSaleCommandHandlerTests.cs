@@ -37,6 +37,7 @@ public class CreateSaleCommandHandlerTests
             SaleDate: new DateTime(2026, 3, 8),
             BuyerName: "Jane Smith",
             BuyerEmail: "jane@example.com",
+            BuyerPhone: null,
             Notes: "Cash sale",
             Items: new List<CreateSaleItemCommand>
             {
@@ -65,7 +66,7 @@ public class CreateSaleCommandHandlerTests
 
         var handler = new CreateSaleCommandHandler(ctxMock.Object, userMock.Object);
         var command = new CreateSaleCommand(
-            DateTime.UtcNow, null, null, null, new List<CreateSaleItemCommand>());
+            DateTime.UtcNow, null, null, null, null, new List<CreateSaleItemCommand>());
 
         // Act & Assert
         await Assert.ThrowsAsync<ForbiddenException>(() =>
@@ -82,7 +83,7 @@ public class CreateSaleCommandHandlerTests
 
         var unspecifiedDate = DateTime.SpecifyKind(new DateTime(2026, 3, 8), DateTimeKind.Unspecified);
         var command = new CreateSaleCommand(
-            unspecifiedDate, null, null, null, new List<CreateSaleItemCommand>());
+            unspecifiedDate, null, null, null, null, new List<CreateSaleItemCommand>());
 
         // Act — should NOT throw (was throwing before the fix)
         var result = await handler.Handle(command, CancellationToken.None);
@@ -100,7 +101,7 @@ public class CreateSaleCommandHandlerTests
         var handler = new CreateSaleCommandHandler(ctxMock.Object, userMock.Object);
 
         var command = new CreateSaleCommand(
-            DateTime.UtcNow, null, null, null,
+            DateTime.UtcNow, null, null, null, null,
             new List<CreateSaleItemCommand>
             {
                 new(null, null, Quantity: 2, SalePrice: 100m),  // 200

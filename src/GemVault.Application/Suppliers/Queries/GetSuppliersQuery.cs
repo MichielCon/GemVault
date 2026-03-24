@@ -40,6 +40,7 @@ public class GetSuppliersQueryHandler(
             s.Name,
             s.Email,
             s.Phone,
+            s.Website,
             s.Address,
             s.Notes,
             s.PurchaseOrders.Count(o => !o.IsDeleted),

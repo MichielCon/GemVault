@@ -32,6 +32,7 @@ public class GetSupplierByIdQueryHandler(
             supplier.Name,
             supplier.Email,
             supplier.Phone,
+            supplier.Website,
             supplier.Address,
             supplier.Notes,
             supplier.PurchaseOrders.Count(o => !o.IsDeleted),

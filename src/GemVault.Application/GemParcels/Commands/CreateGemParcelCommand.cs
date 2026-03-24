@@ -17,6 +17,7 @@ public record CreateGemParcelCommand(
     string? Color,
     string? Treatment,
     decimal? PurchasePrice,
+    DateTime? AcquiredAt,
     string? Notes,
     bool IsPublic,
     Guid? OriginId) : IRequest<GemParcelDto>;
@@ -54,6 +55,9 @@ public class CreateGemParcelCommandHandler(
             Color = request.Color,
             Treatment = request.Treatment,
             PurchasePrice = request.PurchasePrice,
+            AcquiredAt = request.AcquiredAt.HasValue
+                ? DateTime.SpecifyKind(request.AcquiredAt.Value, DateTimeKind.Utc)
+                : null,
             Notes = request.Notes,
             IsPublic = request.IsPublic,
             OwnerId = currentUser.UserId.Value,

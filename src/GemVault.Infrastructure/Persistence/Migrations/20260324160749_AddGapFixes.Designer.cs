@@ -3,6 +3,7 @@ using System;
 using GemVault.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GemVault.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260324160749_AddGapFixes")]
+    partial class AddGapFixes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -64,7 +67,7 @@ namespace GemVault.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("GemId");
 
-                    b.ToTable("Certificates", (string)null);
+                    b.ToTable("Certificates");
                 });
 
             modelBuilder.Entity("GemVault.Domain.Entities.Gem", b =>
@@ -161,7 +164,7 @@ namespace GemVault.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("OwnerId");
 
-                    b.ToTable("Gems", (string)null);
+                    b.ToTable("Gems");
                 });
 
             modelBuilder.Entity("GemVault.Domain.Entities.GemParcel", b =>
@@ -232,7 +235,7 @@ namespace GemVault.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("OwnerId");
 
-                    b.ToTable("GemParcels", (string)null);
+                    b.ToTable("GemParcels");
                 });
 
             modelBuilder.Entity("GemVault.Domain.Entities.GemPhoto", b =>
@@ -283,7 +286,7 @@ namespace GemVault.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("GemParcelId");
 
-                    b.ToTable("GemPhotos", (string)null);
+                    b.ToTable("GemPhotos");
                 });
 
             modelBuilder.Entity("GemVault.Domain.Entities.GemVocabulary", b =>
@@ -316,7 +319,7 @@ namespace GemVault.Infrastructure.Persistence.Migrations
                     b.HasIndex("Field", "Value")
                         .IsUnique();
 
-                    b.ToTable("GemVocabularies", (string)null);
+                    b.ToTable("GemVocabularies");
                 });
 
             modelBuilder.Entity("GemVault.Domain.Entities.OrderItem", b =>
@@ -358,7 +361,7 @@ namespace GemVault.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("PurchaseOrderId");
 
-                    b.ToTable("OrderItems", (string)null);
+                    b.ToTable("OrderItems");
                 });
 
             modelBuilder.Entity("GemVault.Domain.Entities.Origin", b =>
@@ -389,7 +392,7 @@ namespace GemVault.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("Country", "Locality");
 
-                    b.ToTable("Origins", (string)null);
+                    b.ToTable("Origins");
 
                     b.HasData(
                         new
@@ -2575,7 +2578,7 @@ namespace GemVault.Infrastructure.Persistence.Migrations
                     b.HasIndex("Token")
                         .IsUnique();
 
-                    b.ToTable("PublicTokens", (string)null);
+                    b.ToTable("PublicTokens");
                 });
 
             modelBuilder.Entity("GemVault.Domain.Entities.PurchaseOrder", b =>
@@ -2615,7 +2618,7 @@ namespace GemVault.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("SupplierId");
 
-                    b.ToTable("PurchaseOrders", (string)null);
+                    b.ToTable("PurchaseOrders");
                 });
 
             modelBuilder.Entity("GemVault.Domain.Entities.RefreshToken", b =>
@@ -2656,7 +2659,7 @@ namespace GemVault.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("UserId", "ExpiresAt");
 
-                    b.ToTable("RefreshTokens", (string)null);
+                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("GemVault.Domain.Entities.Sale", b =>
@@ -2699,7 +2702,7 @@ namespace GemVault.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("OwnerId");
 
-                    b.ToTable("Sales", (string)null);
+                    b.ToTable("Sales");
                 });
 
             modelBuilder.Entity("GemVault.Domain.Entities.SaleItem", b =>
@@ -2741,7 +2744,7 @@ namespace GemVault.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("SaleId");
 
-                    b.ToTable("SaleItems", (string)null);
+                    b.ToTable("SaleItems");
                 });
 
             modelBuilder.Entity("GemVault.Domain.Entities.Supplier", b =>
@@ -2789,7 +2792,7 @@ namespace GemVault.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("OwnerId");
 
-                    b.ToTable("Suppliers", (string)null);
+                    b.ToTable("Suppliers");
                 });
 
             modelBuilder.Entity("GemVault.Infrastructure.Identity.ApplicationUser", b =>

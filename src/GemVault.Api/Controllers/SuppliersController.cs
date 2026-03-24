@@ -40,7 +40,7 @@ public class SuppliersController(IMediator mediator) : ControllerBase
         [FromBody] UpdateSupplierCommandBody body,
         CancellationToken ct)
     {
-        var command = new UpdateSupplierCommand(id, body.Name, body.Email, body.Phone, body.Address, body.Notes);
+        var command = new UpdateSupplierCommand(id, body.Name, body.Email, body.Phone, body.Website, body.Address, body.Notes);
         var result = await mediator.Send(command, ct);
         return Ok(result);
     }
@@ -53,4 +53,4 @@ public class SuppliersController(IMediator mediator) : ControllerBase
     }
 }
 
-public record UpdateSupplierCommandBody(string Name, string? Email, string? Phone, string? Address, string? Notes);
+public record UpdateSupplierCommandBody(string Name, string? Email, string? Phone, string? Website, string? Address, string? Notes);

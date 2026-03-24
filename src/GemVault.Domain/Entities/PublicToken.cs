@@ -8,6 +8,7 @@ public class PublicToken : BaseEntity
     public Guid? GemId { get; set; }
     public Guid? GemParcelId { get; set; }
     public bool IsActive { get; set; } = true;
+    public int ScanCount { get; set; } = 0;
 
     public Gem? Gem { get; set; }
     public GemParcel? GemParcel { get; set; }

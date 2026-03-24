@@ -19,6 +19,7 @@ public record UpdateGemParcelCommand(
     string? Color,
     string? Treatment,
     decimal? PurchasePrice,
+    DateTime? AcquiredAt,
     string? Notes,
     bool IsPublic,
     Guid? OriginId) : IRequest<GemParcelDto>;
@@ -61,6 +62,9 @@ public class UpdateGemParcelCommandHandler(
         parcel.Color = request.Color;
         parcel.Treatment = request.Treatment;
         parcel.PurchasePrice = request.PurchasePrice;
+        parcel.AcquiredAt = request.AcquiredAt.HasValue
+            ? DateTime.SpecifyKind(request.AcquiredAt.Value, DateTimeKind.Utc)
+            : null;
         parcel.Notes = request.Notes;
         parcel.OriginId = request.OriginId;
 

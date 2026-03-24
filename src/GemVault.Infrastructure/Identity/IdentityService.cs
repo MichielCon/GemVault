@@ -119,4 +119,28 @@ public class IdentityService(UserManager<ApplicationUser> userManager) : IIdenti
             ? Array.Empty<string>()
             : result.Errors.Select(e => e.Description).ToList();
     }
+
+    public async Task<(bool Found, string Token)> GeneratePasswordResetTokenAsync(
+        string email, CancellationToken ct = default)
+    {
+        var user = await userManager.FindByEmailAsync(email);
+        if (user is null || user.IsDeleted)
+            return (false, string.Empty);
+
+        var token = await userManager.GeneratePasswordResetTokenAsync(user);
+        return (true, token);
+    }
+
+    public async Task<IReadOnlyList<string>> ResetPasswordAsync(
+        string email, string token, string newPassword, CancellationToken ct = default)
+    {
+        var user = await userManager.FindByEmailAsync(email);
+        if (user is null || user.IsDeleted)
+            return ["User not found."];
+
+        var result = await userManager.ResetPasswordAsync(user, token, newPassword);
+        return result.Succeeded
+            ? Array.Empty<string>()
+            : result.Errors.Select(e => e.Description).ToList();
+    }
 }

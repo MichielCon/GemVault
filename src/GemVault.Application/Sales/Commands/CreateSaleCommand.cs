@@ -14,6 +14,7 @@ public record CreateSaleCommand(
     DateTime SaleDate,
     string? BuyerName,
     string? BuyerEmail,
+    string? BuyerPhone,
     string? Notes,
     List<CreateSaleItemCommand> Items) : IRequest<SaleDto>;
 
@@ -45,6 +46,7 @@ public class CreateSaleCommandHandler(
             SaleDate = DateTime.SpecifyKind(request.SaleDate, DateTimeKind.Utc),
             BuyerName = request.BuyerName,
             BuyerEmail = request.BuyerEmail,
+            BuyerPhone = request.BuyerPhone,
             Notes = request.Notes,
             OwnerId = currentUser.UserId.Value,
         };
@@ -77,6 +79,7 @@ public class CreateSaleCommandHandler(
             sale.SaleDate,
             sale.BuyerName,
             sale.BuyerEmail,
+            sale.BuyerPhone,
             sale.Notes,
             itemDtos,
             itemDtos.Sum(i => i.SalePrice * i.Quantity),

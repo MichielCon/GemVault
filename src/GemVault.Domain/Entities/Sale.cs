@@ -7,6 +7,7 @@ public class Sale : BaseEntity
     public DateTime SaleDate { get; set; }
     public string? BuyerName { get; set; }
     public string? BuyerEmail { get; set; }
+    public string? BuyerPhone { get; set; }
     public Guid OwnerId { get; set; }
     public string? Notes { get; set; }
 

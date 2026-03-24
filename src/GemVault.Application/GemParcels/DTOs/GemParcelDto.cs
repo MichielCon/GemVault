@@ -14,6 +14,7 @@ public record GemParcelDto(
     string? Color,
     string? Treatment,
     decimal? PurchasePrice,
+    DateTime? AcquiredAt,
     string? Notes,
     bool IsPublic,
     Guid OwnerId,

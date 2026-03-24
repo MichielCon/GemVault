@@ -51,6 +51,7 @@ public class GetAdminPublicTokensQueryHandler(
                 t.Id,
                 t.Token,
                 t.IsActive,
+                t.ScanCount,
                 t.GemId,
                 t.Gem?.Name,
                 t.GemParcelId,

@@ -48,7 +48,7 @@ public class GemsController(IMediator mediator) : ControllerBase
             id, body.Name, body.Species, body.Variety, body.WeightCarats,
             body.Color, body.Clarity, body.Cut, body.Treatment, body.Shape,
             body.LengthMm, body.WidthMm, body.HeightMm, body.PurchasePrice,
-            body.Notes, body.IsPublic, body.OriginId, body.Attributes);
+            body.AcquiredAt, body.Notes, body.IsPublic, body.OriginId, body.Attributes);
 
         var result = await mediator.Send(command, ct);
         return Ok(result);
@@ -103,6 +103,7 @@ public record UpdateGemCommandBody(
     decimal? WidthMm,
     decimal? HeightMm,
     decimal? PurchasePrice,
+    DateTime? AcquiredAt,
     string? Notes,
     bool IsPublic,
     Guid? OriginId,

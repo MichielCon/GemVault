@@ -8,7 +8,7 @@ using MediatR;
 
 namespace GemVault.Application.Suppliers.Commands;
 
-public record CreateSupplierCommand(string Name, string? Email, string? Phone, string? Address, string? Notes) : IRequest<SupplierDto>;
+public record CreateSupplierCommand(string Name, string? Email, string? Phone, string? Website, string? Address, string? Notes) : IRequest<SupplierDto>;
 
 public class CreateSupplierCommandValidator : AbstractValidator<CreateSupplierCommand>
 {
@@ -16,6 +16,8 @@ public class CreateSupplierCommandValidator : AbstractValidator<CreateSupplierCo
     {
         RuleFor(x => x.Name).NotEmpty().MaximumLength(200);
         RuleFor(x => x.Email).MaximumLength(200).EmailAddress().When(x => x.Email != null);
+        RuleFor(x => x.Phone).MaximumLength(50).When(x => x.Phone != null);
+        RuleFor(x => x.Website).MaximumLength(500).When(x => x.Website != null);
         RuleFor(x => x.Notes).MaximumLength(5000).When(x => x.Notes != null);
     }
 }
@@ -35,6 +37,7 @@ public class CreateSupplierCommandHandler(
             Name = request.Name,
             Email = request.Email,
             Phone = request.Phone,
+            Website = request.Website,
             Address = request.Address,
             Notes = request.Notes,
             OwnerId = currentUser.UserId.Value,
@@ -48,6 +51,7 @@ public class CreateSupplierCommandHandler(
             supplier.Name,
             supplier.Email,
             supplier.Phone,
+            supplier.Website,
             supplier.Address,
             supplier.Notes,
             0,
