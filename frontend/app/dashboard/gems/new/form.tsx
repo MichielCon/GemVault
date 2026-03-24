@@ -176,6 +176,9 @@ export function GemCreateForm({ vocabulary, origins }: Props) {
                     Purchase price
                   </Label>
                   <Input id="purchasePrice" name="purchasePrice" type="number" min="0" step="0.01" placeholder="e.g. 1500.00" />
+                  <p className="text-[11px] text-muted-foreground leading-snug">
+                    If you&apos;re recording a purchase order for this gem, you can leave this blank and set the cost there instead.
+                  </p>
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <Label htmlFor="acquiredAt">Acquired on</Label>

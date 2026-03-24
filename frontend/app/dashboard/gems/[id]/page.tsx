@@ -171,6 +171,7 @@ export default async function GemDetailPage({ params }: Props) {
                 <Detail
                   label="Purchase price"
                   value={gem.purchasePrice != null ? `$${gem.purchasePrice.toFixed(2)}` : null}
+                  hint={gem.purchasePrice != null ? "Also recorded in your purchase order if acquired via one." : undefined}
                 />
                 <Detail
                   label="Acquired on"
@@ -231,12 +232,15 @@ export default async function GemDetailPage({ params }: Props) {
   );
 }
 
-function Detail({ label, value }: { label: string; value: string | null | undefined }) {
+function Detail({ label, value, hint }: { label: string; value: string | null | undefined; hint?: string }) {
   if (!value) return null;
   return (
     <>
       <dt className="text-zinc-400 text-xs font-medium uppercase tracking-wide">{label}</dt>
-      <dd className="font-medium text-zinc-800">{value}</dd>
+      <dd className="font-medium text-zinc-800">
+        {value}
+        {hint && <span className="ml-1 text-[10px] font-normal text-zinc-400" title={hint}>ⓘ</span>}
+      </dd>
     </>
   );
 }

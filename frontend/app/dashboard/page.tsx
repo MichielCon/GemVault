@@ -109,7 +109,7 @@ export default async function DashboardPage() {
             </div>
           </div>
           <p className="text-3xl font-bold tracking-tight">{fmt(s.unsoldInventoryValue)}</p>
-          <p className="mt-1 text-xs text-muted-foreground">cost of unsold items</p>
+          <p className="mt-1 text-xs text-muted-foreground">sum of purchase prices on unsold gems</p>
         </Link>
 
         {/* Revenue Chart — col 6, row 2 */}
