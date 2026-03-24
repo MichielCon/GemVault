@@ -2,7 +2,7 @@ import Image from "next/image";
 import { publicApi, ApiError } from "@/lib/api";
 import { proxyPhotoUrl } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { Lock } from "lucide-react";
+import { Lock, Gem, ImageOff } from "lucide-react";
 import type { PublicGemDto } from "@/lib/types";
 
 interface Props {
@@ -61,8 +61,9 @@ export default async function PublicScanPage({ params }: Props) {
             />
           </div>
         ) : (
-          <div className="mb-6 flex aspect-video w-full items-center justify-center rounded-2xl border border-dashed bg-muted text-muted-foreground">
-            No photo
+          <div className="mb-6 flex aspect-video w-full flex-col items-center justify-center gap-2 rounded-2xl border border-dashed bg-muted text-muted-foreground">
+            <ImageOff size={32} className="text-zinc-300" />
+            <span>No photo</span>
           </div>
         )}
 
@@ -136,16 +137,16 @@ function PrivatePage() {
       </header>
 
       <div className="mx-auto max-w-md px-4 py-24 flex flex-col items-center text-center gap-5">
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-slate-100">
-          <span className="text-4xl select-none">💎</span>
+        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-zinc-100">
+          <Gem size={36} className="text-zinc-400" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">This gem is incognito</h1>
+          <h1 className="text-2xl font-bold tracking-tight">This item is private</h1>
           <p className="mt-2 text-muted-foreground">
-            This gem is private and can’t be viewed.
+            This item is private and can’t be viewed.
           </p>
         </div>
-        <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-500">
+        <div className="flex items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-4 py-2 text-sm text-zinc-500">
           <Lock size={13} />
           Private collection
         </div>

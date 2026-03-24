@@ -16,8 +16,8 @@ export default async function AdminPublicTokensPage({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">Public Tokens</h1>
-        <p className="mt-1 text-sm text-slate-500">Manage scan link tokens across all users</p>
+        <h1 className="text-xl font-semibold tracking-tight">Public Tokens</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Manage scan link tokens across all users</p>
       </div>
       <PublicTokensTable result={result} currentPage={page} currentFilter={filter} />
     </div>

@@ -19,10 +19,10 @@ export default async function VocabularyAdminPage({ searchParams }: PageProps) {
   ]);
 
   return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Vocabulary</h1>
-        <p className="mt-1 text-sm text-slate-500">
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-xl font-semibold tracking-tight">Vocabulary</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Manage the dropdown options used in gem and parcel forms.
         </p>
       </div>

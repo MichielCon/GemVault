@@ -14,8 +14,8 @@ export default async function AdminSessionsPage({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">Active Sessions</h1>
-        <p className="mt-1 text-sm text-slate-500">Manage refresh tokens across all users</p>
+        <h1 className="text-xl font-semibold tracking-tight">Active Sessions</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Manage refresh tokens across all users</p>
       </div>
       <SessionsTable result={result} currentPage={page} search={search} />
     </div>

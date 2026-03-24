@@ -2,8 +2,8 @@ import Link from "next/link";
 import { salesApi } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/ui/search-input";
+import { SaleTableRow } from "@/components/sales/sale-table-row";
 import { Plus, TrendingUp } from "lucide-react";
-import type { SaleSummaryDto } from "@/lib/types";
 
 interface Props {
   searchParams: Promise<{ page?: string; search?: string }>;
@@ -52,7 +52,7 @@ export default async function SalesPage({ searchParams }: Props) {
               </thead>
               <tbody className="divide-y divide-zinc-100">
                 {result.items.map((sale) => (
-                  <SaleRow key={sale.id} sale={sale} />
+                  <SaleTableRow key={sale.id} sale={sale} />
                 ))}
               </tbody>
             </table>
@@ -67,22 +67,6 @@ export default async function SalesPage({ searchParams }: Props) {
   );
 }
 
-function SaleRow({ sale }: { sale: SaleSummaryDto }) {
-  return (
-    <tr className="hover:bg-zinc-50 transition-colors">
-      <td className="px-4 py-3 font-medium">
-        <Link href={`/dashboard/sales/${sale.id}`} className="hover:underline">
-          {new Date(sale.saleDate).toLocaleDateString()}
-        </Link>
-      </td>
-      <td className="px-4 py-3 text-muted-foreground">{sale.buyerName ?? "—"}</td>
-      <td className="px-4 py-3 text-muted-foreground">{sale.itemCount}</td>
-      <td className="px-4 py-3 font-medium">
-        {sale.totalSaleValue.toLocaleString("en-US", { style: "currency", currency: "USD" })}
-      </td>
-    </tr>
-  );
-}
 
 function EmptyState({ hasSearch }: { hasSearch: boolean }) {
   return (

@@ -81,7 +81,7 @@ export default function NewOriginPage() {
           </CardContent>
 
           <CardFooter className="gap-3">
-            <Button type="submit" disabled={pending}>
+            <Button type="submit" variant="violet" disabled={pending}>
               {pending ? "Saving…" : "Save origin"}
             </Button>
             <Button asChild variant="outline" disabled={pending}>

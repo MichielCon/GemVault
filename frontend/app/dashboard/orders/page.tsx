@@ -2,8 +2,8 @@ import Link from "next/link";
 import { purchaseOrdersApi } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/ui/search-input";
+import { OrderTableRow } from "@/components/orders/order-table-row";
 import { Plus, ShoppingCart } from "lucide-react";
-import type { PurchaseOrderSummaryDto } from "@/lib/types";
 
 interface Props {
   searchParams: Promise<{ page?: string; search?: string }>;
@@ -53,7 +53,7 @@ export default async function OrdersPage({ searchParams }: Props) {
               </thead>
               <tbody className="divide-y divide-zinc-100">
                 {result.items.map((order) => (
-                  <OrderRow key={order.id} order={order} />
+                  <OrderTableRow key={order.id} order={order} />
                 ))}
               </tbody>
             </table>
@@ -68,23 +68,6 @@ export default async function OrdersPage({ searchParams }: Props) {
   );
 }
 
-function OrderRow({ order }: { order: PurchaseOrderSummaryDto }) {
-  return (
-    <tr className="hover:bg-zinc-50 transition-colors">
-      <td className="px-4 py-3 font-medium">
-        <Link href={`/dashboard/orders/${order.id}`} className="hover:underline">
-          {order.reference ?? <span className="text-muted-foreground">—</span>}
-        </Link>
-      </td>
-      <td className="px-4 py-3 text-muted-foreground">{order.supplierName}</td>
-      <td className="px-4 py-3 text-muted-foreground">{new Date(order.orderDate).toLocaleDateString()}</td>
-      <td className="px-4 py-3 text-muted-foreground">{order.itemCount}</td>
-      <td className="px-4 py-3 font-medium">
-        {order.totalCost.toLocaleString("en-US", { style: "currency", currency: "USD" })}
-      </td>
-    </tr>
-  );
-}
 
 function EmptyState({ hasSearch }: { hasSearch: boolean }) {
   return (

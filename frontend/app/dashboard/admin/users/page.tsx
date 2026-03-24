@@ -18,8 +18,8 @@ export default async function AdminUsersPage({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">User Management</h1>
-        <p className="mt-1 text-sm text-slate-500">Manage roles, status, and sessions</p>
+        <h1 className="text-xl font-semibold tracking-tight">User Management</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Manage roles, status, and sessions</p>
       </div>
       <UserAdminTable
         result={result}

@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Combobox } from "@/components/ui/combobox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Gem, Globe, MapPin, DollarSign, StickyNote } from "lucide-react";
+import { ArrowLeft, Gem, Globe, MapPin, DollarSign, StickyNote, Hexagon } from "lucide-react";
 import type { VocabularyItemDto, OriginDto } from "@/lib/types";
 
 interface Props {
@@ -112,7 +112,7 @@ export function GemCreateForm({ vocabulary, origins }: Props) {
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-sm font-semibold text-zinc-500 uppercase tracking-wide">
-                <span className="text-xs">⬡</span>
+                <Hexagon size={14} className="text-zinc-400" />
                 Physical Properties
               </CardTitle>
             </CardHeader>
