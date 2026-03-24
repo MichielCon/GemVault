@@ -105,6 +105,40 @@ public class GemsController(IMediator mediator) : ControllerBase
         var result = await mediator.Send(command, ct);
         return Ok(result);
     }
+
+    [HttpGet("export")]
+    public async Task<IActionResult> Export(CancellationToken ct)
+    {
+        var items = await mediator.Send(new ExportGemsQuery(), ct);
+        var csv = BuildCsv(
+            "Name,Species,Variety,Weight (ct),Color,Clarity,Cut,Shape,Treatment,Purchase Price,Acquired On,Status,Origin,Locality,Notes,Added On",
+            items.Select(g => new[]
+            {
+                g.Name, g.Species, g.Variety, g.WeightCarats?.ToString() ?? "",
+                g.Color, g.Clarity, g.Cut, g.Shape, g.Treatment,
+                g.PurchasePrice?.ToString("F2") ?? "", g.AcquiredAt ?? "",
+                g.Status, g.OriginCountry, g.Locality, g.Notes, g.AddedOn
+            }));
+        var bytes = System.Text.Encoding.UTF8.GetBytes(csv);
+        return File(bytes, "text/csv", "gems-export.csv");
+    }
+
+    private static string BuildCsv(string header, IEnumerable<string?[]> rows)
+    {
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine(header);
+        foreach (var row in rows)
+            sb.AppendLine(string.Join(",", row.Select(Escape)));
+        return sb.ToString();
+    }
+
+    private static string Escape(string? value)
+    {
+        if (string.IsNullOrEmpty(value)) return "";
+        if (value.Contains(',') || value.Contains('"') || value.Contains('\n') || value.Contains('\r'))
+            return $"\"{value.Replace("\"", "\"\"")}\"";
+        return value;
+    }
 }
 
 public record BulkDeleteGemsRequest(List<string> Ids);

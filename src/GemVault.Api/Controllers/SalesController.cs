@@ -49,4 +49,36 @@ public class SalesController(IMediator mediator) : ControllerBase
         await mediator.Send(new DeleteSaleCommand(id), ct);
         return NoContent();
     }
+
+    [HttpGet("export")]
+    public async Task<IActionResult> Export(CancellationToken ct)
+    {
+        var items = await mediator.Send(new ExportSalesQuery(), ct);
+        var csv = BuildCsv(
+            "Sale Date,Buyer,Item,Species,Unit Price,Quantity,Line Total,Notes",
+            items.Select(s => new[]
+            {
+                s.SaleDate, s.BuyerName, s.ItemName, s.ItemSpecies,
+                s.SalePrice.ToString("F2"), s.Quantity.ToString(), s.LineTotal.ToString("F2"), s.SaleNotes
+            }));
+        var bytes = System.Text.Encoding.UTF8.GetBytes(csv);
+        return File(bytes, "text/csv", "sales-export.csv");
+    }
+
+    private static string BuildCsv(string header, IEnumerable<string?[]> rows)
+    {
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine(header);
+        foreach (var row in rows)
+            sb.AppendLine(string.Join(",", row.Select(Escape)));
+        return sb.ToString();
+    }
+
+    private static string Escape(string? value)
+    {
+        if (string.IsNullOrEmpty(value)) return "";
+        if (value.Contains(',') || value.Contains('"') || value.Contains('\n') || value.Contains('\r'))
+            return $"\"{value.Replace("\"", "\"\"")}\"";
+        return value;
+    }
 }

@@ -4,7 +4,7 @@ import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { LayoutGrid, List, Plus, Package, Search, X, Filter, ArrowUp, ArrowDown, CheckSquare, Check, Trash2 } from "lucide-react";
+import { LayoutGrid, List, Plus, Package, Search, X, Filter, ArrowUp, ArrowDown, CheckSquare, Check, Trash2, Download } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MagicCard } from "@/components/magicui/magic-card";
@@ -355,8 +355,11 @@ export function ParcelInventoryView({
             </button>
           </div>
 
-          {/* Add button */}
-          <div className="ml-auto">
+          {/* Add button + Export */}
+          <div className="ml-auto flex items-center gap-2">
+            <Button asChild size="sm" variant="outline">
+              <a href="/api/export/parcels" download><Download size={14} />Export CSV</a>
+            </Button>
             <Button asChild size="sm" variant="violet">
               <Link href="/dashboard/parcels/new"><Plus size={15} />Add parcel</Link>
             </Button>

@@ -3,7 +3,7 @@ import { salesApi } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/ui/search-input";
 import { SaleTableRow } from "@/components/sales/sale-table-row";
-import { Plus, TrendingUp } from "lucide-react";
+import { Plus, TrendingUp, Download } from "lucide-react";
 
 interface Props {
   searchParams: Promise<{ page?: string; search?: string }>;
@@ -27,9 +27,14 @@ export default async function SalesPage({ searchParams }: Props) {
           <h1 className="text-xl font-semibold tracking-tight">Sales</h1>
           <p className="text-sm text-muted-foreground">Record and track gem sales</p>
         </div>
-        <Button asChild size="sm" variant="violet">
-          <Link href="/dashboard/sales/new"><Plus size={16} />New sale</Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button asChild size="sm" variant="outline">
+            <a href="/api/export/sales" download><Download size={14} />Export CSV</a>
+          </Button>
+          <Button asChild size="sm" variant="violet">
+            <Link href="/dashboard/sales/new"><Plus size={16} />New sale</Link>
+          </Button>
+        </div>
       </div>
 
       <div className="shrink-0 mb-4">
