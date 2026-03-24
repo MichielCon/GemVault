@@ -11,9 +11,12 @@ namespace GemVault.Api.Controllers;
 public class DashboardController(IMediator mediator) : ControllerBase
 {
     [HttpGet("stats")]
-    public async Task<IActionResult> GetStats(CancellationToken ct)
+    public async Task<IActionResult> GetStats(
+        [FromQuery] DateTime? from,
+        [FromQuery] DateTime? to,
+        CancellationToken ct)
     {
-        var result = await mediator.Send(new GetDashboardStatsQuery(), ct);
+        var result = await mediator.Send(new GetDashboardStatsQuery(from, to), ct);
         return Ok(result);
     }
 }

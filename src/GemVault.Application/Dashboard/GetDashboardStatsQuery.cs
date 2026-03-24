@@ -37,7 +37,7 @@ public record DashboardStatsDto(
     List<RecentSaleDto> RecentSales,
     List<RecentItemDto> RecentItems);
 
-public record GetDashboardStatsQuery : IRequest<DashboardStatsDto>;
+public record GetDashboardStatsQuery(DateTime? From = null, DateTime? To = null) : IRequest<DashboardStatsDto>;
 
 public class GetDashboardStatsQueryHandler(
     IApplicationDbContext context,
@@ -75,20 +75,31 @@ public class GetDashboardStatsQueryHandler(
             .Select(p => new { p.Id, p.PurchasePrice, p.Quantity, p.Species })
             .ToListAsync(ct);
 
-        // All sale items (for revenue totals and monthly chart)
-        var allSaleItems = await context.SaleItems
-            .Where(i => !i.IsDeleted && !i.Sale.IsDeleted && i.Sale.OwnerId == userId)
+        // Normalise date range (ensure UTC for Npgsql)
+        var from = request.From.HasValue ? DateTime.SpecifyKind(request.From.Value, DateTimeKind.Utc) : (DateTime?)null;
+        var to = request.To.HasValue ? DateTime.SpecifyKind(request.To.Value.AddDays(1), DateTimeKind.Utc) : (DateTime?)null;
+
+        // All sale items (for revenue totals and monthly chart) — optionally date-filtered
+        var saleItemsQuery = context.SaleItems
+            .Where(i => !i.IsDeleted && !i.Sale.IsDeleted && i.Sale.OwnerId == userId);
+        if (from.HasValue) saleItemsQuery = saleItemsQuery.Where(i => i.Sale.SaleDate >= from.Value);
+        if (to.HasValue)   saleItemsQuery = saleItemsQuery.Where(i => i.Sale.SaleDate < to.Value);
+        var allSaleItems = await saleItemsQuery
             .Select(i => new { i.SaleId, SaleDate = i.Sale.SaleDate, i.SalePrice, i.Quantity })
             .ToListAsync(ct);
 
         var supplierCount = await context.Suppliers
             .CountAsync(s => s.OwnerId == userId && !s.IsDeleted, ct);
 
-        var purchaseOrderCount = await context.PurchaseOrders
-            .CountAsync(o => o.OwnerId == userId && !o.IsDeleted, ct);
+        var purchaseOrdersQuery = context.PurchaseOrders.Where(o => o.OwnerId == userId && !o.IsDeleted);
+        if (from.HasValue) purchaseOrdersQuery = purchaseOrdersQuery.Where(o => o.OrderDate >= from.Value);
+        if (to.HasValue)   purchaseOrdersQuery = purchaseOrdersQuery.Where(o => o.OrderDate < to.Value);
+        var purchaseOrderCount = await purchaseOrdersQuery.CountAsync(ct);
 
-        var saleCount = await context.Sales
-            .CountAsync(s => s.OwnerId == userId && !s.IsDeleted, ct);
+        var salesQuery = context.Sales.Where(s => s.OwnerId == userId && !s.IsDeleted);
+        if (from.HasValue) salesQuery = salesQuery.Where(s => s.SaleDate >= from.Value);
+        if (to.HasValue)   salesQuery = salesQuery.Where(s => s.SaleDate < to.Value);
+        var saleCount = await salesQuery.CountAsync(ct);
 
         // Recent gems and parcels added
         var recentGems = await context.Gems
@@ -105,9 +116,11 @@ public class GetDashboardStatsQueryHandler(
             .Select(p => new RecentItemDto(p.Id, p.Name, "Parcel", p.Species, p.Variety, p.CreatedAt))
             .ToListAsync(ct);
 
-        // Recent sales
-        var recentSaleEntities = await context.Sales
-            .Where(s => s.OwnerId == userId && !s.IsDeleted)
+        // Recent sales — respect date filter
+        var recentSalesQuery = context.Sales.Where(s => s.OwnerId == userId && !s.IsDeleted);
+        if (from.HasValue) recentSalesQuery = recentSalesQuery.Where(s => s.SaleDate >= from.Value);
+        if (to.HasValue)   recentSalesQuery = recentSalesQuery.Where(s => s.SaleDate < to.Value);
+        var recentSaleEntities = await recentSalesQuery
             .OrderByDescending(s => s.SaleDate)
             .Take(5)
             .Select(s => new { s.Id, s.SaleDate, s.BuyerName })
@@ -132,10 +145,10 @@ public class GetDashboardStatsQueryHandler(
         var unsoldInventoryValue = unsoldGems.Sum(g => g.PurchasePrice ?? 0m)
                                  + unsoldParcels.Sum(p => p.PurchasePrice ?? 0m);
 
-        // Monthly revenue — last 6 months
-        var sixMonthsAgo = DateTime.UtcNow.AddMonths(-6);
+        // Monthly revenue — use date range when set, otherwise last 6 months
+        var chartFrom = from ?? DateTime.UtcNow.AddMonths(-6);
         var monthlyRevenue = allSaleItems
-            .Where(i => i.SaleDate >= sixMonthsAgo)
+            .Where(i => i.SaleDate >= chartFrom)
             .GroupBy(i => new { i.SaleDate.Year, i.SaleDate.Month })
             .Select(g => new MonthlyRevenueDto(g.Key.Year, g.Key.Month, g.Sum(i => i.SalePrice * i.Quantity)))
             .OrderBy(m => m.Year).ThenBy(m => m.Month)
