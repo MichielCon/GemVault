@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { adminApi } from "./api";
 import type { AdminPublicTokenDto } from "./types";
 
@@ -50,6 +51,7 @@ export async function revokeUserSessions(
   const userId = formData.get("userId") as string;
   try {
     await adminApi.revokeUserSessions(userId);
+    revalidatePath("/dashboard/admin/sessions");
     return { error: null };
   } catch (e: unknown) {
     return { error: e instanceof Error ? e.message : "Failed to revoke sessions." };
@@ -63,9 +65,30 @@ export async function revokeSession(
   const sessionId = formData.get("sessionId") as string;
   try {
     await adminApi.revokeSession(sessionId);
+    revalidatePath("/dashboard/admin/sessions");
     return { error: null };
   } catch (e: unknown) {
     return { error: e instanceof Error ? e.message : "Failed to revoke session." };
+  }
+}
+
+export async function revokeSessionById(sessionId: string): Promise<{ error: string | null }> {
+  try {
+    await adminApi.revokeSession(sessionId);
+    revalidatePath("/dashboard/admin/sessions");
+    return { error: null };
+  } catch (e: unknown) {
+    return { error: e instanceof Error ? e.message : "Failed to revoke session." };
+  }
+}
+
+export async function revokeUserSessionsById(userId: string): Promise<{ error: string | null }> {
+  try {
+    await adminApi.revokeUserSessions(userId);
+    revalidatePath("/dashboard/admin/sessions");
+    return { error: null };
+  } catch (e: unknown) {
+    return { error: e instanceof Error ? e.message : "Failed to revoke sessions." };
   }
 }
 

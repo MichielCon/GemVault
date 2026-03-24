@@ -1,9 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useState, useTransition } from "react";
 import type { PagedResult, AdminSessionDto } from "@/lib/types";
-import { revokeSession } from "@/lib/admin-actions";
+import { revokeSessionById, revokeUserSessionsById } from "@/lib/admin-actions";
 
 interface Props {
   result: PagedResult<AdminSessionDto>;
@@ -11,27 +11,85 @@ interface Props {
   search: string;
 }
 
-function SessionRow({ session }: { session: AdminSessionDto }) {
+function RevokeAllButton({ userId, email, count }: { userId: string; email: string; count: number }) {
   const router = useRouter();
-  const [state, action] = useActionState(revokeSession, { error: null });
-  const prevStateRef = useRef(state);
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
 
-  useEffect(() => {
-    if (prevStateRef.current !== state && state.error === null) {
-      router.refresh();
-    }
-    prevStateRef.current = state;
-  }, [state, router]);
+  function handleRevokeAll() {
+    startTransition(async () => {
+      const result = await revokeUserSessionsById(userId);
+      if (result.error) {
+        setError(result.error);
+      } else {
+        setConfirming(false);
+        router.refresh();
+      }
+    });
+  }
 
   return (
-    <tr className={`border-b border-slate-50 last:border-0 ${session.isExpired ? "opacity-50" : "hover:bg-slate-50"}`}>
-      <td className="px-4 py-3 text-sm text-slate-700">{session.userEmail}</td>
-      <td className="px-4 py-3 text-sm text-slate-400">{new Date(session.createdAt).toLocaleString()}</td>
-      <td className="px-4 py-3 text-sm text-slate-400">{new Date(session.expiresAt).toLocaleString()}</td>
+    <div className="flex items-center gap-2">
+      <span className="text-sm text-zinc-600">
+        <span className="font-medium">{email}</span>
+        <span className="ml-2 text-zinc-400">— {count} active session{count !== 1 ? "s" : ""}</span>
+      </span>
+      {confirming ? (
+        <div className="flex items-center gap-1">
+          <button
+            onClick={handleRevokeAll}
+            disabled={isPending}
+            className="rounded bg-red-600 px-2 py-1 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-50"
+          >
+            {isPending ? "Revoking…" : "Confirm revoke all"}
+          </button>
+          <button
+            onClick={() => setConfirming(false)}
+            className="rounded bg-zinc-100 px-2 py-1 text-xs font-medium text-zinc-600 hover:bg-zinc-200"
+          >
+            Cancel
+          </button>
+        </div>
+      ) : (
+        <button
+          onClick={() => setConfirming(true)}
+          className="rounded bg-red-100 px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-200"
+        >
+          Revoke all
+        </button>
+      )}
+      {error && <p className="text-xs text-red-500">{error}</p>}
+    </div>
+  );
+}
+
+function SessionRow({ session }: { session: AdminSessionDto }) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const [confirming, setConfirming] = useState(false);
+
+  function handleRevoke() {
+    startTransition(async () => {
+      const result = await revokeSessionById(session.id);
+      if (result.error) {
+        setError(result.error);
+      } else {
+        setConfirming(false);
+        router.refresh();
+      }
+    });
+  }
+
+  return (
+    <tr className={`border-b border-zinc-50 last:border-0 ${session.isExpired ? "opacity-50" : "hover:bg-zinc-50"}`}>
+      <td className="px-4 py-3 text-sm text-zinc-700">{session.userEmail}</td>
+      <td className="px-4 py-3 text-sm text-zinc-400">{new Date(session.createdAt).toLocaleString()}</td>
+      <td className="px-4 py-3 text-sm text-zinc-400">{new Date(session.expiresAt).toLocaleString()}</td>
       <td className="px-4 py-3">
         {session.isExpired ? (
-          <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">
+          <span className="inline-flex items-center rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-500">
             Expired
           </span>
         ) : (
@@ -40,23 +98,21 @@ function SessionRow({ session }: { session: AdminSessionDto }) {
           </span>
         )}
       </td>
-      <td className="px-4 py-3 font-mono text-xs text-slate-400">{session.tokenHashMasked}</td>
+      <td className="px-4 py-3 font-mono text-xs text-zinc-400">{session.tokenHashMasked}</td>
       <td className="px-4 py-3">
         {!session.isExpired && (
           confirming ? (
             <div className="flex items-center gap-1">
-              <form action={action} onSubmit={() => setConfirming(false)}>
-                <input type="hidden" name="sessionId" value={session.id} />
-                <button
-                  type="submit"
-                  className="rounded bg-red-600 px-2 py-1 text-xs font-medium text-white hover:bg-red-700"
-                >
-                  Confirm
-                </button>
-              </form>
+              <button
+                onClick={handleRevoke}
+                disabled={isPending}
+                className="rounded bg-red-600 px-2 py-1 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-50"
+              >
+                {isPending ? "Revoking…" : "Confirm"}
+              </button>
               <button
                 onClick={() => setConfirming(false)}
-                className="rounded bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-200"
+                className="rounded bg-zinc-100 px-2 py-1 text-xs font-medium text-zinc-600 hover:bg-zinc-200"
               >
                 Cancel
               </button>
@@ -70,7 +126,7 @@ function SessionRow({ session }: { session: AdminSessionDto }) {
             </button>
           )
         )}
-        {state.error && <p className="mt-1 text-xs text-red-500">{state.error}</p>}
+        {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
       </td>
     </tr>
   );
@@ -86,6 +142,20 @@ export default function SessionsTable({ result, currentPage, search }: Props) {
     router.push(`/dashboard/admin/sessions?${params.toString()}`);
   }
 
+  // Group active sessions by user to show "Revoke All" per user
+  const userSessionMap = new Map<string, { userId: string; email: string; count: number }>();
+  for (const session of result.items) {
+    if (!session.isExpired) {
+      const existing = userSessionMap.get(session.userId);
+      if (existing) {
+        existing.count++;
+      } else {
+        userSessionMap.set(session.userId, { userId: session.userId, email: session.userEmail, count: 1 });
+      }
+    }
+  }
+  const usersWithMultipleSessions = Array.from(userSessionMap.values()).filter((u) => u.count > 1);
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
@@ -94,17 +164,26 @@ export default function SessionsTable({ result, currentPage, search }: Props) {
           placeholder="Filter by email…"
           defaultValue={search}
           onChange={(e) => updateParam("search", e.target.value)}
-          className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-400"
+          className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-700 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-400"
         />
-        <span className="ml-auto text-sm text-slate-400">
+        <span className="ml-auto text-sm text-zinc-400">
           {result.totalCount} session{result.totalCount !== 1 ? "s" : ""}
         </span>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      {usersWithMultipleSessions.length > 0 && (
+        <div className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 space-y-2">
+          <p className="text-xs font-medium uppercase tracking-wide text-red-400">Users with multiple active sessions</p>
+          {usersWithMultipleSessions.map((u) => (
+            <RevokeAllButton key={u.userId} userId={u.userId} email={u.email} count={u.count} />
+          ))}
+        </div>
+      )}
+
+      <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-slate-100 text-left text-xs font-medium uppercase tracking-wide text-slate-400">
+            <tr className="border-b border-zinc-100 text-left text-xs font-medium uppercase tracking-wide text-zinc-400">
               <th className="px-4 py-3">User</th>
               <th className="px-4 py-3">Issued</th>
               <th className="px-4 py-3">Expires</th>
@@ -119,7 +198,7 @@ export default function SessionsTable({ result, currentPage, search }: Props) {
             ))}
             {result.items.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-slate-400">
+                <td colSpan={6} className="px-4 py-8 text-center text-zinc-400">
                   {search ? `No sessions found for "${search}".` : "No active sessions."}
                 </td>
               </tr>
@@ -129,13 +208,13 @@ export default function SessionsTable({ result, currentPage, search }: Props) {
       </div>
 
       {result.totalPages > 1 && (
-        <div className="flex items-center justify-between text-sm text-slate-500">
+        <div className="flex items-center justify-between text-sm text-zinc-500">
           <span>Page {result.page} of {result.totalPages}</span>
           <div className="flex gap-2">
             {result.hasPreviousPage && (
               <button
                 onClick={() => updateParam("page", String(currentPage - 1))}
-                className="rounded border border-slate-200 bg-white px-3 py-1 hover:bg-slate-50"
+                className="rounded border border-zinc-200 bg-white px-3 py-1 hover:bg-zinc-50"
               >
                 Previous
               </button>
@@ -143,7 +222,7 @@ export default function SessionsTable({ result, currentPage, search }: Props) {
             {result.hasNextPage && (
               <button
                 onClick={() => updateParam("page", String(currentPage + 1))}
-                className="rounded border border-slate-200 bg-white px-3 py-1 hover:bg-slate-50"
+                className="rounded border border-zinc-200 bg-white px-3 py-1 hover:bg-zinc-50"
               >
                 Next
               </button>
