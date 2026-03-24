@@ -24,5 +24,4 @@ public class GemParcel : BaseEntity, IGemRecord
     public PublicToken? PublicToken { get; set; }
     public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     public ICollection<SaleItem> SaleItems { get; set; } = new List<SaleItem>();
-    public ICollection<Gem> SplitGems { get; set; } = new List<Gem>();
 }
