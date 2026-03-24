@@ -5,7 +5,7 @@ import { type NextRequest, NextResponse } from "next/server";
 // In Docker: http://minio:9000 (container-to-container).
 // In local dev: http://localhost:9000 (MinIO mapped port).
 const MINIO_INTERNAL = process.env.MINIO_INTERNAL_URL ?? "http://minio:9000";
-const MINIO_BUCKET = process.env.MINIO_BUCKET ?? "gemvault";
+const MINIO_BUCKET = process.env.MINIO_BUCKET ?? "gemvault-images";
 
 const ALLOWED_CONTENT_TYPES = new Set([
   "image/jpeg",
