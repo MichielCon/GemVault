@@ -148,6 +148,7 @@ public class RefreshTokenConfiguration : IEntityTypeConfiguration<Domain.Entitie
         builder.Property(t => t.TokenHash).IsRequired().HasMaxLength(64);
         builder.HasIndex(t => t.TokenHash).IsUnique();
         builder.HasIndex(t => t.UserId);
+        builder.HasIndex(t => new { t.UserId, t.ExpiresAt });
     }
 }
 

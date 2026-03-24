@@ -16,6 +16,7 @@ public class UpdateSupplierCommandValidator : AbstractValidator<UpdateSupplierCo
     {
         RuleFor(x => x.Name).NotEmpty().MaximumLength(200);
         RuleFor(x => x.Email).MaximumLength(200).When(x => x.Email != null);
+        RuleFor(x => x.Notes).MaximumLength(5000).When(x => x.Notes != null);
     }
 }
 

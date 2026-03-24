@@ -29,6 +29,7 @@ public class CreateGemParcelCommandValidator : AbstractValidator<CreateGemParcel
         RuleFor(x => x.Quantity).GreaterThan(0);
         RuleFor(x => x.TotalWeightCarats).GreaterThan(0).When(x => x.TotalWeightCarats.HasValue);
         RuleFor(x => x.PurchasePrice).GreaterThanOrEqualTo(0).When(x => x.PurchasePrice.HasValue);
+        RuleFor(x => x.Notes).MaximumLength(5000).When(x => x.Notes != null);
     }
 }
 

@@ -1,3 +1,4 @@
+using FluentValidation;
 using GemVault.Application.Admin.DTOs;
 using GemVault.Application.Common.Models;
 using GemVault.Application.Interfaces;
@@ -8,6 +9,15 @@ namespace GemVault.Application.Admin.Queries;
 
 public record GetAdminSessionsQuery(int Page = 1, int PageSize = 20, string? Search = null)
     : IRequest<PagedResult<AdminSessionDto>>;
+
+public class GetAdminSessionsQueryValidator : AbstractValidator<GetAdminSessionsQuery>
+{
+    public GetAdminSessionsQueryValidator()
+    {
+        RuleFor(x => x.Page).GreaterThanOrEqualTo(1);
+        RuleFor(x => x.PageSize).InclusiveBetween(1, 100);
+    }
+}
 
 public class GetAdminSessionsQueryHandler(
     IApplicationDbContext context,
@@ -30,10 +40,11 @@ public class GetAdminSessionsQueryHandler(
 
         var total = await query.CountAsync(ct);
 
+        var pageSize = Math.Min(request.PageSize, 100);
         var tokens = await query
             .OrderByDescending(t => t.CreatedAt)
-            .Skip((request.Page - 1) * request.PageSize)
-            .Take(request.PageSize)
+            .Skip((request.Page - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync(ct);
 
         var userIds = tokens.Select(t => t.UserId).Distinct();
@@ -50,6 +61,6 @@ public class GetAdminSessionsQueryHandler(
             t.ExpiresAt < now
         )).ToList();
 
-        return new PagedResult<AdminSessionDto>(dtos, total, request.Page, request.PageSize);
+        return new PagedResult<AdminSessionDto>(dtos, total, request.Page, pageSize);
     }
 }

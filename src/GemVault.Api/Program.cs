@@ -6,6 +6,7 @@ using GemVault.Infrastructure;
 using GemVault.Infrastructure.Identity;
 using GemVault.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -69,6 +70,15 @@ builder.Services.AddCors(opts =>
 // Health checks
 builder.Services.AddHealthChecks();
 
+// Forwarded headers — required to get real client IP behind nginx
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    // Trust all proxies (nginx is in the same Docker network)
+    options.KnownProxies.Clear();
+    options.KnownIPNetworks.Clear();
+});
+
 // Rate limiting
 builder.Services.AddRateLimiter(opts =>
 {
@@ -108,6 +118,7 @@ using (var scope = app.Services.CreateScope())
     await db.Database.MigrateAsync();
 }
 
+app.UseForwardedHeaders();
 app.UseCors();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 

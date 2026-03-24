@@ -1,6 +1,7 @@
 using GemVault.Application.Common.Options;
 using GemVault.Application.Interfaces;
 using GemVault.Domain.Interfaces;
+using GemVault.Infrastructure.BackgroundServices;
 using GemVault.Infrastructure.Identity;
 using GemVault.Infrastructure.Persistence;
 using GemVault.Infrastructure.Storage;
@@ -28,9 +29,9 @@ public static class DependencyInjection
         services.AddIdentityCore<ApplicationUser>(opts =>
         {
             opts.Password.RequireDigit = true;
-            opts.Password.RequiredLength = 8;
-            opts.Password.RequireUppercase = false;
-            opts.Password.RequireNonAlphanumeric = false;
+            opts.Password.RequiredLength = 10;
+            opts.Password.RequireUppercase = true;
+            opts.Password.RequireNonAlphanumeric = true;
             opts.User.RequireUniqueEmail = true;
         })
         .AddRoles<IdentityRole<Guid>>()
@@ -55,6 +56,9 @@ public static class DependencyInjection
                 .Build();
         });
         services.AddScoped<IStorageService, MinioStorageService>();
+
+        // Background services
+        services.AddHostedService<RefreshTokenCleanupService>();
 
         return services;
     }

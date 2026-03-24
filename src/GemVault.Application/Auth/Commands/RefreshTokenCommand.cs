@@ -34,7 +34,15 @@ public class RefreshTokenCommandHandler(
         if (!found)
             throw new ValidationException("User not found.");
 
-        // Rotate: revoke old, issue new
+        // Optimistic concurrency: only revoke if the token is still active in the DB.
+        // This prevents two concurrent requests from both succeeding with the same refresh token.
+        var rowsAffected = await context.ExecuteSqlRawAsync(
+            "UPDATE \"RefreshTokens\" SET \"IsRevoked\" = TRUE WHERE \"Id\" = {0} AND \"IsRevoked\" = FALSE",
+            ct, stored.Id);
+        if (rowsAffected == 0)
+            throw new ValidationException("Refresh token has already been used.");
+
+        // Keep EF entity state consistent with the DB update
         stored.IsRevoked = true;
         stored.UpdatedAt = DateTime.UtcNow;
 
