@@ -4,22 +4,38 @@ services:
     ports: []  # Remove dev port binding — DB only reachable inside Docker network
     volumes:
       - /opt/gemvault/data/postgres:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          memory: 1G
 
   minio:
     restart: always
     ports: []  # Remove dev ports — MinIO is only reachable inside Docker network
     volumes:
       - /opt/gemvault/data/minio:/data
+    deploy:
+      resources:
+        limits:
+          memory: 512M
 
   api:
     restart: always
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
+    deploy:
+      resources:
+        limits:
+          memory: 512M
 
   frontend:
     restart: always
     environment:
       - NODE_ENV=production
+    deploy:
+      resources:
+        limits:
+          memory: 512M
 
   nginx:
     restart: always
@@ -29,6 +45,10 @@ services:
     volumes:
       - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - /opt/gemvault/certs:/etc/nginx/certs:ro
+    deploy:
+      resources:
+        limits:
+          memory: 128M
 
   seq:
     restart: always
@@ -36,3 +56,18 @@ services:
       - "5341:5341"  # ingestion only — UI NOT exposed publicly
     volumes:
       - /opt/gemvault/data/seq:/data
+    environment:
+      - SEQ_CACHE_STORAGESIZE=512
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  backup:
+    restart: always
+    volumes:
+      - /opt/gemvault/data/backups:/backups
+    deploy:
+      resources:
+        limits:
+          memory: 128M
