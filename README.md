@@ -60,7 +60,8 @@ Built end-to-end using a multi-agent Claude Code setup where specialised AI agen
 | Auth | ASP.NET Identity + JWT + refresh tokens |
 | Charts | Recharts 2 — server-data, client-rendered bar and donut charts |
 | Tests | xUnit unit tests + integration tests (WebApplicationFactory + Testcontainers PostgreSQL + Respawn) |
-| Infrastructure | Docker Compose (5 services: api, frontend, db, minio, nginx) |
+| Logging | Serilog + Seq — structured logs, correlation IDs, per-request user/duration enrichment |
+| Infrastructure | Docker Compose (7 services: api, frontend, db, minio, nginx, seq, backup) |
 | CI/CD | GitHub Actions — build + test on PR, SSH deploy on merge to main |
 
 ---
@@ -84,8 +85,9 @@ GemVault/
 │   ├── components/ui/           # Reusable UI components
 │   └── lib/                     # API client, server actions, types
 ├── docker/                      # Dockerfile.api, Dockerfile.frontend, nginx.conf
-├── docker-compose.yml           # Local dev — all 5 services
-└── docker-compose.prod.yml      # Production overrides
+├── docker-compose.yml           # Local dev — all 7 services
+├── docker-compose.prod.yml      # Production overrides
+└── docs/                        # Developer documentation
 ```
 
 **Key design decisions:**
@@ -137,6 +139,7 @@ docker compose up -d
 | API | http://localhost:5000 |
 | API health | http://localhost:5000/health |
 | MinIO console | http://localhost:9001 |
+| Seq logs | http://localhost:8080 |
 
 The API applies EF Core migrations automatically on startup. On first run, register an account at `/auth/register`.
 
@@ -184,5 +187,5 @@ PublicToken     → UUID per Gem/Parcel for QR/RFID scan links
 - [x] Phase 2 — Frontend (full dashboard, edit forms, photo uploader, public scan page)
 - [x] Phase 3 — Suppliers, purchase orders, sales, dashboard stats, vocabulary system, origin picker
 - [x] Phase 3.5 — Analytics dashboard (KPI cards, revenue chart, species donut), photo proxy, sold badge + status filter, grid/list toggle, integration test suite
-- [ ] Phase 4 — Provenance map (Leaflet), QR code generation, certificate upload (PDF → MinIO)
+- [x] Phase 4 — Provenance map (Leaflet), QR code generation, certificate upload (PDF → MinIO), structured logging + Seq, production backups, resource limits
 - [ ] Phase 5 — .NET MAUI desktop/mobile app (offline-first, shared C# domain models), multi-tenancy, insurance valuation PDF reports
