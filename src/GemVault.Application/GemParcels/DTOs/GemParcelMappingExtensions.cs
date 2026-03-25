@@ -31,6 +31,7 @@ internal static class GemParcelMappingExtensions
             p.OwnerId,
             p.OriginId,
             p.Origin?.Country,
+            p.Origin?.Locality,
             p.PublicToken?.Token,
             p.CreatedAt,
             p.UpdatedAt,
@@ -39,7 +40,8 @@ internal static class GemParcelMappingExtensions
                 .Select(ph => new GemParcelPhotoDto(ph.Id, storage.GetPublicUrl(ph.ObjectKey), ph.IsCover, ph.CreatedAt))
                 .ToList(),
             soldInfo,
-            splitGemCount);
+            splitGemCount,
+            p.OrderItems.FirstOrDefault(oi => !oi.IsDeleted)?.PurchaseOrderId);
     }
 
     internal static GemParcelSummaryDto ToSummaryDto(this GemParcel p, IStorageService storage, bool isSold = false)

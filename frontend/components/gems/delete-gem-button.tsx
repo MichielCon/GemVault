@@ -1,27 +1,43 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { deleteGem } from "@/lib/gem-actions";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 const initialState = { error: null as string | null };
 
 export function DeleteGemButton({ id }: { id: string }) {
   const [, formAction, pending] = useActionState(deleteGem, initialState);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  function handleConfirm() {
+    setConfirmOpen(false);
+    const fd = new FormData();
+    fd.append("id", id);
+    formAction(fd);
+  }
 
   return (
-    <form
-      action={formAction}
-      onSubmit={(e) => {
-        if (!window.confirm("Delete this gem? This cannot be undone.")) {
-          e.preventDefault();
-        }
-      }}
-    >
-      <input type="hidden" name="id" value={id} />
-      <Button type="submit" variant="destructive" size="sm" disabled={pending}>
+    <>
+      <Button
+        type="button"
+        variant="destructive"
+        size="sm"
+        disabled={pending}
+        onClick={() => setConfirmOpen(true)}
+      >
         {pending ? "Deleting…" : "Delete gem"}
       </Button>
-    </form>
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Delete gem"
+        description="This will permanently delete the gem and all its photos. This cannot be undone."
+        confirmLabel="Delete"
+        destructive
+        onConfirm={handleConfirm}
+        onCancel={() => setConfirmOpen(false)}
+      />
+    </>
   );
 }

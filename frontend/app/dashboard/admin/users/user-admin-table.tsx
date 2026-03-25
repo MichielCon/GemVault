@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState, useCallback } from "react";
 import type { PagedResult, AdminUserDto } from "@/lib/types";
 import {
   changeUserRole,
@@ -223,6 +223,7 @@ function UserRow({ user }: { user: AdminUserDto }) {
 
 export default function UserAdminTable({ result, currentPage, search, role, status }: Props) {
   const router = useRouter();
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   function updateParam(key: string, value: string) {
     const params = new URLSearchParams();
@@ -233,6 +234,12 @@ export default function UserAdminTable({ result, currentPage, search, role, stat
     router.push(`/dashboard/admin/users?${params.toString()}`);
   }
 
+  const handleSearchChange = useCallback((value: string) => {
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    searchDebounceRef.current = setTimeout(() => updateParam("search", value), 300);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search, role, status]);
+
   return (
     <div className="space-y-4">
       {/* Filter bar */}
@@ -241,7 +248,7 @@ export default function UserAdminTable({ result, currentPage, search, role, stat
           type="text"
           placeholder="Search email…"
           defaultValue={search}
-          onChange={(e) => updateParam("search", e.target.value)}
+          onChange={(e) => handleSearchChange(e.target.value)}
           className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-400"
         />
         <select

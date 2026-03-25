@@ -23,7 +23,7 @@ public class DeleteSaleCommandHandler(
             ?? throw new NotFoundException("Sale", request.Id);
 
         if (sale.OwnerId != currentUser.UserId)
-            throw new NotFoundException("Sale", request.Id);
+            throw new ForbiddenException();
 
         sale.IsDeleted = true;
         sale.UpdatedAt = DateTime.UtcNow;

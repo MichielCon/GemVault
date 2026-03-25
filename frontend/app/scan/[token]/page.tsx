@@ -1,6 +1,5 @@
 import Image from "next/image";
 import { publicApi, ApiError } from "@/lib/api";
-import { proxyPhotoUrl } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Lock, Gem, ImageOff, MapPin, Weight, Palette, Sparkles } from "lucide-react";
 import type { PublicGemDto } from "@/lib/types";
@@ -46,7 +45,7 @@ export default async function PublicScanPage({ params }: Props) {
       <div className="relative w-full aspect-[4/3] bg-zinc-900 max-h-[60vw] sm:max-h-80">
         {coverPhoto ? (
           <Image
-            src={proxyPhotoUrl(coverPhoto.url) ?? ""}
+            src={coverPhoto.url}
             alt={gem.name}
             fill
             unoptimized
@@ -78,7 +77,7 @@ export default async function PublicScanPage({ params }: Props) {
           {otherPhotos.slice(0, 6).map((p) => (
             <div key={p.id} className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-zinc-100">
               <Image
-                src={proxyPhotoUrl(p.url) ?? ""}
+                src={p.url}
                 alt=""
                 fill
                 unoptimized

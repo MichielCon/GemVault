@@ -2,12 +2,14 @@ using GemVault.Application.Public.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace GemVault.Api.Controllers;
 
 [ApiController]
 [Route("api/v1/public")]
 [AllowAnonymous]
+[EnableRateLimiting("public")]
 public class PublicController(IMediator mediator) : ControllerBase
 {
     /// <summary>

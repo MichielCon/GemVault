@@ -39,7 +39,7 @@ public class UpdatePurchaseOrderCommandHandler(
             ?? throw new NotFoundException("PurchaseOrder", request.Id);
 
         if (order.OwnerId != currentUser.UserId)
-            throw new NotFoundException("PurchaseOrder", request.Id);
+            throw new ForbiddenException();
 
         Supplier? supplier = null;
         if (request.SupplierId.HasValue)

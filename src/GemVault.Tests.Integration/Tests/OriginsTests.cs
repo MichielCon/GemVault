@@ -23,15 +23,17 @@ public class OriginsTests(DatabaseFixture fixture) : IntegrationTestBase(fixture
     public async Task CreateOrigin_Authenticated_Returns201()
     {
         await AuthenticateAsync();
+        // Use a unique locality suffix to avoid conflicts with seeded data
+        var locality = $"Test-{Guid.NewGuid():N}";
 
         var res = await Client.PostAsJsonAsync("/api/v1/origins",
-            new { country = "Colombia", locality = "Muzo" });
+            new { country = "TestCountry", locality });
 
         Assert.Equal(HttpStatusCode.Created, res.StatusCode);
         var origin = await res.Content.ReadFromJsonAsync<OriginResult>(JsonOptions);
         Assert.NotNull(origin);
-        Assert.Equal("Colombia", origin.Country);
-        Assert.Equal("Muzo", origin.Locality);
+        Assert.Equal("TestCountry", origin.Country);
+        Assert.Equal(locality, origin.Locality);
         Assert.NotEqual(Guid.Empty, origin.Id);
     }
 
@@ -135,15 +137,16 @@ public class OriginsTests(DatabaseFixture fixture) : IntegrationTestBase(fixture
     {
         // Create an origin first (any authenticated user can do this)
         await AuthenticateAsync();
+        var country = $"Country-{Guid.NewGuid():N}";
         var createRes = await Client.PostAsJsonAsync("/api/v1/origins",
-            new { country = "Brazil" });
+            new { country });
         Assert.Equal(HttpStatusCode.Created, createRes.StatusCode);
         var created = await createRes.Content.ReadFromJsonAsync<OriginResult>(JsonOptions);
         Assert.NotNull(created);
 
         // The same Collector-role user attempts to update — must be rejected
         var updateRes = await Client.PutAsJsonAsync($"/api/v1/origins/{created.Id}",
-            new { country = "Brazil Updated" });
+            new { country = $"{country} Updated" });
 
         Assert.Equal(HttpStatusCode.Forbidden, updateRes.StatusCode);
     }
@@ -153,8 +156,9 @@ public class OriginsTests(DatabaseFixture fixture) : IntegrationTestBase(fixture
     {
         // Create an origin first (any authenticated user can do this)
         await AuthenticateAsync();
+        var country = $"Country-{Guid.NewGuid():N}";
         var createRes = await Client.PostAsJsonAsync("/api/v1/origins",
-            new { country = "Tanzania" });
+            new { country });
         Assert.Equal(HttpStatusCode.Created, createRes.StatusCode);
         var created = await createRes.Content.ReadFromJsonAsync<OriginResult>(JsonOptions);
         Assert.NotNull(created);

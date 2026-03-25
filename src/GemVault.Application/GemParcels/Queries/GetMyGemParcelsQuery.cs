@@ -44,6 +44,7 @@ public class GetMyGemParcelsQueryHandler(
             throw new ForbiddenException();
 
         var query = context.GemParcels
+            .AsNoTracking()
             .Include(p => p.Photos)
             .Include(p => p.SaleItems.Where(si => !si.IsDeleted))
             .Where(p => p.OwnerId == currentUser.UserId && !p.IsDeleted);

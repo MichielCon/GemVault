@@ -3,12 +3,14 @@ using GemVault.Application.Admin.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace GemVault.Api.Controllers;
 
 [ApiController]
 [Route("api/v1/admin")]
 [Authorize(Roles = "Admin")]
+[EnableRateLimiting("api")]
 public class AdminController(IMediator mediator) : ControllerBase
 {
     [HttpGet("stats")]

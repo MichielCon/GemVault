@@ -23,7 +23,7 @@ public class DeleteSupplierCommandHandler(
             ?? throw new NotFoundException("Supplier", request.Id);
 
         if (supplier.OwnerId != currentUser.UserId)
-            throw new NotFoundException("Supplier", request.Id);
+            throw new ForbiddenException();
 
         supplier.IsDeleted = true;
         supplier.UpdatedAt = DateTime.UtcNow;

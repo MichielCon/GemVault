@@ -67,8 +67,6 @@ public class UploadGemParcelPhotoCommandHandler(
             foreach (var ph in parcel.Photos.Where(ph => ph.IsCover && !ph.IsDeleted))
                 ph.IsCover = false;
 
-        await storage.UploadAsync(objectKey, request.FileStream, request.ContentType, request.FileSize, ct);
-
         var photo = new GemPhoto
         {
             GemParcelId = parcel.Id,
@@ -79,8 +77,20 @@ public class UploadGemParcelPhotoCommandHandler(
             IsCover = request.IsCover,
         };
 
+        // Save DB record first — if MinIO fails the record is detectable and recoverable.
         context.GemPhotos.Add(photo);
         await context.SaveChangesAsync(ct);
+
+        try
+        {
+            await storage.UploadAsync(objectKey, request.FileStream, request.ContentType, request.FileSize, ct);
+        }
+        catch
+        {
+            photo.IsDeleted = true;
+            await context.SaveChangesAsync(ct);
+            throw;
+        }
 
         return new GemParcelPhotoDto(photo.Id, storage.GetPublicUrl(objectKey), photo.IsCover, photo.CreatedAt);
     }

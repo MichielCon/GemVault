@@ -265,10 +265,12 @@ export const suppliersApi = {
 // ─── PurchaseOrders ───────────────────────────────────────────────────────────
 
 export const purchaseOrdersApi = {
-  list: (page = 1, pageSize = 20, search?: string, supplierId?: string) => {
+  list: (page = 1, pageSize = 20, search?: string, supplierId?: string, from?: string, to?: string) => {
     const q = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
     if (search) q.set("search", search);
     if (supplierId) q.set("supplierId", supplierId);
+    if (from) q.set("from", from);
+    if (to) q.set("to", to);
     return get<PagedResult<PurchaseOrderSummaryDto>>(`/api/v1/purchase-orders?${q}`);
   },
   get: (id: string) => get<PurchaseOrderDto>(`/api/v1/purchase-orders/${id}`),
@@ -277,9 +279,11 @@ export const purchaseOrdersApi = {
 // ─── Sales ────────────────────────────────────────────────────────────────────
 
 export const salesApi = {
-  list: (page = 1, pageSize = 20, search?: string) => {
+  list: (page = 1, pageSize = 20, search?: string, from?: string, to?: string) => {
     const q = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
     if (search) q.set("search", search);
+    if (from) q.set("from", from);
+    if (to) q.set("to", to);
     return get<PagedResult<SaleSummaryDto>>(`/api/v1/sales?${q}`);
   },
   get: (id: string) => get<SaleDto>(`/api/v1/sales/${id}`),

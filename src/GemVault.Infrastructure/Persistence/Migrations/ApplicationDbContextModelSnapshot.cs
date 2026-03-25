@@ -397,7 +397,8 @@ namespace GemVault.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Country", "Locality");
+                    b.HasIndex("Country", "Locality")
+                        .IsUnique();
 
                     b.ToTable("Origins");
 

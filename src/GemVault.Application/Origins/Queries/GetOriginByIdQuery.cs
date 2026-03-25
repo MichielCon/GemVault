@@ -14,6 +14,7 @@ public class GetOriginByIdQueryHandler(IApplicationDbContext context)
     public async Task<OriginDto> Handle(GetOriginByIdQuery request, CancellationToken ct)
     {
         var origin = await context.Origins
+            .AsNoTracking()
             .FirstOrDefaultAsync(o => o.Id == request.Id, ct)
             ?? throw new NotFoundException("Origin", request.Id);
 

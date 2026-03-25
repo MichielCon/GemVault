@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { adminApi } from "./api";
+import { parseApiError } from "./server-utils";
 import type { AdminPublicTokenDto } from "./types";
 
 export async function changeUserRole(
@@ -14,7 +15,7 @@ export async function changeUserRole(
     await adminApi.changeRole(userId, role);
     return { error: null };
   } catch (e: unknown) {
-    return { error: e instanceof Error ? e.message : "Failed to change role." };
+    return { error: parseApiError(e) };
   }
 }
 
@@ -27,7 +28,7 @@ export async function deactivateUser(
     await adminApi.deactivateUser(userId);
     return { error: null };
   } catch (e: unknown) {
-    return { error: e instanceof Error ? e.message : "Failed to deactivate user." };
+    return { error: parseApiError(e) };
   }
 }
 
@@ -40,7 +41,7 @@ export async function reactivateUser(
     await adminApi.reactivateUser(userId);
     return { error: null };
   } catch (e: unknown) {
-    return { error: e instanceof Error ? e.message : "Failed to reactivate user." };
+    return { error: parseApiError(e) };
   }
 }
 
@@ -54,7 +55,7 @@ export async function revokeUserSessions(
     revalidatePath("/dashboard/admin/sessions");
     return { error: null };
   } catch (e: unknown) {
-    return { error: e instanceof Error ? e.message : "Failed to revoke sessions." };
+    return { error: parseApiError(e) };
   }
 }
 
@@ -68,7 +69,7 @@ export async function revokeSession(
     revalidatePath("/dashboard/admin/sessions");
     return { error: null };
   } catch (e: unknown) {
-    return { error: e instanceof Error ? e.message : "Failed to revoke session." };
+    return { error: parseApiError(e) };
   }
 }
 
@@ -78,7 +79,7 @@ export async function revokeSessionById(sessionId: string): Promise<{ error: str
     revalidatePath("/dashboard/admin/sessions");
     return { error: null };
   } catch (e: unknown) {
-    return { error: e instanceof Error ? e.message : "Failed to revoke session." };
+    return { error: parseApiError(e) };
   }
 }
 
@@ -88,7 +89,7 @@ export async function revokeUserSessionsById(userId: string): Promise<{ error: s
     revalidatePath("/dashboard/admin/sessions");
     return { error: null };
   } catch (e: unknown) {
-    return { error: e instanceof Error ? e.message : "Failed to revoke sessions." };
+    return { error: parseApiError(e) };
   }
 }
 
@@ -101,7 +102,7 @@ export async function togglePublicToken(
     const token = await adminApi.togglePublicToken(tokenId);
     return { token, error: null };
   } catch (e: unknown) {
-    return { token: null, error: e instanceof Error ? e.message : "Failed to toggle token." };
+    return { token: null, error: parseApiError(e) };
   }
 }
 
@@ -114,7 +115,7 @@ export async function adminDeletePhoto(
     await adminApi.deletePhoto(photoId);
     return { error: null };
   } catch (e: unknown) {
-    return { error: e instanceof Error ? e.message : "Failed to delete photo." };
+    return { error: parseApiError(e) };
   }
 }
 
@@ -127,6 +128,6 @@ export async function adminDeleteCertificate(
     await adminApi.deleteCertificate(certId);
     return { error: null };
   } catch (e: unknown) {
-    return { error: e instanceof Error ? e.message : "Failed to delete certificate." };
+    return { error: parseApiError(e) };
   }
 }

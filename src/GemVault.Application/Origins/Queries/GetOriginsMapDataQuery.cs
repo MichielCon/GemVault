@@ -20,16 +20,26 @@ public class GetOriginsMapDataQueryHandler(
 
         var userId = currentUser.UserId.Value;
 
-        var origins = await context.Origins.ToListAsync(ct);
-
         var gems = await context.Gems
+            .AsNoTracking()
             .Where(g => g.OwnerId == userId && !g.IsDeleted && g.OriginId != null)
             .Select(g => new { g.OriginId, g.WeightCarats, g.PurchasePrice, g.Species })
             .ToListAsync(ct);
 
         var parcels = await context.GemParcels
+            .AsNoTracking()
             .Where(p => p.OwnerId == userId && !p.IsDeleted && p.OriginId != null)
             .Select(p => new { p.OriginId, p.TotalWeightCarats, p.PurchasePrice, p.Species })
+            .ToListAsync(ct);
+
+        var originIds = gems.Select(g => g.OriginId!.Value)
+            .Concat(parcels.Select(p => p.OriginId!.Value))
+            .Distinct()
+            .ToHashSet();
+
+        var origins = await context.Origins
+            .AsNoTracking()
+            .Where(o => originIds.Contains(o.Id))
             .ToListAsync(ct);
 
         var gemsByOrigin = gems.GroupBy(g => g.OriginId!.Value).ToDictionary(g => g.Key, g => g.ToList());

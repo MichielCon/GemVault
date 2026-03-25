@@ -18,6 +18,7 @@ public class GetGemByIdQueryHandler(
     public async Task<GemDto> Handle(GetGemByIdQuery request, CancellationToken ct)
     {
         var gem = await context.Gems
+            .AsNoTracking()
             .Include(g => g.Photos)
             .Include(g => g.Origin)
             .Include(g => g.PublicToken)
@@ -25,6 +26,7 @@ public class GetGemByIdQueryHandler(
                 .ThenInclude(si => si.Sale)
             .Include(g => g.Certificates)
             .Include(g => g.SourceParcel)
+            .Include(g => g.OrderItems)
             .FirstOrDefaultAsync(g => g.Id == request.GemId && !g.IsDeleted, ct)
             ?? throw new NotFoundException("Gem", request.GemId);
 

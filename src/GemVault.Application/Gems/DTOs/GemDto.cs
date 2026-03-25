@@ -33,6 +33,7 @@ public record GemDto(
     Guid OwnerId,
     Guid? OriginId,
     string? OriginCountry,
+    string? OriginLocality,
     string? Attributes,
     GemStatus Status,
     string? PublicToken,
@@ -42,7 +43,8 @@ public record GemDto(
     GemSoldInfoDto? SoldInfo,
     List<CertificateDto> Certificates,
     Guid? SourceParcelId,
-    string? SourceParcelName);
+    string? SourceParcelName,
+    Guid? PurchaseOrderId);
 
 public record GemSummaryDto(
     Guid Id,

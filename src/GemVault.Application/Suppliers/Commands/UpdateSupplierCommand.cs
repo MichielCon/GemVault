@@ -38,7 +38,7 @@ public class UpdateSupplierCommandHandler(
             ?? throw new NotFoundException("Supplier", request.Id);
 
         if (supplier.OwnerId != currentUser.UserId)
-            throw new NotFoundException("Supplier", request.Id);
+            throw new ForbiddenException();
 
         supplier.Name = request.Name;
         supplier.Email = request.Email;

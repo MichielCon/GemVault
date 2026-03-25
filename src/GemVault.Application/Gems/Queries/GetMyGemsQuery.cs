@@ -46,6 +46,7 @@ public class GetMyGemsQueryHandler(
             throw new ForbiddenException();
 
         var query = context.Gems
+            .AsNoTracking()
             .Include(g => g.Photos)
             .Include(g => g.SaleItems.Where(si => !si.IsDeleted))
             .Where(g => g.OwnerId == currentUser.UserId && !g.IsDeleted);

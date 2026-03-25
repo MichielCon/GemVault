@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createOrigin } from "@/lib/origin-actions";
 import { Button } from "@/components/ui/button";
@@ -16,10 +17,15 @@ import {
 } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 
-const initialState = { error: null as string | null };
+const initialState = { error: null as string | null, id: null as string | null };
 
 export default function NewOriginPage() {
+  const router = useRouter();
   const [state, formAction, pending] = useActionState(createOrigin, initialState);
+
+  useEffect(() => {
+    if (state.id) router.push("/dashboard/origins");
+  }, [state.id, router]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -71,8 +77,8 @@ export default function NewOriginPage() {
           </CardContent>
 
           <CardFooter className="gap-3">
-            <Button type="submit" variant="violet" disabled={pending}>
-              {pending ? "Saving…" : "Save origin"}
+            <Button type="submit" variant="violet" disabled={pending || !!state.id}>
+              {pending || state.id ? "Saving…" : "Save origin"}
             </Button>
             <Button asChild variant="outline" disabled={pending}>
               <Link href="/dashboard/origins">Cancel</Link>

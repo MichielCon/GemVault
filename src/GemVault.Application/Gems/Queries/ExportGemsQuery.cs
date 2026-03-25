@@ -39,9 +39,11 @@ public class ExportGemsQueryHandler(
         var userId = currentUser.UserId.Value;
 
         return await context.Gems
+            .AsNoTracking()
             .Where(g => g.OwnerId == userId && !g.IsDeleted)
             .Include(g => g.Origin)
             .OrderByDescending(g => g.CreatedAt)
+            .Take(10_000)
             .Select(g => new GemExportDto(
                 g.Name,
                 g.Species,

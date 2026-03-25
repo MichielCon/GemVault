@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { proxyPhotoUrl } from "@/lib/utils";
 import { uploadGemPhoto, deleteGemPhoto } from "@/lib/gem-actions";
 import { uploadParcelPhoto, deleteParcelPhoto } from "@/lib/parcel-actions";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 interface Photo {
   id: string;
@@ -27,6 +28,7 @@ export function PhotoGallery({ photos, name, entityId, type }: Props) {
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; idx: number } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const stripRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -80,9 +82,12 @@ export function PhotoGallery({ photos, name, entityId, type }: Props) {
     router.refresh();
   }
 
-  async function handleDelete(photoId: string, idx: number) {
+  async function confirmDeletePhoto() {
+    if (!pendingDelete) return;
+    const { id, idx } = pendingDelete;
+    setPendingDelete(null);
     const deleteAction = type === "gem" ? deleteGemPhoto : deleteParcelPhoto;
-    const result = await deleteAction(photoId);
+    const result = await deleteAction(id);
     if (result.error) { setUploadError(result.error); return; }
     if (idx === activeIdx) setActiveIdx(Math.max(0, idx - 1));
     router.refresh();
@@ -110,8 +115,9 @@ export function PhotoGallery({ photos, name, entityId, type }: Props) {
               className="absolute top-2 right-2 rounded-full bg-black/60 p-1.5 text-white/70
                          opacity-0 group-hover:opacity-100 transition-all duration-150
                          hover:text-white hover:bg-red-600 hover:scale-110"
-              onClick={() => handleDelete(activePhoto.id, activeIdx)}
+              onClick={() => setPendingDelete({ id: activePhoto.id, idx: activeIdx })}
               title="Delete photo"
+              aria-label="Delete photo"
             >
               <Trash2 size={14} />
             </button>
@@ -206,9 +212,22 @@ export function PhotoGallery({ photos, name, entityId, type }: Props) {
 
       {uploadError && <p className="text-sm text-destructive">{uploadError}</p>}
 
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        title="Delete photo"
+        description="This photo will be permanently removed. This cannot be undone."
+        confirmLabel="Delete"
+        destructive
+        onConfirm={confirmDeletePhoto}
+        onCancel={() => setPendingDelete(null)}
+      />
+
       {/* ── Lightbox ── */}
       {lightboxIdx !== null && (
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Photo lightbox"
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 animate-in fade-in duration-150"
           onClick={() => setLightboxIdx(null)}
         >
@@ -216,6 +235,7 @@ export function PhotoGallery({ photos, name, entityId, type }: Props) {
             className="absolute top-4 right-4 rounded-full p-2 text-white/70
                        hover:text-white hover:bg-white/10 transition-all duration-150"
             onClick={() => setLightboxIdx(null)}
+            aria-label="Close lightbox"
           >
             <X size={24} />
           </button>

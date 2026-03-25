@@ -20,12 +20,14 @@ public record GemParcelDto(
     Guid OwnerId,
     Guid? OriginId,
     string? OriginCountry,
+    string? OriginLocality,
     string? PublicToken,
     DateTime CreatedAt,
     DateTime UpdatedAt,
     List<GemParcelPhotoDto> Photos,
     GemParcelSoldInfoDto? SoldInfo,
-    int SplitGemCount);
+    int SplitGemCount,
+    Guid? PurchaseOrderId);
 
 public record GemParcelSummaryDto(
     Guid Id,

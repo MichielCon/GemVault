@@ -31,8 +31,8 @@ public class GetPurchaseOrdersQueryHandler(
             throw new ForbiddenException();
 
         var query = context.PurchaseOrders
+            .AsNoTracking()
             .Include(o => o.Supplier)
-            .Include(o => o.Items)
             .Where(o => o.OwnerId == currentUser.UserId && !o.IsDeleted);
 
         if (request.SupplierId.HasValue)
@@ -50,21 +50,20 @@ public class GetPurchaseOrdersQueryHandler(
         var total = await query.CountAsync(ct);
 
         var pageSize = Math.Min(request.PageSize, 100);
-        var items = await query
+        var dtos = await query
             .OrderByDescending(o => o.OrderDate)
             .Skip((request.Page - 1) * pageSize)
             .Take(pageSize)
+            .Select(o => new PurchaseOrderSummaryDto(
+                o.Id,
+                o.Reference,
+                o.OrderDate,
+                o.Supplier != null ? o.Supplier.Name : null,
+                o.BoughtFrom,
+                o.Items.Where(i => !i.IsDeleted).Sum(i => i.CostPrice),
+                o.Items.Count(i => !i.IsDeleted),
+                o.CreatedAt))
             .ToListAsync(ct);
-
-        var dtos = items.Select(o => new PurchaseOrderSummaryDto(
-            o.Id,
-            o.Reference,
-            o.OrderDate,
-            o.Supplier?.Name,
-            o.BoughtFrom,
-            o.Items.Where(i => !i.IsDeleted).Sum(i => i.CostPrice),
-            o.Items.Count(i => !i.IsDeleted),
-            o.CreatedAt)).ToList();
 
         return new PagedResult<PurchaseOrderSummaryDto>(dtos, total, request.Page, pageSize);
     }

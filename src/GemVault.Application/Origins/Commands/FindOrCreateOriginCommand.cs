@@ -45,7 +45,21 @@ public class FindOrCreateOriginCommandHandler(
         };
 
         context.Origins.Add(origin);
-        await context.SaveChangesAsync(ct);
+        try
+        {
+            await context.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateException)
+        {
+            // Race condition: another request inserted the same origin concurrently.
+            // Re-query to get the existing record. EF tracking state is stale but a fresh
+            // AsNoTracking query will bypass the change tracker.
+            existing = await context.Origins
+                .AsNoTracking()
+                .FirstOrDefaultAsync(o => o.Country == request.Country &&
+                    (request.Locality == null ? o.Locality == null : o.Locality == request.Locality), ct);
+            return new OriginDto(existing!.Id, existing.Country, existing.Locality, existing.CreatedAt);
+        }
 
         return new OriginDto(origin.Id, origin.Country, origin.Locality, origin.CreatedAt);
     }

@@ -37,7 +37,7 @@ public class UpdateSaleCommandHandler(
             ?? throw new NotFoundException("Sale", request.Id);
 
         if (sale.OwnerId != currentUser.UserId)
-            throw new NotFoundException("Sale", request.Id);
+            throw new ForbiddenException();
 
         sale.SaleDate = DateTime.SpecifyKind(request.SaleDate, DateTimeKind.Utc);
         sale.BuyerName = request.BuyerName;

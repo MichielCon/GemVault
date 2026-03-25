@@ -136,6 +136,8 @@ export async function getEmailConfirmed(): Promise<boolean> {
     const payload = JSON.parse(
       Buffer.from(token.split(".")[1], "base64url").toString("utf8")
     ) as Record<string, unknown>;
+    const exp = payload["exp"] as number | undefined;
+    if (exp && exp < Date.now() / 1000) return true;
     return payload["email_confirmed"] === "true";
   } catch {
     return true;
@@ -158,6 +160,8 @@ export async function getSessionRole(): Promise<"Admin" | "Business" | "Collecto
     const payload = JSON.parse(
       Buffer.from(token.split(".")[1], "base64url").toString("utf8")
     ) as Record<string, unknown>;
+    const exp = payload["exp"] as number | undefined;
+    if (exp && exp < Date.now() / 1000) return null;
     const roleUri =
       "http://schemas.microsoft.com/ws/2008/06/identity/claims/role";
     const role = (payload[roleUri] ?? payload["role"]) as string | undefined;

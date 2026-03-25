@@ -165,8 +165,6 @@ export default async function ParcelDetailPage({ params }: Props) {
                   label="Added"
                   value={new Date(parcel.createdAt).toLocaleDateString()}
                 />
-                <dt className="text-zinc-400 text-xs font-medium uppercase tracking-wide">Linked order</dt>
-                <dd className="font-medium text-zinc-800">—</dd>
               </dl>
               {parcel.notes && (
                 <p className="mt-3 text-sm text-zinc-500 leading-relaxed">{parcel.notes}</p>

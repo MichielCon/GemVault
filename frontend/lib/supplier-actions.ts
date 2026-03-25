@@ -1,50 +1,13 @@
 "use server";
 
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ApiError } from "./api";
-
-function baseUrl() {
-  return (
-    process.env.INTERNAL_API_URL ??
-    process.env.NEXT_PUBLIC_API_URL ??
-    "http://localhost:5000"
-  );
-}
-
-async function authHeader(): Promise<Record<string, string>> {
-  const store = await cookies();
-  const token = store.get("access_token")?.value;
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
-
-function parseApiError(e: unknown): string {
-  if (!(e instanceof ApiError)) return "Something went wrong. Please try again.";
-
-  try {
-    const body = JSON.parse(e.message) as {
-      title?: string;
-      errors?: Record<string, string[]>;
-    };
-    if (body.errors) {
-      const messages = Object.values(body.errors).flat();
-      if (messages.length > 0) return messages.join(" ");
-    }
-    if (body.title) return body.title;
-  } catch {
-    // plain text body
-  }
-
-  if (e.status === 401) return "You must be logged in to do that.";
-  if (e.status === 403) return "You do not have permission to do that.";
-  if (e.status === 422) return "Invalid data. Please check your inputs.";
-  return "Something went wrong. Please try again.";
-}
+import { baseUrl, authHeader, parseApiError } from "./server-utils";
 
 export async function createSupplier(
-  _prev: { error: string | null },
+  _prev: { error: string | null; id: string | null },
   formData: FormData
-): Promise<{ error: string | null }> {
+): Promise<{ error: string | null; id: string | null }> {
   const raw = {
     name: formData.get("name") as string,
     email: (formData.get("email") as string) || null,
@@ -69,11 +32,11 @@ export async function createSupplier(
       const text = await res.text().catch(() => "");
       throw new ApiError(res.status, text);
     }
+    const supplier = (await res.json()) as { id: string };
+    return { id: supplier.id, error: null };
   } catch (e) {
-    return { error: parseApiError(e) };
+    return { error: parseApiError(e), id: null };
   }
-
-  redirect("/dashboard/suppliers");
 }
 
 export async function createSupplierInline(
@@ -110,9 +73,9 @@ export async function createSupplierInline(
 }
 
 export async function updateSupplier(
-  _prev: { error: string | null },
+  _prev: { error: string | null; id: string | null },
   formData: FormData
-): Promise<{ error: string | null }> {
+): Promise<{ error: string | null; id: string | null }> {
   const id = formData.get("id") as string;
   const raw = {
     name: formData.get("name") as string,
@@ -138,11 +101,10 @@ export async function updateSupplier(
       const text = await res.text().catch(() => "");
       throw new ApiError(res.status, text);
     }
+    return { id, error: null };
   } catch (e) {
-    return { error: parseApiError(e) };
+    return { error: parseApiError(e), id: null };
   }
-
-  redirect(`/dashboard/suppliers/${id}`);
 }
 
 export async function deleteSupplier(

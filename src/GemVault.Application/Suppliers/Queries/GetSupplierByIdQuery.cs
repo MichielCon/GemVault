@@ -20,12 +20,12 @@ public class GetSupplierByIdQueryHandler(
             throw new ForbiddenException();
 
         var supplier = await context.Suppliers
-            .Include(s => s.PurchaseOrders)
+            .AsNoTracking()
             .FirstOrDefaultAsync(s => s.Id == request.Id && !s.IsDeleted, ct)
             ?? throw new NotFoundException("Supplier", request.Id);
 
         if (supplier.OwnerId != currentUser.UserId)
-            throw new NotFoundException("Supplier", request.Id);
+            throw new ForbiddenException();
 
         return new SupplierDto(
             supplier.Id,

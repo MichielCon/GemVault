@@ -13,14 +13,26 @@ using System.Text;
 
 namespace GemVault.Tests.Integration.Infrastructure;
 
-public class GemVaultWebApplicationFactory(string connectionString)
-    : WebApplicationFactory<Program>
+public class GemVaultWebApplicationFactory : WebApplicationFactory<Program>
 {
     // A fixed secret used for both token generation (JwtOptions) and validation (JwtBearerOptions).
     // PostConfigure guarantees it overrides whatever Program.cs wired up at startup.
     private const string TestJwtSecret = "integration-test-secret-must-be-32-chars!!";
     private const string TestJwtIssuer = "GemVault";
     private const string TestJwtAudience = "GemVaultClient";
+
+    private readonly string _connectionString;
+
+    public GemVaultWebApplicationFactory(string connectionString)
+    {
+        _connectionString = connectionString;
+        // Set env vars BEFORE the host is built — Program.cs line 38 reads Jwt:Secret
+        // via IConfiguration which includes environment variables. ConfigureAppConfiguration
+        // callbacks run too late (after the ?? throw already executed).
+        Environment.SetEnvironmentVariable("Jwt__Secret", TestJwtSecret);
+        Environment.SetEnvironmentVariable("Jwt__Issuer", TestJwtIssuer);
+        Environment.SetEnvironmentVariable("Jwt__Audience", TestJwtAudience);
+    }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -29,7 +41,7 @@ public class GemVaultWebApplicationFactory(string connectionString)
         builder.ConfigureAppConfiguration((_, config) =>
             config.AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["ConnectionStrings:DefaultConnection"] = connectionString,
+                ["ConnectionStrings:DefaultConnection"] = _connectionString,
                 ["Jwt:Secret"] = TestJwtSecret,
                 ["Jwt:Issuer"] = TestJwtIssuer,
                 ["Jwt:Audience"] = TestJwtAudience,

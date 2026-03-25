@@ -13,18 +13,16 @@ public class AdminUserService(
 {
     public async Task<AdminStatsDto> GetAdminStatsAsync(CancellationToken ct = default)
     {
-        var users = await userManager.Users.ToListAsync(ct);
-
         var now = DateTime.UtcNow;
         var startOfMonth = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
 
-        var totalUsers = users.Count;
-        var adminCount = users.Count(u => u.Role == UserRole.Admin);
-        var businessCount = users.Count(u => u.Role == UserRole.Business);
-        var collectorCount = users.Count(u => u.Role == UserRole.Collector);
-        var activeUsers = users.Count(u => !u.IsDeleted);
-        var deletedUsers = users.Count(u => u.IsDeleted);
-        var newUsersThisMonth = users.Count(u => u.CreatedAt >= startOfMonth);
+        var totalUsers = await userManager.Users.CountAsync(ct);
+        var adminCount = await userManager.Users.CountAsync(u => u.Role == UserRole.Admin, ct);
+        var businessCount = await userManager.Users.CountAsync(u => u.Role == UserRole.Business, ct);
+        var collectorCount = await userManager.Users.CountAsync(u => u.Role == UserRole.Collector, ct);
+        var activeUsers = await userManager.Users.CountAsync(u => !u.IsDeleted, ct);
+        var deletedUsers = await userManager.Users.CountAsync(u => u.IsDeleted, ct);
+        var newUsersThisMonth = await userManager.Users.CountAsync(u => u.CreatedAt >= startOfMonth, ct);
 
         var totalGems = await context.Gems.CountAsync(ct);
         var totalParcels = await context.GemParcels.CountAsync(ct);
@@ -33,12 +31,12 @@ public class AdminUserService(
         var totalPublicTokens = await context.PublicTokens.CountAsync(ct);
         var activePublicTokens = await context.PublicTokens.CountAsync(p => p.IsActive, ct);
 
-        var recentUsers = users
+        var recentUsers = await userManager.Users
             .Where(u => !u.IsDeleted)
             .OrderByDescending(u => u.CreatedAt)
             .Take(10)
             .Select(u => new RecentUserDto(u.Id, u.Email!, u.Role.ToString(), u.CreatedAt))
-            .ToList();
+            .ToListAsync(ct);
 
         return new AdminStatsDto(
             totalUsers, adminCount, businessCount, collectorCount,

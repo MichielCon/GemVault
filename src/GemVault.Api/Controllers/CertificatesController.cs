@@ -2,15 +2,18 @@ using GemVault.Application.Certificates;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace GemVault.Api.Controllers;
 
 [ApiController]
+[Route("api/v1")]
 [Authorize]
+[EnableRateLimiting("api")]
 public class CertificatesController(IMediator mediator) : ControllerBase
 {
     /// <summary>Upload a certificate PDF for a gem.</summary>
-    [HttpPost("api/v1/gems/{gemId:guid}/certificates")]
+    [HttpPost("gems/{gemId:guid}/certificates")]
     [RequestSizeLimit(25 * 1024 * 1024)]
     public async Task<IActionResult> Upload(
         Guid gemId,
@@ -41,7 +44,7 @@ public class CertificatesController(IMediator mediator) : ControllerBase
     }
 
     /// <summary>Delete (soft-delete) a certificate.</summary>
-    [HttpDelete("api/v1/certificates/{id:guid}")]
+    [HttpDelete("certificates/{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
     {
         await mediator.Send(new DeleteCertificateCommand(id), ct);

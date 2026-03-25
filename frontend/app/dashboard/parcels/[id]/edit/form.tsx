@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { updateParcel } from "@/lib/parcel-actions";
 import { Button } from "@/components/ui/button";
@@ -30,24 +31,38 @@ interface Props {
   origins: OriginDto[];
 }
 
-const initialState = { error: null as string | null };
+const initialState = { error: null as string | null, id: null as string | null };
 
 export function ParcelEditForm({ parcel, vocabulary, origins }: Props) {
+  const router = useRouter();
   const [state, formAction, pending] = useActionState(updateParcel, initialState);
   const [species, setSpecies] = useState<string | null>(parcel.species ?? null);
   const [variety, setVariety] = useState<string | null>(parcel.variety ?? null);
   const [color, setColor] = useState<string | null>(parcel.color ?? null);
   const [treatment, setTreatment] = useState<string | null>(parcel.treatment ?? null);
-  const speciesOptions = vocabulary.species.map((v) => ({ value: v.value, label: v.value }));
 
-  const varietyOptions = species
-    ? vocabulary.variety
-        .filter((v) => v.parentValue === species)
-        .map((v) => ({ value: v.value, label: v.value }))
-    : vocabulary.variety.map((v) => ({ value: v.value, label: v.value }));
+  useEffect(() => {
+    if (state.id) router.push(`/dashboard/parcels/${state.id}`);
+  }, [state.id, router]);
 
-  const colorOptions = vocabulary.color.map((v) => ({ value: v.value, label: v.value }));
-  const treatmentOptions = vocabulary.treatment.map((v) => ({ value: v.value, label: v.value }));
+  const speciesOptions = useMemo(
+    () => vocabulary.species.map((v) => ({ value: v.value, label: v.value })),
+    [vocabulary.species]
+  );
+  const varietyOptions = useMemo(
+    () => species
+      ? vocabulary.variety.filter((v) => v.parentValue === species).map((v) => ({ value: v.value, label: v.value }))
+      : vocabulary.variety.map((v) => ({ value: v.value, label: v.value })),
+    [vocabulary.variety, species]
+  );
+  const colorOptions = useMemo(
+    () => vocabulary.color.map((v) => ({ value: v.value, label: v.value })),
+    [vocabulary.color]
+  );
+  const treatmentOptions = useMemo(
+    () => vocabulary.treatment.map((v) => ({ value: v.value, label: v.value })),
+    [vocabulary.treatment]
+  );
 
   function handleSpeciesChange(val: string | null) {
     setSpecies(val);
@@ -226,8 +241,8 @@ export function ParcelEditForm({ parcel, vocabulary, origins }: Props) {
           </CardContent>
 
           <CardFooter className="gap-3">
-            <Button type="submit" disabled={pending}>
-              {pending ? "Saving…" : "Save changes"}
+            <Button type="submit" disabled={pending || !!state.id}>
+              {pending || state.id ? "Saving…" : "Save changes"}
             </Button>
             <Button asChild variant="outline" disabled={pending}>
               <Link href={`/dashboard/parcels/${parcel.id}`}>Cancel</Link>

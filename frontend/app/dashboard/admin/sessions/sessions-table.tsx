@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useCallback, useRef, useState, useTransition } from "react";
 import type { PagedResult, AdminSessionDto } from "@/lib/types";
 import { revokeSessionById, revokeUserSessionsById } from "@/lib/admin-actions";
 
@@ -134,6 +134,7 @@ function SessionRow({ session }: { session: AdminSessionDto }) {
 
 export default function SessionsTable({ result, currentPage, search }: Props) {
   const router = useRouter();
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   function updateParam(key: string, value: string) {
     const params = new URLSearchParams();
@@ -141,6 +142,12 @@ export default function SessionsTable({ result, currentPage, search }: Props) {
     if (value) params.set(key, value);
     router.push(`/dashboard/admin/sessions?${params.toString()}`);
   }
+
+  const handleSearchChange = useCallback((value: string) => {
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    searchDebounceRef.current = setTimeout(() => updateParam("search", value), 300);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
 
   // Group active sessions by user to show "Revoke All" per user
   const userSessionMap = new Map<string, { userId: string; email: string; count: number }>();
@@ -163,7 +170,7 @@ export default function SessionsTable({ result, currentPage, search }: Props) {
           type="text"
           placeholder="Filter by email…"
           defaultValue={search}
-          onChange={(e) => updateParam("search", e.target.value)}
+          onChange={(e) => handleSearchChange(e.target.value)}
           className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-700 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-400"
         />
         <span className="ml-auto text-sm text-zinc-400">

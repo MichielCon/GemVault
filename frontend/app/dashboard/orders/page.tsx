@@ -3,19 +3,20 @@ import { purchaseOrdersApi } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/ui/search-input";
 import { OrderTableRow } from "@/components/orders/order-table-row";
+import { DateRangeFilter } from "@/components/ui/date-range-filter";
 import { Plus, ShoppingCart } from "lucide-react";
 
 interface Props {
-  searchParams: Promise<{ page?: string; search?: string }>;
+  searchParams: Promise<{ page?: string; search?: string; from?: string; to?: string }>;
 }
 
 export default async function OrdersPage({ searchParams }: Props) {
-  const { page: pageStr, search } = await searchParams;
+  const { page: pageStr, search, from, to } = await searchParams;
   const page = Number(pageStr ?? 1);
 
   let result;
   try {
-    result = await purchaseOrdersApi.list(page, 12, search);
+    result = await purchaseOrdersApi.list(page, 12, search, undefined, from, to);
   } catch {
     return <p className="text-muted-foreground">Failed to load orders. Is the API running?</p>;
   }
@@ -32,8 +33,9 @@ export default async function OrdersPage({ searchParams }: Props) {
         </Button>
       </div>
 
-      <div className="shrink-0 mb-4">
-        <SearchInput basePath="/dashboard/orders" placeholder="Search by reference or supplier…" defaultValue={search} />
+      <div className="shrink-0 mb-4 flex flex-wrap items-center gap-3">
+        <SearchInput basePath="/dashboard/orders" placeholder="Search by reference or supplier…" defaultValue={search} extraParams={{ ...(from ? { from } : {}), ...(to ? { to } : {}) }} />
+        <DateRangeFilter basePath="/dashboard/orders" from={from} to={to} extraParams={{ ...(search ? { search } : {}) }} />
       </div>
 
       <div className="flex-1 min-h-0">
@@ -62,7 +64,7 @@ export default async function OrdersPage({ searchParams }: Props) {
       </div>
 
       <div className="shrink-0 pt-3">
-        <Pagination page={page} totalPages={result.totalPages} search={search} />
+        <Pagination page={page} totalPages={result.totalPages} search={search} from={from} to={to} />
       </div>
     </div>
   );
@@ -86,11 +88,13 @@ function EmptyState({ hasSearch }: { hasSearch: boolean }) {
   );
 }
 
-function Pagination({ page, totalPages, search }: { page: number; totalPages: number; search?: string }) {
+function Pagination({ page, totalPages, search, from, to }: { page: number; totalPages: number; search?: string; from?: string; to?: string }) {
   if (totalPages <= 1) return null;
   function url(p: number) {
     const q = new URLSearchParams({ page: String(p) });
     if (search) q.set("search", search);
+    if (from) q.set("from", from);
+    if (to) q.set("to", to);
     return `/dashboard/orders?${q}`;
   }
   return (

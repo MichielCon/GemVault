@@ -118,7 +118,7 @@ public class OriginConfiguration : IEntityTypeConfiguration<Origin>
         builder.HasQueryFilter(o => !o.IsDeleted);
         builder.Property(o => o.Country).IsRequired().HasMaxLength(100);
         builder.Property(o => o.Locality).HasMaxLength(200);
-        builder.HasIndex(o => new { o.Country, o.Locality });
+        builder.HasIndex(o => new { o.Country, o.Locality }).IsUnique();
         builder.HasData(OriginSeedData.GetAll());
     }
 }

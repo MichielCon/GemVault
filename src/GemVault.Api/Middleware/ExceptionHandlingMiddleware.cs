@@ -13,13 +13,18 @@ public class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Exception
         }
         catch (Exception ex)
         {
-            await HandleExceptionAsync(context, ex, logger);
+            await HandleExceptionAsync(context, ex);
         }
     }
 
-    private static async Task HandleExceptionAsync(
-        HttpContext context, Exception exception, ILogger logger)
+    private async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
+        var userId = context.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                     ?? context.User.FindFirst("sub")?.Value
+                     ?? "anonymous";
+        var method = context.Request.Method;
+        var path = context.Request.Path;
+
         var (status, title, errors) = exception switch
         {
             ValidationException ve => (400, "Validation Error", ve.Errors),
@@ -28,18 +33,26 @@ public class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Exception
             _ => (500, "An unexpected error occurred.", (IDictionary<string, string[]>?)null),
         };
 
-        if (status == 500)
-            logger.LogError(exception, "Unhandled exception");
+        switch (status)
+        {
+            case 403:
+                logger.LogWarning("Forbidden: {UserId} on {Method} {Path}", userId, method, path);
+                break;
+            case 400:
+                logger.LogDebug(exception, "Validation error for {UserId}", userId);
+                break;
+            case 404:
+                logger.LogDebug("Not found: {Message}", exception.Message);
+                break;
+            default:
+                logger.LogError(exception, "Unhandled exception for {UserId} on {Method} {Path}", userId, method, path);
+                break;
+        }
 
         context.Response.StatusCode = status;
         context.Response.ContentType = "application/json";
 
-        var body = new
-        {
-            status,
-            title,
-            errors,
-        };
+        var body = new { status, title, errors };
 
         await context.Response.WriteAsync(JsonSerializer.Serialize(body,
             new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }));

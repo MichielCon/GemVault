@@ -38,6 +38,7 @@ internal static class GemMappingExtensions
             gem.OwnerId,
             gem.OriginId,
             gem.Origin?.Country,
+            gem.Origin?.Locality,
             gem.Attributes,
             gem.Status,
             gem.PublicToken?.Token,
@@ -61,6 +62,7 @@ internal static class GemMappingExtensions
                     c.CreatedAt))
                 .ToList(),
             gem.SourceParcelId,
-            gem.SourceParcel?.Name);
+            gem.SourceParcel?.Name,
+            gem.OrderItems.FirstOrDefault(oi => !oi.IsDeleted)?.PurchaseOrderId);
     }
 }

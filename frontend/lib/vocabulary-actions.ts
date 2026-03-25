@@ -69,3 +69,12 @@ export async function deleteVocabularyItem(
     return { error: parseApiError(e) };
   }
 }
+
+export async function deleteVocabularyItemById(id: number): Promise<{ error: string | null }> {
+  try {
+    await vocabularyAdminApi.delete(id);
+    return { error: null };
+  } catch (e) {
+    return { error: parseApiError(e) };
+  }
+}

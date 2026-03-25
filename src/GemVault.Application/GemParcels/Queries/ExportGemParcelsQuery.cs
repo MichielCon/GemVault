@@ -36,9 +36,11 @@ public class ExportGemParcelsQueryHandler(
         var userId = currentUser.UserId.Value;
 
         return await context.GemParcels
+            .AsNoTracking()
             .Where(p => p.OwnerId == userId && !p.IsDeleted)
             .Include(p => p.Origin)
             .OrderByDescending(p => p.CreatedAt)
+            .Take(10_000)
             .Select(p => new GemParcelExportDto(
                 p.Name,
                 p.Species,

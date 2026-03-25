@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { QrCode, Download, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,10 +12,11 @@ interface Props {
 
 export function QrCodeButton({ token, name }: Props) {
   const [open, setOpen] = useState(false);
+  const svgContainerRef = useRef<HTMLDivElement>(null);
   const url = `${typeof window !== "undefined" ? window.location.origin : ""}/scan/${token}`;
 
   function downloadSvg() {
-    const svg = document.querySelector("#qr-svg-export svg") as SVGElement | null;
+    const svg = svgContainerRef.current?.querySelector("svg") as SVGElement | null;
     if (!svg) return;
     const blob = new Blob([svg.outerHTML], { type: "image/svg+xml" });
     const a = document.createElement("a");
@@ -35,7 +36,13 @@ export function QrCodeButton({ token, name }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setOpen(false)}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      onClick={() => setOpen(false)}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="qr-dialog-title"
+    >
       <div
         className="relative flex flex-col items-center gap-5 rounded-xl border bg-card p-7 shadow-2xl w-[320px]"
         onClick={(e) => e.stopPropagation()}
@@ -43,16 +50,17 @@ export function QrCodeButton({ token, name }: Props) {
         <button
           onClick={() => setOpen(false)}
           className="absolute right-3 top-3 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          aria-label="Close QR code dialog"
         >
           <X size={15} />
         </button>
 
         <div>
-          <h3 className="text-center font-semibold">{name}</h3>
+          <h3 id="qr-dialog-title" className="text-center font-semibold">{name}</h3>
           <p className="text-center text-xs text-muted-foreground mt-0.5">Scan to view gem details</p>
         </div>
 
-        <div id="qr-svg-export" className="rounded-lg bg-white p-4 shadow-inner">
+        <div ref={svgContainerRef} className="rounded-lg bg-white p-4 shadow-inner">
           <QRCodeSVG
             value={url}
             size={200}

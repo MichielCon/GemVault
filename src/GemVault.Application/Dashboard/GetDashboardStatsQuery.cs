@@ -51,28 +51,43 @@ public class GetDashboardStatsQueryHandler(
 
         var userId = currentUser.UserId.Value;
 
-        // Gem IDs that appear in any sale
+        // All gems and parcels
+        var allGems = await context.Gems
+            .AsNoTracking()
+            .Where(g => g.OwnerId == userId && !g.IsDeleted)
+            .Select(g => new { g.Id, g.PurchasePrice, g.Species })
+            .ToListAsync(ct);
+
+        var allParcels = await context.GemParcels
+            .AsNoTracking()
+            .Where(p => p.OwnerId == userId && !p.IsDeleted)
+            .Select(p => new { p.Id, p.PurchasePrice, p.Quantity, p.Species })
+            .ToListAsync(ct);
+
+        // Server-side subquery: gems/parcels that appear in a sale
+        var unsoldGemCount = await context.Gems
+            .AsNoTracking()
+            .Where(g => g.OwnerId == userId && !g.IsDeleted && !g.SaleItems.Any(si => !si.IsDeleted))
+            .CountAsync(ct);
+
+        var unsoldParcelCount = await context.GemParcels
+            .AsNoTracking()
+            .Where(p => p.OwnerId == userId && !p.IsDeleted && !p.SaleItems.Any(si => !si.IsDeleted))
+            .CountAsync(ct);
+
+        // Gem IDs that appear in any sale (still needed for cost-of-sold calculation)
         var soldGemIds = await context.SaleItems
+            .AsNoTracking()
             .Where(i => i.GemId.HasValue && !i.IsDeleted && !i.Sale.IsDeleted && i.Sale.OwnerId == userId)
             .Select(i => i.GemId!.Value)
             .Distinct()
             .ToListAsync(ct);
 
         var soldParcelIds = await context.SaleItems
+            .AsNoTracking()
             .Where(i => i.GemParcelId.HasValue && !i.IsDeleted && !i.Sale.IsDeleted && i.Sale.OwnerId == userId)
             .Select(i => i.GemParcelId!.Value)
             .Distinct()
-            .ToListAsync(ct);
-
-        // All gems and parcels
-        var allGems = await context.Gems
-            .Where(g => g.OwnerId == userId && !g.IsDeleted)
-            .Select(g => new { g.Id, g.PurchasePrice, g.Species })
-            .ToListAsync(ct);
-
-        var allParcels = await context.GemParcels
-            .Where(p => p.OwnerId == userId && !p.IsDeleted)
-            .Select(p => new { p.Id, p.PurchasePrice, p.Quantity, p.Species })
             .ToListAsync(ct);
 
         // Normalise date range (ensure UTC for Npgsql)
@@ -81,6 +96,7 @@ public class GetDashboardStatsQueryHandler(
 
         // All sale items (for revenue totals and monthly chart) — optionally date-filtered
         var saleItemsQuery = context.SaleItems
+            .AsNoTracking()
             .Where(i => !i.IsDeleted && !i.Sale.IsDeleted && i.Sale.OwnerId == userId);
         if (from.HasValue) saleItemsQuery = saleItemsQuery.Where(i => i.Sale.SaleDate >= from.Value);
         if (to.HasValue)   saleItemsQuery = saleItemsQuery.Where(i => i.Sale.SaleDate < to.Value);
@@ -89,20 +105,22 @@ public class GetDashboardStatsQueryHandler(
             .ToListAsync(ct);
 
         var supplierCount = await context.Suppliers
+            .AsNoTracking()
             .CountAsync(s => s.OwnerId == userId && !s.IsDeleted, ct);
 
-        var purchaseOrdersQuery = context.PurchaseOrders.Where(o => o.OwnerId == userId && !o.IsDeleted);
+        var purchaseOrdersQuery = context.PurchaseOrders.AsNoTracking().Where(o => o.OwnerId == userId && !o.IsDeleted);
         if (from.HasValue) purchaseOrdersQuery = purchaseOrdersQuery.Where(o => o.OrderDate >= from.Value);
         if (to.HasValue)   purchaseOrdersQuery = purchaseOrdersQuery.Where(o => o.OrderDate < to.Value);
         var purchaseOrderCount = await purchaseOrdersQuery.CountAsync(ct);
 
-        var salesQuery = context.Sales.Where(s => s.OwnerId == userId && !s.IsDeleted);
+        var salesQuery = context.Sales.AsNoTracking().Where(s => s.OwnerId == userId && !s.IsDeleted);
         if (from.HasValue) salesQuery = salesQuery.Where(s => s.SaleDate >= from.Value);
         if (to.HasValue)   salesQuery = salesQuery.Where(s => s.SaleDate < to.Value);
         var saleCount = await salesQuery.CountAsync(ct);
 
         // Recent gems and parcels added
         var recentGems = await context.Gems
+            .AsNoTracking()
             .Where(g => g.OwnerId == userId && !g.IsDeleted)
             .OrderByDescending(g => g.CreatedAt)
             .Take(5)
@@ -110,6 +128,7 @@ public class GetDashboardStatsQueryHandler(
             .ToListAsync(ct);
 
         var recentParcels = await context.GemParcels
+            .AsNoTracking()
             .Where(p => p.OwnerId == userId && !p.IsDeleted)
             .OrderByDescending(p => p.CreatedAt)
             .Take(5)
@@ -117,7 +136,7 @@ public class GetDashboardStatsQueryHandler(
             .ToListAsync(ct);
 
         // Recent sales — respect date filter
-        var recentSalesQuery = context.Sales.Where(s => s.OwnerId == userId && !s.IsDeleted);
+        var recentSalesQuery = context.Sales.AsNoTracking().Where(s => s.OwnerId == userId && !s.IsDeleted);
         if (from.HasValue) recentSalesQuery = recentSalesQuery.Where(s => s.SaleDate >= from.Value);
         if (to.HasValue)   recentSalesQuery = recentSalesQuery.Where(s => s.SaleDate < to.Value);
         var recentSaleEntities = await recentSalesQuery
@@ -185,8 +204,8 @@ public class GetDashboardStatsQueryHandler(
             allGems.Count,
             allParcels.Count,
             allParcels.Sum(p => p.Quantity),
-            unsoldGems.Count,
-            unsoldParcels.Count,
+            unsoldGemCount,
+            unsoldParcelCount,
             totalPurchaseValue,
             totalSalesValue,
             unsoldInventoryValue,

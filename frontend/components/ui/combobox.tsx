@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+// useLayoutEffect is safe here — combobox is always client-side
 import { cn } from "@/lib/utils";
 import { ChevronDown, X, Search } from "lucide-react";
 
@@ -48,8 +49,8 @@ export function Combobox({
   }, []);
 
   // Focus search when opening
-  React.useEffect(() => {
-    if (open) setTimeout(() => searchRef.current?.focus(), 10);
+  React.useLayoutEffect(() => {
+    if (open) searchRef.current?.focus();
   }, [open]);
 
   const filtered = search

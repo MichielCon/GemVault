@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { updateSupplier } from "@/lib/supplier-actions";
 import { Button } from "@/components/ui/button";
@@ -21,10 +22,15 @@ interface Props {
   supplier: SupplierDto;
 }
 
-const initialState = { error: null as string | null };
+const initialState = { error: null as string | null, id: null as string | null };
 
 export function SupplierEditForm({ supplier }: Props) {
+  const router = useRouter();
   const [state, formAction, pending] = useActionState(updateSupplier, initialState);
+
+  useEffect(() => {
+    if (state.id) router.push(`/dashboard/suppliers/${supplier.id}`);
+  }, [state.id, router, supplier.id]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -118,8 +124,8 @@ export function SupplierEditForm({ supplier }: Props) {
           </CardContent>
 
           <CardFooter className="gap-3">
-            <Button type="submit" disabled={pending}>
-              {pending ? "Saving…" : "Save changes"}
+            <Button type="submit" disabled={pending || !!state.id}>
+              {pending || state.id ? "Saving…" : "Save changes"}
             </Button>
             <Button asChild variant="outline" disabled={pending}>
               <Link href={`/dashboard/suppliers/${supplier.id}`}>Cancel</Link>

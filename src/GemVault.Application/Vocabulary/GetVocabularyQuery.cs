@@ -13,6 +13,7 @@ public class GetVocabularyAdminQueryHandler(IApplicationDbContext context)
     {
         var field = request.Field.ToLowerInvariant();
         var items = await context.GemVocabularies
+            .AsNoTracking()
             .Where(v => v.Field == field)
             .OrderBy(v => v.SortOrder)
             .Select(v => new VocabularyAdminDto(v.Id, v.Field, v.Value, v.ParentValue, v.SortOrder))
@@ -62,7 +63,7 @@ public class GetVocabularyQueryHandler(IApplicationDbContext context) : IRequest
                 .ToDictionary(g => g.Key, g => g.Count(), StringComparer.OrdinalIgnoreCase);
         }
 
-        var query = context.GemVocabularies.Where(v => v.Field == field);
+        var query = context.GemVocabularies.AsNoTracking().Where(v => v.Field == field);
         if (request.ParentValue is not null)
             query = query.Where(v => v.ParentValue == request.ParentValue);
 

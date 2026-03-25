@@ -3,11 +3,13 @@ using GemVault.Application.Origins.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace GemVault.Api.Controllers;
 
 [ApiController]
 [Route("api/v1/origins")]
+[EnableRateLimiting("api")]
 [Authorize]
 public class OriginsController(IMediator mediator) : ControllerBase
 {

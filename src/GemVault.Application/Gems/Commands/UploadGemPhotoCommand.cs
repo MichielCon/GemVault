@@ -65,8 +65,6 @@ public class UploadGemPhotoCommandHandler(
         var photoId = Guid.NewGuid();
         var objectKey = $"gems/{request.GemId}/{photoId}.{ext}";
 
-        await storage.UploadAsync(objectKey, request.FileStream, request.ContentType, request.FileSize, ct);
-
         // If this is cover, unset other cover photos
         if (request.IsCover)
             foreach (var p in gem.Photos.Where(p => p.IsCover))
@@ -83,8 +81,20 @@ public class UploadGemPhotoCommandHandler(
             IsCover = request.IsCover || !gem.Photos.Any(),
         };
 
+        // Save DB record first — if MinIO fails the record is detectable and recoverable.
         context.GemPhotos.Add(photo);
         await context.SaveChangesAsync(ct);
+
+        try
+        {
+            await storage.UploadAsync(objectKey, request.FileStream, request.ContentType, request.FileSize, ct);
+        }
+        catch
+        {
+            photo.IsDeleted = true;
+            await context.SaveChangesAsync(ct);
+            throw;
+        }
 
         return new GemPhotoDto(photo.Id, storage.GetPublicUrl(objectKey), photo.IsCover, photo.CreatedAt);
     }

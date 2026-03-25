@@ -20,6 +20,7 @@ public class GetSaleByIdQueryHandler(
             throw new ForbiddenException();
 
         var sale = await context.Sales
+            .AsNoTracking()
             .Include(s => s.Items)
                 .ThenInclude(i => i.Gem)
             .Include(s => s.Items)
@@ -28,7 +29,7 @@ public class GetSaleByIdQueryHandler(
             ?? throw new NotFoundException("Sale", request.Id);
 
         if (sale.OwnerId != currentUser.UserId)
-            throw new NotFoundException("Sale", request.Id);
+            throw new ForbiddenException();
 
         var itemDtos = sale.Items
             .Where(i => !i.IsDeleted)

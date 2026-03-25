@@ -4,6 +4,7 @@ using GemVault.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
@@ -14,6 +15,7 @@ namespace GemVault.Api.Controllers;
 [ApiController]
 [Route("api/v1/gems")]
 [Authorize]
+[EnableRateLimiting("api")]
 public class GemsController(IMediator mediator) : ControllerBase
 {
     [HttpGet]
@@ -80,7 +82,7 @@ public class GemsController(IMediator mediator) : ControllerBase
         [FromBody] BulkDeleteGemsRequest body,
         CancellationToken ct)
     {
-        await mediator.Send(new BulkDeleteGemsCommand(body.Ids.Select(Guid.Parse).ToList()), ct);
+        await mediator.Send(new BulkDeleteGemsCommand(body.Ids), ct);
         return NoContent();
     }
 
@@ -260,7 +262,7 @@ public class GemsController(IMediator mediator) : ControllerBase
     }
 }
 
-public record BulkDeleteGemsRequest(List<string> Ids);
+public record BulkDeleteGemsRequest(List<Guid> Ids);
 
 // Separate body record to allow id injection from route
 public record UpdateGemCommandBody(

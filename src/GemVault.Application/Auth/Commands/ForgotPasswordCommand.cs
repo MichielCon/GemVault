@@ -29,11 +29,7 @@ public class ForgotPasswordCommandHandler(
         if (found)
         {
             // TODO: Send reset email via SMTP when email service is configured.
-            // For now, log the token so it can be retrieved during development.
-            logger.LogInformation(
-                "Password reset token for {Email}: {Token}",
-                request.Email,
-                token);
+            logger.LogInformation("Password reset requested for {Email}", request.Email);
         }
 
         return Unit.Value;

@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createGem } from "@/lib/gem-actions";
 import { Button } from "@/components/ui/button";
@@ -25,10 +26,15 @@ interface Props {
   origins: OriginDto[];
 }
 
-const initialState = { error: null as string | null };
+const initialState = { error: null as string | null, id: null as string | null };
 
 export function GemCreateForm({ vocabulary, origins }: Props) {
+  const router = useRouter();
   const [state, formAction, pending] = useActionState(createGem, initialState);
+
+  useEffect(() => {
+    if (state.id) router.push(`/dashboard/gems/${state.id}`);
+  }, [state.id, router]);
   const [species, setSpecies] = useState<string | null>(null);
   const [variety, setVariety] = useState<string | null>(null);
   const [color, setColor] = useState<string | null>(null);
@@ -36,15 +42,36 @@ export function GemCreateForm({ vocabulary, origins }: Props) {
   const [cut, setCut] = useState<string | null>(null);
   const [shape, setShape] = useState<string | null>(null);
   const [treatment, setTreatment] = useState<string | null>(null);
-  const speciesOptions = vocabulary.species.map((v) => ({ value: v.value, label: v.value }));
-  const varietyOptions = species
-    ? vocabulary.variety.filter((v) => v.parentValue === species).map((v) => ({ value: v.value, label: v.value }))
-    : vocabulary.variety.map((v) => ({ value: v.value, label: v.value }));
-  const colorOptions = vocabulary.color.map((v) => ({ value: v.value, label: v.value }));
-  const clarityOptions = vocabulary.clarity.map((v) => ({ value: v.value, label: v.value }));
-  const cutOptions = vocabulary.cut.map((v) => ({ value: v.value, label: v.value }));
-  const shapeOptions = vocabulary.shape.map((v) => ({ value: v.value, label: v.value }));
-  const treatmentOptions = vocabulary.treatment.map((v) => ({ value: v.value, label: v.value }));
+  const speciesOptions = useMemo(
+    () => vocabulary.species.map((v) => ({ value: v.value, label: v.value })),
+    [vocabulary.species]
+  );
+  const varietyOptions = useMemo(
+    () => species
+      ? vocabulary.variety.filter((v) => v.parentValue === species).map((v) => ({ value: v.value, label: v.value }))
+      : vocabulary.variety.map((v) => ({ value: v.value, label: v.value })),
+    [vocabulary.variety, species]
+  );
+  const colorOptions = useMemo(
+    () => vocabulary.color.map((v) => ({ value: v.value, label: v.value })),
+    [vocabulary.color]
+  );
+  const clarityOptions = useMemo(
+    () => vocabulary.clarity.map((v) => ({ value: v.value, label: v.value })),
+    [vocabulary.clarity]
+  );
+  const cutOptions = useMemo(
+    () => vocabulary.cut.map((v) => ({ value: v.value, label: v.value })),
+    [vocabulary.cut]
+  );
+  const shapeOptions = useMemo(
+    () => vocabulary.shape.map((v) => ({ value: v.value, label: v.value })),
+    [vocabulary.shape]
+  );
+  const treatmentOptions = useMemo(
+    () => vocabulary.treatment.map((v) => ({ value: v.value, label: v.value })),
+    [vocabulary.treatment]
+  );
 
   function handleSpeciesChange(val: string | null) {
     setSpecies(val);
@@ -254,8 +281,8 @@ export function GemCreateForm({ vocabulary, origins }: Props) {
 
           {/* Actions */}
           <div className="flex items-center gap-3 pt-1">
-            <Button type="submit" variant="violet" disabled={pending} className="min-w-[100px]">
-              {pending ? "Saving…" : "Save gem"}
+            <Button type="submit" variant="violet" disabled={pending || !!state.id} className="min-w-[100px]">
+              {pending || state.id ? "Saving…" : "Save gem"}
             </Button>
             <Button asChild variant="outline" disabled={pending}>
               <Link href="/dashboard/gems">Cancel</Link>

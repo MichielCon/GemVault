@@ -23,7 +23,7 @@ public class DeletePurchaseOrderCommandHandler(
             ?? throw new NotFoundException("PurchaseOrder", request.Id);
 
         if (order.OwnerId != currentUser.UserId)
-            throw new NotFoundException("PurchaseOrder", request.Id);
+            throw new ForbiddenException();
 
         order.IsDeleted = true;
         order.UpdatedAt = DateTime.UtcNow;

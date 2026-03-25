@@ -20,7 +20,7 @@ public class GetSuppliersQueryHandler(
             throw new ForbiddenException();
 
         var query = context.Suppliers
-            .Include(s => s.PurchaseOrders)
+            .AsNoTracking()
             .Where(s => s.OwnerId == currentUser.UserId && !s.IsDeleted);
 
         if (!string.IsNullOrWhiteSpace(request.Search))
@@ -31,19 +31,18 @@ public class GetSuppliersQueryHandler(
                 (s.Email != null && s.Email.ToLower().Contains(search)));
         }
 
-        var suppliers = await query
+        return await query
             .OrderBy(s => s.Name)
+            .Select(s => new SupplierDto(
+                s.Id,
+                s.Name,
+                s.Email,
+                s.Phone,
+                s.Website,
+                s.Address,
+                s.Notes,
+                s.PurchaseOrders.Count(o => !o.IsDeleted),
+                s.CreatedAt))
             .ToListAsync(ct);
-
-        return suppliers.Select(s => new SupplierDto(
-            s.Id,
-            s.Name,
-            s.Email,
-            s.Phone,
-            s.Website,
-            s.Address,
-            s.Notes,
-            s.PurchaseOrders.Count(o => !o.IsDeleted),
-            s.CreatedAt)).ToList();
     }
 }

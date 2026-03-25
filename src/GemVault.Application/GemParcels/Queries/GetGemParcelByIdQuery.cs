@@ -18,11 +18,13 @@ public class GetGemParcelByIdQueryHandler(
     public async Task<GemParcelDto> Handle(GetGemParcelByIdQuery request, CancellationToken ct)
     {
         var parcel = await context.GemParcels
+            .AsNoTracking()
             .Include(p => p.Photos)
             .Include(p => p.Origin)
             .Include(p => p.PublicToken)
             .Include(p => p.SaleItems)
                 .ThenInclude(si => si.Sale)
+            .Include(p => p.OrderItems)
             .FirstOrDefaultAsync(p => p.Id == request.Id && !p.IsDeleted, ct)
             ?? throw new NotFoundException("GemParcel", request.Id);
 

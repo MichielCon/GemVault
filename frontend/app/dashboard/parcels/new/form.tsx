@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState, useEffect } from "react";
+import { useActionState, useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createParcel } from "@/lib/parcel-actions";
@@ -47,16 +47,24 @@ export function ParcelCreateForm({ vocabulary, origins }: Props) {
     }
   }, [state.id, router]);
 
-  const speciesOptions = vocabulary.species.map((v) => ({ value: v.value, label: v.value }));
-
-  const varietyOptions = species
-    ? vocabulary.variety
-        .filter((v) => v.parentValue === species)
-        .map((v) => ({ value: v.value, label: v.value }))
-    : vocabulary.variety.map((v) => ({ value: v.value, label: v.value }));
-
-  const colorOptions = vocabulary.color.map((v) => ({ value: v.value, label: v.value }));
-  const treatmentOptions = vocabulary.treatment.map((v) => ({ value: v.value, label: v.value }));
+  const speciesOptions = useMemo(
+    () => vocabulary.species.map((v) => ({ value: v.value, label: v.value })),
+    [vocabulary.species]
+  );
+  const varietyOptions = useMemo(
+    () => species
+      ? vocabulary.variety.filter((v) => v.parentValue === species).map((v) => ({ value: v.value, label: v.value }))
+      : vocabulary.variety.map((v) => ({ value: v.value, label: v.value })),
+    [vocabulary.variety, species]
+  );
+  const colorOptions = useMemo(
+    () => vocabulary.color.map((v) => ({ value: v.value, label: v.value })),
+    [vocabulary.color]
+  );
+  const treatmentOptions = useMemo(
+    () => vocabulary.treatment.map((v) => ({ value: v.value, label: v.value })),
+    [vocabulary.treatment]
+  );
 
   function handleSpeciesChange(val: string | null) {
     setSpecies(val);

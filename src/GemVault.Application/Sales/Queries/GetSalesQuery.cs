@@ -31,7 +31,7 @@ public class GetSalesQueryHandler(
             throw new ForbiddenException();
 
         var query = context.Sales
-            .Include(s => s.Items)
+            .AsNoTracking()
             .Where(s => s.OwnerId == currentUser.UserId && !s.IsDeleted);
 
         if (!string.IsNullOrWhiteSpace(request.Search))
@@ -44,19 +44,18 @@ public class GetSalesQueryHandler(
         var total = await query.CountAsync(ct);
 
         var pageSize = Math.Min(request.PageSize, 100);
-        var items = await query
+        var dtos = await query
             .OrderByDescending(s => s.SaleDate)
             .Skip((request.Page - 1) * pageSize)
             .Take(pageSize)
+            .Select(s => new SaleSummaryDto(
+                s.Id,
+                s.SaleDate,
+                s.BuyerName,
+                s.Items.Where(i => !i.IsDeleted).Sum(i => i.SalePrice * i.Quantity),
+                s.Items.Count(i => !i.IsDeleted),
+                s.CreatedAt))
             .ToListAsync(ct);
-
-        var dtos = items.Select(s => new SaleSummaryDto(
-            s.Id,
-            s.SaleDate,
-            s.BuyerName,
-            s.Items.Where(i => !i.IsDeleted).Sum(i => i.SalePrice * i.Quantity),
-            s.Items.Count(i => !i.IsDeleted),
-            s.CreatedAt)).ToList();
 
         return new PagedResult<SaleSummaryDto>(dtos, total, request.Page, pageSize);
     }

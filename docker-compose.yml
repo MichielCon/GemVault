@@ -18,6 +18,11 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
 
   minio:
     image: minio/minio:latest
@@ -36,6 +41,11 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
 
   api:
     build:
@@ -56,6 +66,7 @@ services:
       - Minio__SecretKey=${MINIO_ROOT_PASSWORD}
       - Minio__BucketName=${MINIO_BUCKET}
       - Minio__UseSSL=false
+      - Seq__ServerUrl=http://seq:5341
       # Override with docker-compose.dev.yml for local development
       - ASPNETCORE_ENVIRONMENT=Production
     depends_on:
@@ -63,6 +74,13 @@ services:
         condition: service_healthy
       minio:
         condition: service_healthy
+      seq:
+        condition: service_started
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "10"
 
   frontend:
     build:
@@ -77,6 +95,11 @@ services:
       - MINIO_INTERNAL_URL=http://minio:9000
     depends_on:
       - api
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
 
   nginx:
     image: nginx:1.27-alpine
@@ -88,7 +111,30 @@ services:
     depends_on:
       - api
       - frontend
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+  seq:
+    image: datalust/seq:latest
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      SEQ_FIRSTRUN_NOAUTHENTICATION: "true"
+    ports:
+      - "5341:5341"  # ingestion (Serilog sink)
+      - "8080:80"    # UI — dev only; blocked in prod overlay
+    volumes:
+      - seq_data:/data
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   postgres_data:
   minio_data:
+  seq_data:

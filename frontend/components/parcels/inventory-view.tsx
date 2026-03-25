@@ -11,6 +11,7 @@ import { MagicCard } from "@/components/magicui/magic-card";
 import type { GemParcelSummaryDto, PagedResult } from "@/lib/types";
 import { proxyPhotoUrl } from "@/lib/utils";
 import { bulkDeleteParcels } from "@/lib/parcel-actions";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 const STORAGE_KEY = "parcel-view";
 const STATUS_OPTIONS = ["All", "InStock", "Sold"] as const;
@@ -58,6 +59,9 @@ export function ParcelInventoryView({
   const headerRef     = useRef<HTMLDivElement>(null);
   const toolbarRef    = useRef<HTMLDivElement>(null);
   const paginationRef = useRef<HTMLDivElement>(null);
+  const pageSizeRef = useRef(pageSize);
+  pageSizeRef.current = pageSize;
+  const viewLoadedRef = useRef(false);
   const activeStatus: Status = (STATUS_OPTIONS.includes(status as Status) ? status : "All") as Status;
 
   const hasActiveFilters = !!(species || color || minPrice || maxPrice);
@@ -73,10 +77,12 @@ export function ParcelInventoryView({
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [bulkError, setBulkError] = useState<string | null>(null);
   const [exportOpen, setExportOpen] = useState(false);
+  const [bulkConfirmOpen, setBulkConfirmOpen] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved === "list" || saved === "grid") setView(saved);
+    viewLoadedRef.current = true;
   }, []);
 
   useEffect(() => {
@@ -89,7 +95,7 @@ export function ParcelInventoryView({
 
     function calcIdealPageSize(currentView: "grid" | "list"): number {
       const c = containerRef.current;
-      if (!c) return pageSize;
+      if (!c) return pageSizeRef.current;
       const totalH      = c.clientHeight;
       const headerH     = (headerRef.current?.offsetHeight   ?? 52) + 20;
       const toolbarH    = (toolbarRef.current?.offsetHeight  ?? 36) + 16;
@@ -112,8 +118,9 @@ export function ParcelInventoryView({
     }
 
     function apply() {
+      if (!viewLoadedRef.current) return;
       const ideal = calcIdealPageSize(view);
-      if (ideal === pageSize) return;
+      if (ideal === pageSizeRef.current) return;
       const q = new URLSearchParams({ page: "1", pageSize: String(ideal) });
       if (search)                 q.set("search", search);
       if (activeStatus !== "All") q.set("status", activeStatus);
@@ -127,9 +134,13 @@ export function ParcelInventoryView({
     }
 
     apply();
-    const ro = new ResizeObserver(apply);
+    let resizeTimeout: ReturnType<typeof setTimeout>;
+    const ro = new ResizeObserver(() => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(apply, 150);
+    });
     ro.observe(container);
-    return () => ro.disconnect();
+    return () => { ro.disconnect(); clearTimeout(resizeTimeout); };
   }, [view]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function toggle(v: "grid" | "list") {
@@ -140,7 +151,7 @@ export function ParcelInventoryView({
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
     const value = inputRef.current?.value.trim() ?? "";
-    const q = new URLSearchParams({ page: "1" });
+    const q = new URLSearchParams({ page: "1", pageSize: String(pageSize) });
     if (value) q.set("search", value);
     if (activeStatus !== "All") q.set("status", activeStatus);
     if (species) q.set("species", species);
@@ -153,7 +164,7 @@ export function ParcelInventoryView({
   }
 
   function clearSearch() {
-    const q = new URLSearchParams({ page: "1" });
+    const q = new URLSearchParams({ page: "1", pageSize: String(pageSize) });
     if (activeStatus !== "All") q.set("status", activeStatus);
     if (species) q.set("species", species);
     if (color) q.set("color", color);
@@ -165,7 +176,7 @@ export function ParcelInventoryView({
   }
 
   function handleStatus(s: Status) {
-    const q = new URLSearchParams({ page: "1" });
+    const q = new URLSearchParams({ page: "1", pageSize: String(pageSize) });
     if (search) q.set("search", search);
     if (s !== "All") q.set("status", s);
     if (species) q.set("species", species);
@@ -178,7 +189,7 @@ export function ParcelInventoryView({
   }
 
   function handleSort(by: string, dir: string) {
-    const q = new URLSearchParams({ page: "1" });
+    const q = new URLSearchParams({ page: "1", pageSize: String(pageSize) });
     if (search) q.set("search", search);
     if (activeStatus !== "All") q.set("status", activeStatus);
     if (species) q.set("species", species);
@@ -191,7 +202,7 @@ export function ParcelInventoryView({
   }
 
   function applyFilters() {
-    const q = new URLSearchParams({ page: "1" });
+    const q = new URLSearchParams({ page: "1", pageSize: String(pageSize) });
     if (inputRef.current?.value.trim()) q.set("search", inputRef.current.value.trim());
     if (activeStatus !== "All") q.set("status", activeStatus);
     if (speciesInput.trim()) q.set("species", speciesInput.trim());
@@ -208,7 +219,7 @@ export function ParcelInventoryView({
     setColorInput("");
     setMinPriceInput("");
     setMaxPriceInput("");
-    const q = new URLSearchParams({ page: "1" });
+    const q = new URLSearchParams({ page: "1", pageSize: String(pageSize) });
     if (inputRef.current?.value.trim()) q.set("search", inputRef.current.value.trim());
     if (activeStatus !== "All") q.set("status", activeStatus);
     router.push(`/dashboard/parcels?${q}`);
@@ -231,7 +242,6 @@ export function ParcelInventoryView({
   }
 
   async function handleBulkDelete() {
-    if (!confirm(`Delete ${selectedIds.size} parcel${selectedIds.size !== 1 ? "s" : ""}? This cannot be undone.`)) return;
     setBulkDeleting(true);
     setBulkError(null);
     const { error } = await bulkDeleteParcels([...selectedIds]);
@@ -480,7 +490,7 @@ export function ParcelInventoryView({
           <span className="text-xs font-medium text-zinc-300">{selectedIds.size} selected</span>
           <div className="h-3 w-px bg-zinc-700" />
           <button
-            onClick={handleBulkDelete}
+            onClick={() => setBulkConfirmOpen(true)}
             disabled={bulkDeleting}
             className="flex items-center gap-1.5 rounded-full bg-red-600 px-3 py-1 text-xs font-medium text-white hover:bg-red-700 transition-colors disabled:opacity-50"
           >
@@ -495,6 +505,15 @@ export function ParcelInventoryView({
           </button>
         </div>
       )}
+      <ConfirmDialog
+        open={bulkConfirmOpen}
+        title={`Delete ${selectedIds.size} parcel${selectedIds.size !== 1 ? "s" : ""}`}
+        description="This will permanently delete the selected parcels and their photos. This cannot be undone."
+        confirmLabel="Delete"
+        destructive
+        onConfirm={() => { setBulkConfirmOpen(false); handleBulkDelete(); }}
+        onCancel={() => setBulkConfirmOpen(false)}
+      />
     </div>
   );
 }

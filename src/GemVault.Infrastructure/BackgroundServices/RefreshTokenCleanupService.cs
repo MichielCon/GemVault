@@ -17,8 +17,9 @@ public class RefreshTokenCleanupService(IServiceScopeFactory scopeFactory, ILogg
             using var scope = scopeFactory.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var cutoff = DateTime.UtcNow.AddDays(-7);
-            var deleted = await context.Database.ExecuteSqlRawAsync(
-                "DELETE FROM \"RefreshTokens\" WHERE \"IsRevoked\" = TRUE AND \"ExpiresAt\" < {0}", cutoff);
+            var deleted = await context.RefreshTokens
+                .Where(t => t.IsRevoked && t.ExpiresAt < cutoff)
+                .ExecuteDeleteAsync(stoppingToken);
             logger.LogInformation("Cleaned up {Count} expired refresh tokens", deleted);
         }
     }

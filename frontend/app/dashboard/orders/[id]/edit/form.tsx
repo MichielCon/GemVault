@@ -60,7 +60,7 @@ export function OrderEditForm({ order, suppliers }: Props) {
         <CardHeader>
           <CardTitle className="text-xl">Edit purchase order</CardTitle>
           <CardDescription>
-            Update the order details. Line items cannot be changed after creation.
+            Update the order header details below.
           </CardDescription>
         </CardHeader>
 
@@ -131,6 +131,37 @@ export function OrderEditForm({ order, suppliers }: Props) {
                 className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none"
               />
             </div>
+
+            {order.items.length > 0 && (
+              <div className="flex flex-col gap-2">
+                <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Line items (read-only)</p>
+                <div className="overflow-hidden rounded-lg border border-zinc-200/80">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-zinc-100 bg-zinc-50/60">
+                        <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Item</th>
+                        <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Description</th>
+                        <th className="px-3 py-2 text-right text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Cost</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-zinc-100">
+                      {order.items.map((item) => (
+                        <tr key={item.id} className="hover:bg-zinc-50">
+                          <td className="px-3 py-2 text-zinc-700">
+                            {item.gemName ?? item.gemParcelName ?? <span className="text-zinc-400 italic">No item linked</span>}
+                          </td>
+                          <td className="px-3 py-2 text-zinc-500 text-xs">{item.notes ?? "—"}</td>
+                          <td className="px-3 py-2 text-right font-medium text-zinc-800">
+                            {item.costPrice.toLocaleString("en-US", { style: "currency", currency: "USD" })}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <p className="text-xs text-zinc-400">Line items cannot be changed after creation.</p>
+              </div>
+            )}
           </CardContent>
 
           <CardFooter className="gap-3">

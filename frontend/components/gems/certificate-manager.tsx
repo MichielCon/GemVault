@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import type { CertificateDto } from "@/lib/types";
 import { FileText, Trash2, Plus, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
 import { proxyPhotoUrl } from "@/lib/utils";
@@ -181,6 +182,22 @@ function CertificateRow({
   const [deleteState, deleteFormAction, isDeleting] = useActionState(deleteCertificate, {
     error: null,
   });
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const prevDeleteState = useRef(deleteState);
+
+  useEffect(() => {
+    if (prevDeleteState.current !== deleteState && deleteState.error === null) {
+      onDeleted();
+    }
+    prevDeleteState.current = deleteState;
+  }, [deleteState, onDeleted]);
+
+  function handleConfirmDelete() {
+    setConfirmOpen(false);
+    const fd = new FormData();
+    fd.append("certId", cert.id);
+    deleteFormAction(fd);
+  }
 
   return (
     <div className="flex items-start justify-between gap-3 rounded-lg border border-slate-100 bg-white p-3">
@@ -216,33 +233,27 @@ function CertificateRow({
             </a>
           </Button>
         )}
-        <form
-          action={deleteFormAction}
-          onSubmit={(e) => {
-            if (
-              !window.confirm(
-                `Delete certificate "${cert.certNumber}"? This cannot be undone.`
-              )
-            ) {
-              e.preventDefault();
-              return;
-            }
-            // Trigger parent refresh shortly after submission
-            setTimeout(onDeleted, 400);
-          }}
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+          disabled={isDeleting}
+          title="Delete certificate"
+          aria-label="Delete certificate"
+          onClick={() => setConfirmOpen(true)}
         >
-          <input type="hidden" name="certId" value={cert.id} />
-          <Button
-            type="submit"
-            variant="ghost"
-            size="sm"
-            className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
-            disabled={isDeleting}
-            title="Delete certificate"
-          >
-            <Trash2 size={13} />
-          </Button>
-        </form>
+          <Trash2 size={13} />
+        </Button>
+        <ConfirmDialog
+          open={confirmOpen}
+          title="Delete certificate"
+          description={`Delete certificate "${cert.certNumber}"? This cannot be undone.`}
+          confirmLabel="Delete"
+          destructive
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setConfirmOpen(false)}
+        />
       </div>
     </div>
   );

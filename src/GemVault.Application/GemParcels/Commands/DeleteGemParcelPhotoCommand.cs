@@ -3,6 +3,7 @@ using GemVault.Application.Interfaces;
 using GemVault.Domain.Interfaces;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace GemVault.Application.GemParcels.Commands;
 
@@ -11,7 +12,8 @@ public record DeleteGemParcelPhotoCommand(Guid PhotoId) : IRequest;
 public class DeleteGemParcelPhotoCommandHandler(
     IApplicationDbContext context,
     ICurrentUserService currentUser,
-    IStorageService storage)
+    IStorageService storage,
+    ILogger<DeleteGemParcelPhotoCommandHandler> logger)
     : IRequestHandler<DeleteGemParcelPhotoCommand>
 {
     public async Task Handle(DeleteGemParcelPhotoCommand request, CancellationToken ct)
@@ -24,8 +26,7 @@ public class DeleteGemParcelPhotoCommandHandler(
         if (photo.GemParcel == null || photo.GemParcel.OwnerId != currentUser.UserId)
             throw new ForbiddenException();
 
-        await storage.DeleteAsync(photo.ObjectKey, ct);
-
+        // Mark DB record deleted first — safer than MinIO-first approach.
         photo.IsDeleted = true;
 
         // If deleted photo was cover, promote the next available photo
@@ -39,5 +40,17 @@ public class DeleteGemParcelPhotoCommandHandler(
         }
 
         await context.SaveChangesAsync(ct);
+
+        // Delete from MinIO after DB commit. On failure, log and continue —
+        // the orphaned object can be cleaned up by a background job.
+        try
+        {
+            await storage.DeleteAsync(photo.ObjectKey, ct);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to delete object {ObjectKey} from storage after photo {PhotoId} was soft-deleted",
+                photo.ObjectKey, photo.Id);
+        }
     }
 }

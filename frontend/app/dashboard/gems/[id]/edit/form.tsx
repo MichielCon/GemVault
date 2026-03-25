@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { updateGem } from "@/lib/gem-actions";
 import { Button } from "@/components/ui/button";
@@ -33,10 +34,15 @@ interface Props {
   origins: OriginDto[];
 }
 
-const initialState = { error: null as string | null };
+const initialState = { error: null as string | null, id: null as string | null };
 
 export function GemEditForm({ gem, vocabulary, origins }: Props) {
+  const router = useRouter();
   const [state, formAction, pending] = useActionState(updateGem, initialState);
+
+  useEffect(() => {
+    if (state.id) router.push(`/dashboard/gems/${state.id}`);
+  }, [state.id, router]);
   const [species, setSpecies] = useState<string | null>(gem.species ?? null);
   const [variety, setVariety] = useState<string | null>(gem.variety ?? null);
   const [color, setColor] = useState<string | null>(gem.color ?? null);
@@ -44,19 +50,36 @@ export function GemEditForm({ gem, vocabulary, origins }: Props) {
   const [cut, setCut] = useState<string | null>(gem.cut ?? null);
   const [shape, setShape] = useState<string | null>(gem.shape ?? null);
   const [treatment, setTreatment] = useState<string | null>(gem.treatment ?? null);
-  const speciesOptions = vocabulary.species.map((v) => ({ value: v.value, label: v.value }));
-
-  const varietyOptions = species
-    ? vocabulary.variety
-        .filter((v) => v.parentValue === species)
-        .map((v) => ({ value: v.value, label: v.value }))
-    : vocabulary.variety.map((v) => ({ value: v.value, label: v.value }));
-
-  const colorOptions = vocabulary.color.map((v) => ({ value: v.value, label: v.value }));
-  const clarityOptions = vocabulary.clarity.map((v) => ({ value: v.value, label: v.value }));
-  const cutOptions = vocabulary.cut.map((v) => ({ value: v.value, label: v.value }));
-  const shapeOptions = vocabulary.shape.map((v) => ({ value: v.value, label: v.value }));
-  const treatmentOptions = vocabulary.treatment.map((v) => ({ value: v.value, label: v.value }));
+  const speciesOptions = useMemo(
+    () => vocabulary.species.map((v) => ({ value: v.value, label: v.value })),
+    [vocabulary.species]
+  );
+  const varietyOptions = useMemo(
+    () => species
+      ? vocabulary.variety.filter((v) => v.parentValue === species).map((v) => ({ value: v.value, label: v.value }))
+      : vocabulary.variety.map((v) => ({ value: v.value, label: v.value })),
+    [vocabulary.variety, species]
+  );
+  const colorOptions = useMemo(
+    () => vocabulary.color.map((v) => ({ value: v.value, label: v.value })),
+    [vocabulary.color]
+  );
+  const clarityOptions = useMemo(
+    () => vocabulary.clarity.map((v) => ({ value: v.value, label: v.value })),
+    [vocabulary.clarity]
+  );
+  const cutOptions = useMemo(
+    () => vocabulary.cut.map((v) => ({ value: v.value, label: v.value })),
+    [vocabulary.cut]
+  );
+  const shapeOptions = useMemo(
+    () => vocabulary.shape.map((v) => ({ value: v.value, label: v.value })),
+    [vocabulary.shape]
+  );
+  const treatmentOptions = useMemo(
+    () => vocabulary.treatment.map((v) => ({ value: v.value, label: v.value })),
+    [vocabulary.treatment]
+  );
 
   function handleSpeciesChange(val: string | null) {
     setSpecies(val);
@@ -272,8 +295,8 @@ export function GemEditForm({ gem, vocabulary, origins }: Props) {
           </CardContent>
 
           <CardFooter className="gap-3">
-            <Button type="submit" disabled={pending}>
-              {pending ? "Saving…" : "Save changes"}
+            <Button type="submit" disabled={pending || !!state.id}>
+              {pending || state.id ? "Saving…" : "Save changes"}
             </Button>
             <Button asChild variant="outline" disabled={pending}>
               <Link href={`/dashboard/gems/${gem.id}`}>Cancel</Link>

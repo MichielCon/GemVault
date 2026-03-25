@@ -48,10 +48,10 @@ public class RegisterCommandHandler(
         if (errors.Count > 0)
             throw new ValidationException(string.Join("; ", errors));
 
-        // Generate email confirmation token (log for dev; replace with SMTP when configured)
-        var (_, confirmToken) = await identityService.GenerateEmailConfirmationTokenAsync(userId, ct);
-        logger.LogInformation(
-            "Email confirmation token for {Email}: {Token}", request.Email, confirmToken);
+        // Generate email confirmation token
+        // TODO: Send confirmation email via SMTP when email service is configured.
+        var (_, _) = await identityService.GenerateEmailConfirmationTokenAsync(userId, ct);
+        logger.LogInformation("Email confirmation required for {Email}", request.Email);
 
         return await IssueTokensAsync(userId, request.Email, request.Role, ct);
     }

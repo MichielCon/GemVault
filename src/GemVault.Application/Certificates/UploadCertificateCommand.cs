@@ -60,13 +60,10 @@ public class UploadCertificateCommandHandler(
         if (gem.OwnerId != currentUser.UserId)
             throw new ForbiddenException();
 
-        // Upload to MinIO
+        // Create DB record first — if MinIO fails the record is detectable and recoverable.
         var certId = Guid.NewGuid();
         var objectKey = $"certificates/{request.GemId}/{certId}.pdf";
 
-        await storage.UploadAsync(objectKey, request.FileStream, request.ContentType, request.FileSize, ct);
-
-        // Persist entity
         var certificate = new Certificate
         {
             Id = certId,
@@ -82,6 +79,17 @@ public class UploadCertificateCommandHandler(
 
         context.Certificates.Add(certificate);
         await context.SaveChangesAsync(ct);
+
+        try
+        {
+            await storage.UploadAsync(objectKey, request.FileStream, request.ContentType, request.FileSize, ct);
+        }
+        catch
+        {
+            certificate.IsDeleted = true;
+            await context.SaveChangesAsync(ct);
+            throw;
+        }
 
         var fileUrl = storage.GetPublicUrl(objectKey);
 

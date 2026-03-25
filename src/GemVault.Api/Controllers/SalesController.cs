@@ -3,12 +3,14 @@ using GemVault.Application.Sales.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace GemVault.Api.Controllers;
 
 [ApiController]
 [Route("api/v1/sales")]
 [Authorize]
+[EnableRateLimiting("api")]
 public class SalesController(IMediator mediator) : ControllerBase
 {
     [HttpGet]

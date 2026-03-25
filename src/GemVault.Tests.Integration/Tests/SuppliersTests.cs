@@ -74,7 +74,7 @@ public class SuppliersTests(DatabaseFixture fixture) : IntegrationTestBase(fixtu
     }
 
     [Fact]
-    public async Task UpdateSupplier_OtherUsersSupplier_Returns404()
+    public async Task UpdateSupplier_OtherUsersSupplier_Returns403()
     {
         // User A creates a supplier
         var tokenA = await RegisterAndLoginAsync();
@@ -88,6 +88,6 @@ public class SuppliersTests(DatabaseFixture fixture) : IntegrationTestBase(fixtu
         var updateRes = await Client.PutAsJsonAsync($"/api/v1/suppliers/{created!.Id}",
             new { id = created.Id, name = "Hijacked Name" });
 
-        Assert.Equal(HttpStatusCode.NotFound, updateRes.StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, updateRes.StatusCode);
     }
 }

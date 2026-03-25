@@ -3,11 +3,13 @@ using GemVault.Application.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace GemVault.Api.Controllers;
 
 [ApiController]
 [Route("api/v1/vocabulary")]
+[EnableRateLimiting("api")]
 public class VocabularyController(IMediator mediator, ICurrentUserService currentUser) : ControllerBase
 {
     [HttpGet("{field}")]

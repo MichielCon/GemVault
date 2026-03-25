@@ -12,7 +12,7 @@ public class GetOriginsQueryHandler(IApplicationDbContext context)
 {
     public async Task<List<OriginDto>> Handle(GetOriginsQuery request, CancellationToken ct)
     {
-        var query = context.Origins.AsQueryable();
+        var query = context.Origins.AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(request.Search))
         {

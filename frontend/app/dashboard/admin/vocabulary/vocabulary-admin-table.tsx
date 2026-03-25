@@ -1,9 +1,9 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Pencil, Trash2, Plus, X, Check, ChevronUp, ChevronDown, ChevronsUpDown, Search } from "lucide-react";
-import { createVocabularyItem, updateVocabularyItem, deleteVocabularyItem } from "@/lib/vocabulary-actions";
+import { createVocabularyItem, updateVocabularyItem, deleteVocabularyItemById } from "@/lib/vocabulary-actions";
 import type { VocabularyAdminDto } from "@/lib/types";
 
 interface Props {
@@ -47,11 +47,17 @@ function SortableHeader({
 
 function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="w-full max-w-md rounded-xl bg-white shadow-2xl">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="vocab-modal-title"
+      onClick={onClose}
+    >
+      <div className="w-full max-w-md rounded-xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-          <h2 className="text-base font-semibold text-slate-900">{title}</h2>
-          <button type="button" onClick={onClose} className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
+          <h2 id="vocab-modal-title" className="text-base font-semibold text-slate-900">{title}</h2>
+          <button type="button" onClick={onClose} aria-label="Close dialog" className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
             <X size={16} />
           </button>
         </div>
@@ -151,25 +157,17 @@ function EditForm({ item, speciesOptions, onClose }: { item: VocabularyAdminDto;
 
 // ─── Delete button ─────────────────────────────────────────────────────────────
 
-function DeleteButton({ item }: { item: VocabularyAdminDto }) {
-  const router = useRouter();
-  const [state, action, pending] = useActionState(deleteVocabularyItem, { error: null });
-
-  async function handleSubmit(formData: FormData) {
-    if (!window.confirm(`Delete "${item.value}"? This cannot be undone.`)) return;
-    await action(formData);
-    router.refresh();
-  }
-
+function DeleteButton({ item, onDeleteRequest }: { item: VocabularyAdminDto; onDeleteRequest: (item: VocabularyAdminDto) => void }) {
   return (
-    <form action={handleSubmit}>
-      <input type="hidden" name="id" value={item.id} />
-      <button type="submit" disabled={pending} title="Delete"
-        className="rounded-md p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-40">
-        <Trash2 size={14} />
-      </button>
-      {state.error && <span className="ml-2 text-xs text-red-600">{state.error}</span>}
-    </form>
+    <button
+      type="button"
+      onClick={() => onDeleteRequest(item)}
+      title="Delete"
+      aria-label={`Delete ${item.value}`}
+      className="rounded-md p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600"
+    >
+      <Trash2 size={14} />
+    </button>
   );
 }
 
@@ -180,9 +178,28 @@ export function VocabularyAdminTable({ activeTab, fields, items, speciesOptions 
   const searchParams = useSearchParams();
   const [showAdd, setShowAdd] = useState(false);
   const [editingItem, setEditingItem] = useState<VocabularyAdminDto | null>(null);
+  const [deleteItem, setDeleteItem] = useState<VocabularyAdminDto | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("sortOrder");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
+
+  function handleDeleteRequest(item: VocabularyAdminDto) {
+    setDeleteError(null);
+    setDeleteItem(item);
+  }
+
+  function confirmDelete() {
+    if (!deleteItem) return;
+    const id = deleteItem.id;
+    setDeleteItem(null);
+    startTransition(async () => {
+      const result = await deleteVocabularyItemById(id);
+      if (result.error) { setDeleteError(result.error); return; }
+      router.refresh();
+    });
+  }
 
   function switchTab(field: string) {
     const params = new URLSearchParams(searchParams.toString());
@@ -233,6 +250,24 @@ export function VocabularyAdminTable({ activeTab, fields, items, speciesOptions 
           <EditForm item={editingItem} speciesOptions={speciesOptions} onClose={() => setEditingItem(null)} />
         </Modal>
       )}
+      {deleteItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" role="dialog" aria-modal="true" aria-labelledby="delete-vocab-title">
+          <div className="w-full max-w-sm rounded-xl bg-white shadow-2xl p-6">
+            <h2 id="delete-vocab-title" className="text-base font-semibold text-slate-900 mb-2">Delete entry</h2>
+            <p className="text-sm text-slate-600 mb-5">
+              Delete &ldquo;{deleteItem.value}&rdquo;? This cannot be undone.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button type="button" onClick={() => setDeleteItem(null)} className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">
+                Cancel
+              </button>
+              <button type="button" onClick={confirmDelete} disabled={isPending} className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50">
+                {isPending ? "Deleting…" : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="mb-4 flex gap-1 border-b border-slate-200">
@@ -245,6 +280,10 @@ export function VocabularyAdminTable({ activeTab, fields, items, speciesOptions 
           </button>
         ))}
       </div>
+
+      {deleteError && (
+        <p className="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{deleteError}</p>
+      )}
 
       {/* Search + Add */}
       <div className="mb-3 flex items-center gap-3">
@@ -307,11 +346,11 @@ export function VocabularyAdminTable({ activeTab, fields, items, speciesOptions 
                   <td className="px-4 py-3 text-xs text-slate-300">{item.id}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1">
-                      <button type="button" onClick={() => setEditingItem(item)} title="Edit"
+                      <button type="button" onClick={() => setEditingItem(item)} title="Edit" aria-label={`Edit ${item.value}`}
                         className="rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
                         <Pencil size={14} />
                       </button>
-                      <DeleteButton item={item} />
+                      <DeleteButton item={item} onDeleteRequest={handleDeleteRequest} />
                     </div>
                   </td>
                 </tr>

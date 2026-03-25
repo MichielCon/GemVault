@@ -20,6 +20,7 @@ public class GetPurchaseOrderByIdQueryHandler(
             throw new ForbiddenException();
 
         var order = await context.PurchaseOrders
+            .AsNoTracking()
             .Include(o => o.Supplier)
             .Include(o => o.Items)
                 .ThenInclude(i => i.Gem)
@@ -29,7 +30,7 @@ public class GetPurchaseOrderByIdQueryHandler(
             ?? throw new NotFoundException("PurchaseOrder", request.Id);
 
         if (order.OwnerId != currentUser.UserId)
-            throw new NotFoundException("PurchaseOrder", request.Id);
+            throw new ForbiddenException();
 
         var itemDtos = order.Items
             .Where(i => !i.IsDeleted)

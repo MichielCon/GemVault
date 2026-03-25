@@ -2,12 +2,14 @@ using GemVault.Application.Dashboard;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace GemVault.Api.Controllers;
 
 [ApiController]
 [Route("api/v1/dashboard")]
 [Authorize]
+[EnableRateLimiting("api")]
 public class DashboardController(IMediator mediator) : ControllerBase
 {
     [HttpGet("stats")]
