@@ -28,12 +28,22 @@ public class Gem : BaseEntity, IGemRecord
     public GemStatus Status { get; set; } = GemStatus.Available;
 
     public Guid? SourceParcelId { get; set; }
+    public decimal? RoughWeightCarats { get; set; }
+    public string? CutPlanNotes { get; set; }
+
+    // Faceting specifications
+    public string? CuttingDesign { get; set; }
+    public decimal? PavilionAngle { get; set; }
+    public decimal? CrownAngle { get; set; }
+    public decimal? TablePct { get; set; }
+    public int? PlannedFacets { get; set; }
 
     public Origin? Origin { get; set; }
     public GemParcel? SourceParcel { get; set; }
     public ICollection<GemPhoto> Photos { get; set; } = new List<GemPhoto>();
     public PublicToken? PublicToken { get; set; }
     public ICollection<Certificate> Certificates { get; set; } = new List<Certificate>();
+    public ICollection<GemCuttingSession> CuttingSessions { get; set; } = new List<GemCuttingSession>();
     public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     public ICollection<SaleItem> SaleItems { get; set; } = new List<SaleItem>();
 }

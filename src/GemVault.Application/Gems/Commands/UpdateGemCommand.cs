@@ -30,7 +30,14 @@ public record UpdateGemCommand(
     bool IsPublic,
     Guid? OriginId,
     string? Attributes,
-    GemStatus Status = GemStatus.Available) : IRequest<GemDto>;
+    GemStatus Status = GemStatus.Available,
+    decimal? RoughWeightCarats = null,
+    string? CutPlanNotes = null,
+    string? CuttingDesign = null,
+    decimal? PavilionAngle = null,
+    decimal? CrownAngle = null,
+    decimal? TablePct = null,
+    int? PlannedFacets = null) : IRequest<GemDto>;
 
 public class UpdateGemCommandValidator : AbstractValidator<UpdateGemCommand>
 {
@@ -44,6 +51,13 @@ public class UpdateGemCommandValidator : AbstractValidator<UpdateGemCommand>
             .Must(BeValidJson)
             .WithMessage("Attributes must be a valid JSON object.")
             .When(x => x.Attributes is not null);
+        RuleFor(x => x.RoughWeightCarats).GreaterThan(0).When(x => x.RoughWeightCarats.HasValue);
+        RuleFor(x => x.CutPlanNotes).MaximumLength(2000).When(x => x.CutPlanNotes != null);
+        RuleFor(x => x.PavilionAngle).InclusiveBetween(0, 90).When(x => x.PavilionAngle.HasValue);
+        RuleFor(x => x.CrownAngle).InclusiveBetween(0, 90).When(x => x.CrownAngle.HasValue);
+        RuleFor(x => x.TablePct).InclusiveBetween(0, 100).When(x => x.TablePct.HasValue);
+        RuleFor(x => x.PlannedFacets).GreaterThan(0).When(x => x.PlannedFacets.HasValue);
+        RuleFor(x => x.CuttingDesign).MaximumLength(200).When(x => x.CuttingDesign != null);
     }
 
     private static bool BeValidJson(string? value)
@@ -92,6 +106,13 @@ public class UpdateGemCommandHandler(
         gem.OriginId = request.OriginId;
         gem.Attributes = request.Attributes;
         gem.Status = request.Status;
+        gem.RoughWeightCarats = request.RoughWeightCarats;
+        gem.CutPlanNotes = request.CutPlanNotes;
+        gem.CuttingDesign = request.CuttingDesign;
+        gem.PavilionAngle = request.PavilionAngle;
+        gem.CrownAngle = request.CrownAngle;
+        gem.TablePct = request.TablePct;
+        gem.PlannedFacets = request.PlannedFacets;
 
         // Manage public token
         if (request.IsPublic)

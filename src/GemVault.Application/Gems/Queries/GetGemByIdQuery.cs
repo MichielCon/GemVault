@@ -27,6 +27,7 @@ public class GetGemByIdQueryHandler(
             .Include(g => g.Certificates)
             .Include(g => g.SourceParcel)
             .Include(g => g.OrderItems)
+            .Include(g => g.CuttingSessions)
             .FirstOrDefaultAsync(g => g.Id == request.GemId && !g.IsDeleted, ct)
             ?? throw new NotFoundException("Gem", request.GemId);
 

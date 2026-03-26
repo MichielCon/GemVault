@@ -20,7 +20,7 @@ public class PurchaseOrdersTests(DatabaseFixture fixture) : IntegrationTestBase(
     [Fact]
     public async Task CreateOrder_Returns201()
     {
-        await AuthenticateAsync();
+        await AuthenticateAsync("Business");
         var supplier = await CreateSupplierAsync();
 
         var res = await Client.PostAsJsonAsync("/api/v1/purchase-orders", new
@@ -43,7 +43,7 @@ public class PurchaseOrdersTests(DatabaseFixture fixture) : IntegrationTestBase(
     {
         // Regression test: "2026-03-08" (date-only string) used to crash with
         // "Cannot write DateTimeKind.Unspecified with timestamptz" from Npgsql.
-        await AuthenticateAsync();
+        await AuthenticateAsync("Business");
         var supplier = await CreateSupplierAsync();
 
         var res = await Client.PostAsJsonAsync("/api/v1/purchase-orders", new
@@ -67,7 +67,7 @@ public class PurchaseOrdersTests(DatabaseFixture fixture) : IntegrationTestBase(
     [Fact]
     public async Task CreateOrder_UnknownSupplier_Returns404()
     {
-        await AuthenticateAsync();
+        await AuthenticateAsync("Business");
 
         var res = await Client.PostAsJsonAsync("/api/v1/purchase-orders", new
         {
@@ -83,12 +83,12 @@ public class PurchaseOrdersTests(DatabaseFixture fixture) : IntegrationTestBase(
     public async Task CreateOrder_OtherUsersSupplier_Returns404()
     {
         // User A creates a supplier
-        var tokenA = await RegisterAndLoginAsync();
+        var tokenA = await RegisterAndLoginAsync(role: "Business");
         Authenticate(tokenA);
         var supplier = await CreateSupplierAsync("A's Supplier");
 
         // User B tries to create an order with A's supplier
-        var tokenB = await RegisterAndLoginAsync();
+        var tokenB = await RegisterAndLoginAsync(role: "Business");
         Authenticate(tokenB);
         var res = await Client.PostAsJsonAsync("/api/v1/purchase-orders", new
         {
@@ -104,7 +104,7 @@ public class PurchaseOrdersTests(DatabaseFixture fixture) : IntegrationTestBase(
     public async Task GetOrders_ReturnsOnlyOwnedOrders()
     {
         // User A creates an order
-        var tokenA = await RegisterAndLoginAsync();
+        var tokenA = await RegisterAndLoginAsync(role: "Business");
         Authenticate(tokenA);
         var supplierA = await CreateSupplierAsync("A's Supplier");
         await Client.PostAsJsonAsync("/api/v1/purchase-orders", new
@@ -115,7 +115,7 @@ public class PurchaseOrdersTests(DatabaseFixture fixture) : IntegrationTestBase(
         });
 
         // User B creates an order and lists
-        var tokenB = await RegisterAndLoginAsync();
+        var tokenB = await RegisterAndLoginAsync(role: "Business");
         Authenticate(tokenB);
         var supplierB = await CreateSupplierAsync("B's Supplier");
         await Client.PostAsJsonAsync("/api/v1/purchase-orders", new
@@ -136,7 +136,7 @@ public class PurchaseOrdersTests(DatabaseFixture fixture) : IntegrationTestBase(
     [Fact]
     public async Task DeleteOrder_Returns204_ThenGetReturns404()
     {
-        await AuthenticateAsync();
+        await AuthenticateAsync("Business");
         var supplier = await CreateSupplierAsync();
         var createRes = await Client.PostAsJsonAsync("/api/v1/purchase-orders", new
         {

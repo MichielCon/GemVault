@@ -16,7 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Scissors } from "lucide-react";
 import { OriginPicker } from "@/components/origins/origin-picker";
 import type { GemDto, VocabularyItemDto, OriginDto } from "@/lib/types";
 
@@ -247,6 +247,104 @@ export function GemEditForm({ gem, vocabulary, origins }: Props) {
                   type="date"
                   defaultValue={gem.acquiredAt ? gem.acquiredAt.split("T")[0] : ""}
                 />
+              </div>
+            </div>
+
+            {/* Cut Plan */}
+            <div className="flex flex-col gap-4 pt-2 border-t border-zinc-100">
+              <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                <Scissors size={11} />
+                Cut Plan
+              </p>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="roughWeightCarats">Rough weight (ct)</Label>
+                  <Input
+                    id="roughWeightCarats"
+                    name="roughWeightCarats"
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    defaultValue={gem.roughWeightCarats ?? ""}
+                    placeholder="Weight before cutting"
+                  />
+                </div>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="cutPlanNotes">Plan notes</Label>
+                <textarea
+                  id="cutPlanNotes"
+                  name="cutPlanNotes"
+                  rows={2}
+                  maxLength={2000}
+                  defaultValue={gem.cutPlanNotes ?? ""}
+                  placeholder="Intended cut style, angles, lap type…"
+                  className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none"
+                />
+              </div>
+
+              {/* Faceting specs */}
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="cuttingDesign">Faceting design</Label>
+                <Input
+                  id="cuttingDesign"
+                  name="cuttingDesign"
+                  defaultValue={gem.cuttingDesign ?? ""}
+                  placeholder="e.g. Portuguese 64, Custom Oval Barion"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="pavilionAngle">Pavilion angle (°)</Label>
+                  <Input
+                    id="pavilionAngle"
+                    name="pavilionAngle"
+                    type="number"
+                    min="0"
+                    max="90"
+                    step="0.1"
+                    defaultValue={gem.pavilionAngle ?? ""}
+                    placeholder="e.g. 43.5"
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="crownAngle">Crown angle (°)</Label>
+                  <Input
+                    id="crownAngle"
+                    name="crownAngle"
+                    type="number"
+                    min="0"
+                    max="90"
+                    step="0.1"
+                    defaultValue={gem.crownAngle ?? ""}
+                    placeholder="e.g. 35.0"
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="tablePct">Table (%)</Label>
+                  <Input
+                    id="tablePct"
+                    name="tablePct"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.5"
+                    defaultValue={gem.tablePct ?? ""}
+                    placeholder="e.g. 55"
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="plannedFacets">Planned facets</Label>
+                  <Input
+                    id="plannedFacets"
+                    name="plannedFacets"
+                    type="number"
+                    min="1"
+                    step="1"
+                    defaultValue={gem.plannedFacets ?? ""}
+                    placeholder="e.g. 64"
+                  />
+                </div>
               </div>
             </div>
 

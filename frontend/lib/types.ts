@@ -22,6 +22,17 @@ export interface PagedResult<T> {
   hasPreviousPage: boolean;
 }
 
+// ─── Cutting Sessions ─────────────────────────────────────────────────────────
+
+export interface CuttingSessionDto {
+  id: string;
+  sessionDate: string;
+  stage: string;
+  hoursSpent: number | null;
+  notes: string | null;
+  createdAt: string;
+}
+
 // ─── Certificates ─────────────────────────────────────────────────────────────
 
 export interface CertificateDto {
@@ -81,6 +92,16 @@ export interface GemDto {
   certificates: CertificateDto[];
   sourceParcelId: string | null;
   sourceParcelName: string | null;
+  purchaseOrderId: string | null;
+  roughWeightCarats: number | null;
+  cutPlanNotes: string | null;
+  cuttingDesign: string | null;
+  pavilionAngle: number | null;
+  crownAngle: number | null;
+  tablePct: number | null;
+  plannedFacets: number | null;
+  cuttingSessions: CuttingSessionDto[];
+  originLocality: string | null;
 }
 
 export interface GemSummaryDto {

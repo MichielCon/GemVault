@@ -29,7 +29,14 @@ public record CreateGemCommand(
     Guid? OriginId,
     string? Attributes,
     GemStatus Status = GemStatus.Available,
-    Guid? SourceParcelId = null) : IRequest<GemDto>;
+    Guid? SourceParcelId = null,
+    decimal? RoughWeightCarats = null,
+    string? CutPlanNotes = null,
+    string? CuttingDesign = null,
+    decimal? PavilionAngle = null,
+    decimal? CrownAngle = null,
+    decimal? TablePct = null,
+    int? PlannedFacets = null) : IRequest<GemDto>;
 
 public class CreateGemCommandValidator : AbstractValidator<CreateGemCommand>
 {
@@ -43,6 +50,13 @@ public class CreateGemCommandValidator : AbstractValidator<CreateGemCommand>
             .Must(BeValidJson)
             .WithMessage("Attributes must be a valid JSON object.")
             .When(x => x.Attributes is not null);
+        RuleFor(x => x.RoughWeightCarats).GreaterThan(0).When(x => x.RoughWeightCarats.HasValue);
+        RuleFor(x => x.CutPlanNotes).MaximumLength(2000).When(x => x.CutPlanNotes != null);
+        RuleFor(x => x.PavilionAngle).InclusiveBetween(0, 90).When(x => x.PavilionAngle.HasValue);
+        RuleFor(x => x.CrownAngle).InclusiveBetween(0, 90).When(x => x.CrownAngle.HasValue);
+        RuleFor(x => x.TablePct).InclusiveBetween(0, 100).When(x => x.TablePct.HasValue);
+        RuleFor(x => x.PlannedFacets).GreaterThan(0).When(x => x.PlannedFacets.HasValue);
+        RuleFor(x => x.CuttingDesign).MaximumLength(200).When(x => x.CuttingDesign != null);
     }
 
     private static bool BeValidJson(string? value)
@@ -89,6 +103,13 @@ public class CreateGemCommandHandler(
             Attributes = request.Attributes,
             Status = request.Status,
             SourceParcelId = request.SourceParcelId,
+            RoughWeightCarats = request.RoughWeightCarats,
+            CutPlanNotes = request.CutPlanNotes,
+            CuttingDesign = request.CuttingDesign,
+            PavilionAngle = request.PavilionAngle,
+            CrownAngle = request.CrownAngle,
+            TablePct = request.TablePct,
+            PlannedFacets = request.PlannedFacets,
         };
 
         if (request.IsPublic)

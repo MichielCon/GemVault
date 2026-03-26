@@ -34,6 +34,9 @@ import { QrCodeButton } from "@/components/gems/qr-code-button";
 import { ScanLinkCard } from "@/components/gems/scan-link-card";
 import { CertificateManager } from "@/components/gems/certificate-manager";
 import { MiniOriginMapWrapper } from "@/components/map/mini-origin-map-wrapper";
+import { CutPlanCard } from "@/components/gems/cut-plan-card";
+import { FacetingSpecsCard } from "@/components/gems/faceting-specs-card";
+import { CuttingJournalCard } from "@/components/gems/cutting-journal-card";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -242,6 +245,9 @@ export default async function GemDetailPage({ params }: Props) {
             </Card>
           )}
 
+          <FacetingSpecsCard gem={gem} />
+          <CutPlanCard gem={gem} />
+          <CuttingJournalCard gem={gem} />
           <CertificateManager gemId={gem.id} certificates={gem.certificates} />
         </div>
       </div>

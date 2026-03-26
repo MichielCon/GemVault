@@ -25,6 +25,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Sale> Sales => Set<Sale>();
     public DbSet<SaleItem> SaleItems => Set<SaleItem>();
     public DbSet<GemVocabulary> GemVocabularies => Set<GemVocabulary>();
+    public DbSet<GemCuttingSession> CuttingSessions => Set<GemCuttingSession>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

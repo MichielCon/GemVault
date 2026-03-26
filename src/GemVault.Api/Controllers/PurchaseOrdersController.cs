@@ -9,7 +9,7 @@ namespace GemVault.Api.Controllers;
 
 [ApiController]
 [Route("api/v1/purchase-orders")]
-[Authorize]
+[Authorize(Roles = "Business,Admin")]
 [EnableRateLimiting("api")]
 public class PurchaseOrdersController(IMediator mediator) : ControllerBase
 {

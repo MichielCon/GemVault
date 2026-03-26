@@ -1,4 +1,5 @@
 using GemVault.Application.Certificates;
+using GemVault.Application.CuttingSessions;
 using GemVault.Domain.Enums;
 
 namespace GemVault.Application.Gems.DTOs;
@@ -44,7 +45,15 @@ public record GemDto(
     List<CertificateDto> Certificates,
     Guid? SourceParcelId,
     string? SourceParcelName,
-    Guid? PurchaseOrderId);
+    Guid? PurchaseOrderId,
+    decimal? RoughWeightCarats,
+    string? CutPlanNotes,
+    string? CuttingDesign,
+    decimal? PavilionAngle,
+    decimal? CrownAngle,
+    decimal? TablePct,
+    int? PlannedFacets,
+    IReadOnlyList<CuttingSessionDto> CuttingSessions);
 
 public record GemSummaryDto(
     Guid Id,

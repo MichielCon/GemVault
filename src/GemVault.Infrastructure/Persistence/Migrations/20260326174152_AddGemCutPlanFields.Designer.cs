@@ -3,6 +3,7 @@ using System;
 using GemVault.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GemVault.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260326174152_AddGemCutPlanFields")]
+    partial class AddGemCutPlanFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -90,20 +93,12 @@ namespace GemVault.Infrastructure.Persistence.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<decimal?>("CrownAngle")
-                        .HasPrecision(5, 2)
-                        .HasColumnType("numeric(5,2)");
-
                     b.Property<string>("Cut")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
                     b.Property<string>("CutPlanNotes")
                         .HasColumnType("text");
-
-                    b.Property<string>("CuttingDesign")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
 
                     b.Property<decimal?>("HeightMm")
                         .HasPrecision(8, 2)
@@ -133,13 +128,6 @@ namespace GemVault.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uuid");
 
-                    b.Property<decimal?>("PavilionAngle")
-                        .HasPrecision(5, 2)
-                        .HasColumnType("numeric(5,2)");
-
-                    b.Property<int?>("PlannedFacets")
-                        .HasColumnType("integer");
-
                     b.Property<decimal?>("PurchasePrice")
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)");
@@ -162,10 +150,6 @@ namespace GemVault.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
-
-                    b.Property<decimal?>("TablePct")
-                        .HasPrecision(5, 2)
-                        .HasColumnType("numeric(5,2)");
 
                     b.Property<string>("Treatment")
                         .HasMaxLength(200)
@@ -197,47 +181,6 @@ namespace GemVault.Infrastructure.Persistence.Migrations
                     b.HasIndex("SourceParcelId");
 
                     b.ToTable("Gems");
-                });
-
-            modelBuilder.Entity("GemVault.Domain.Entities.GemCuttingSession", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("GemId")
-                        .HasColumnType("uuid");
-
-                    b.Property<decimal?>("HoursSpent")
-                        .HasPrecision(6, 2)
-                        .HasColumnType("numeric(6,2)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)");
-
-                    b.Property<DateTime>("SessionDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Stage")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GemId");
-
-                    b.ToTable("CuttingSessions");
                 });
 
             modelBuilder.Entity("GemVault.Domain.Entities.GemParcel", b =>
@@ -3111,17 +3054,6 @@ namespace GemVault.Infrastructure.Persistence.Migrations
                     b.Navigation("SourceParcel");
                 });
 
-            modelBuilder.Entity("GemVault.Domain.Entities.GemCuttingSession", b =>
-                {
-                    b.HasOne("GemVault.Domain.Entities.Gem", "Gem")
-                        .WithMany("CuttingSessions")
-                        .HasForeignKey("GemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Gem");
-                });
-
             modelBuilder.Entity("GemVault.Domain.Entities.GemParcel", b =>
                 {
                     b.HasOne("GemVault.Domain.Entities.Origin", "Origin")
@@ -3280,8 +3212,6 @@ namespace GemVault.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("GemVault.Domain.Entities.Gem", b =>
                 {
                     b.Navigation("Certificates");
-
-                    b.Navigation("CuttingSessions");
 
                     b.Navigation("OrderItems");
 

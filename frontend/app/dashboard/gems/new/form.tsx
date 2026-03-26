@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Combobox } from "@/components/ui/combobox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Gem, Globe, MapPin, DollarSign, StickyNote, Hexagon, Tag } from "lucide-react";
+import { ArrowLeft, Gem, Globe, MapPin, DollarSign, StickyNote, Hexagon, Tag, Scissors } from "lucide-react";
 import { OriginPicker } from "@/components/origins/origin-picker";
 import type { VocabularyItemDto, OriginDto } from "@/lib/types";
 
@@ -181,6 +181,58 @@ export function GemCreateForm({ vocabulary, origins }: Props) {
                 <div className="flex flex-col gap-1.5">
                   <Label htmlFor="heightMm">Height (mm)</Label>
                   <Input id="heightMm" name="heightMm" type="number" min="0" step="0.1" placeholder="H" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Cut plan */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-sm font-semibold text-zinc-500 uppercase tracking-wide">
+                <Scissors size={13} />
+                Cut Plan
+                <span className="ml-1 text-[10px] font-normal normal-case tracking-normal text-zinc-400">optional</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="roughWeightCarats">Rough weight (ct)</Label>
+                <Input id="roughWeightCarats" name="roughWeightCarats" type="number" min="0.01" step="0.01" placeholder="Weight before cutting, e.g. 5.20" className="max-w-xs" />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="cutPlanNotes">Plan notes</Label>
+                <textarea
+                  id="cutPlanNotes"
+                  name="cutPlanNotes"
+                  rows={2}
+                  maxLength={2000}
+                  placeholder="Intended cut style, angles, lap type…"
+                  className="flex w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/20 focus-visible:border-zinc-300 resize-none"
+                />
+              </div>
+
+              {/* Faceting specs */}
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="cuttingDesign">Faceting design</Label>
+                <Input id="cuttingDesign" name="cuttingDesign" placeholder="e.g. Portuguese 64, Custom Oval Barion" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="pavilionAngle">Pavilion angle (°)</Label>
+                  <Input id="pavilionAngle" name="pavilionAngle" type="number" min="0" max="90" step="0.1" placeholder="e.g. 43.5" />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="crownAngle">Crown angle (°)</Label>
+                  <Input id="crownAngle" name="crownAngle" type="number" min="0" max="90" step="0.1" placeholder="e.g. 35.0" />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="tablePct">Table (%)</Label>
+                  <Input id="tablePct" name="tablePct" type="number" min="0" max="100" step="0.5" placeholder="e.g. 55" />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="plannedFacets">Planned facets</Label>
+                  <Input id="plannedFacets" name="plannedFacets" type="number" min="1" step="1" placeholder="e.g. 64" />
                 </div>
               </div>
             </CardContent>

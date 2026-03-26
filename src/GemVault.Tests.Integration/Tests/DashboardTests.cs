@@ -66,7 +66,7 @@ public class DashboardTests(DatabaseFixture fixture) : IntegrationTestBase(fixtu
     [Fact]
     public async Task GetStats_WithSoldGem_ReflectsInTotals()
     {
-        await AuthenticateAsync();
+        await AuthenticateAsync("Business");
 
         // Create a gem with a known purchase price
         var gemRes = await Client.PostAsJsonAsync("/api/v1/gems",

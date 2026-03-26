@@ -1,4 +1,5 @@
 using GemVault.Application.Certificates;
+using GemVault.Application.CuttingSessions;
 using GemVault.Domain.Entities;
 using GemVault.Domain.Interfaces;
 
@@ -63,6 +64,18 @@ internal static class GemMappingExtensions
                 .ToList(),
             gem.SourceParcelId,
             gem.SourceParcel?.Name,
-            gem.OrderItems.FirstOrDefault(oi => !oi.IsDeleted)?.PurchaseOrderId);
+            gem.OrderItems.FirstOrDefault(oi => !oi.IsDeleted)?.PurchaseOrderId,
+            gem.RoughWeightCarats,
+            gem.CutPlanNotes,
+            gem.CuttingDesign,
+            gem.PavilionAngle,
+            gem.CrownAngle,
+            gem.TablePct,
+            gem.PlannedFacets,
+            gem.CuttingSessions
+                .Where(s => !s.IsDeleted)
+                .OrderByDescending(s => s.SessionDate)
+                .Select(s => new CuttingSessionDto(s.Id, s.SessionDate, s.Stage.ToString(), s.HoursSpent, s.Notes, s.CreatedAt))
+                .ToList());
     }
 }

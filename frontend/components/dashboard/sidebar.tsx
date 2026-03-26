@@ -38,18 +38,22 @@ export default async function Sidebar() {
           Provenance Map
         </NavLink>
 
-        <p className="mb-1 mt-4 px-3 text-[9px] font-semibold uppercase tracking-widest text-zinc-600">
-          Business
-        </p>
-        <NavLink href="/dashboard/suppliers" icon={<Building2 size={15} />}>
-          Suppliers
-        </NavLink>
-        <NavLink href="/dashboard/orders" icon={<ShoppingCart size={15} />}>
-          Orders
-        </NavLink>
-        <NavLink href="/dashboard/sales" icon={<TrendingUp size={15} />}>
-          Sales
-        </NavLink>
+        {(role === "Business" || role === "Admin") && (
+          <>
+            <p className="mb-1 mt-4 px-3 text-[9px] font-semibold uppercase tracking-widest text-zinc-600">
+              Business
+            </p>
+            <NavLink href="/dashboard/suppliers" icon={<Building2 size={15} />}>
+              Suppliers
+            </NavLink>
+            <NavLink href="/dashboard/orders" icon={<ShoppingCart size={15} />}>
+              Orders
+            </NavLink>
+            <NavLink href="/dashboard/sales" icon={<TrendingUp size={15} />}>
+              Sales
+            </NavLink>
+          </>
+        )}
 
         {role === "Admin" && (
           <>

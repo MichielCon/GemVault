@@ -30,11 +30,11 @@ public abstract class IntegrationTestBase : IAsyncLifetime
     public async Task InitializeAsync() => await Fixture.ResetDatabaseAsync();
     public Task DisposeAsync() => Task.CompletedTask;
 
-    protected async Task<string> RegisterAndLoginAsync(string? email = null)
+    protected async Task<string> RegisterAndLoginAsync(string? email = null, string role = "Collector")
     {
         email ??= $"test-{Guid.NewGuid():N}@test.com";
         var res = await Client.PostAsJsonAsync("/api/v1/auth/register",
-            new { email, password = "Password1!", role = "Collector" });
+            new { email, password = "Password1!", role });
         res.EnsureSuccessStatusCode();
         var body = await res.Content.ReadFromJsonAsync<AuthResponseDto>(JsonOptions)
             ?? throw new InvalidOperationException("null auth response");
@@ -45,8 +45,8 @@ public abstract class IntegrationTestBase : IAsyncLifetime
         Client.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", token);
 
-    protected async Task AuthenticateAsync() =>
-        Authenticate(await RegisterAndLoginAsync());
+    protected async Task AuthenticateAsync(string role = "Collector") =>
+        Authenticate(await RegisterAndLoginAsync(role: role));
 
     /// <summary>Direct DB access for assertions (e.g. verify DateTime.Kind).</summary>
     protected ApplicationDbContext CreateDbContext()

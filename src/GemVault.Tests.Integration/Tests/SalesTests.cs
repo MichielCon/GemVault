@@ -13,7 +13,7 @@ public class SalesTests(DatabaseFixture fixture) : IntegrationTestBase(fixture)
     [Fact]
     public async Task CreateSale_Returns201WithCorrectTotal()
     {
-        await AuthenticateAsync();
+        await AuthenticateAsync("Business");
 
         var res = await Client.PostAsJsonAsync("/api/v1/sales", new
         {
@@ -38,7 +38,7 @@ public class SalesTests(DatabaseFixture fixture) : IntegrationTestBase(fixture)
     {
         // Regression test: "2026-03-08" (date-only string) must not crash with
         // "Cannot write DateTimeKind.Unspecified with timestamptz" from Npgsql.
-        await AuthenticateAsync();
+        await AuthenticateAsync("Business");
 
         var res = await Client.PostAsJsonAsync("/api/v1/sales", new
         {
@@ -59,7 +59,7 @@ public class SalesTests(DatabaseFixture fixture) : IntegrationTestBase(fixture)
     [Fact]
     public async Task CreateSale_WithGemLinked_GemEndpointReturnsSoldInfo()
     {
-        await AuthenticateAsync();
+        await AuthenticateAsync("Business");
 
         // Create a gem
         var gemRes = await Client.PostAsJsonAsync("/api/v1/gems", new { name = "Sold Gem" });
@@ -90,7 +90,7 @@ public class SalesTests(DatabaseFixture fixture) : IntegrationTestBase(fixture)
     public async Task GetSales_ReturnsOnlyOwnedSales()
     {
         // User A creates a sale
-        var tokenA = await RegisterAndLoginAsync();
+        var tokenA = await RegisterAndLoginAsync(role: "Business");
         Authenticate(tokenA);
         await Client.PostAsJsonAsync("/api/v1/sales", new
         {
@@ -99,7 +99,7 @@ public class SalesTests(DatabaseFixture fixture) : IntegrationTestBase(fixture)
         });
 
         // User B creates a sale and lists
-        var tokenB = await RegisterAndLoginAsync();
+        var tokenB = await RegisterAndLoginAsync(role: "Business");
         Authenticate(tokenB);
         await Client.PostAsJsonAsync("/api/v1/sales", new
         {

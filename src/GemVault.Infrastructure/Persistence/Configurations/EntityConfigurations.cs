@@ -21,6 +21,10 @@ public class GemConfiguration : IEntityTypeConfiguration<Gem>
         builder.Property(g => g.Shape).HasMaxLength(100);
         builder.Property(g => g.WeightCarats).HasPrecision(10, 4);
         builder.Property(g => g.PurchasePrice).HasPrecision(18, 2);
+        builder.Property(g => g.PavilionAngle).HasPrecision(5, 2);
+        builder.Property(g => g.CrownAngle).HasPrecision(5, 2);
+        builder.Property(g => g.TablePct).HasPrecision(5, 2);
+        builder.Property(g => g.CuttingDesign).HasMaxLength(200);
         builder.Property(g => g.AcquiredAt);
         builder.Property(g => g.LengthMm).HasPrecision(8, 2);
         builder.Property(g => g.WidthMm).HasPrecision(8, 2);
@@ -231,6 +235,24 @@ public class SaleItemConfiguration : IEntityTypeConfiguration<SaleItem>
             .WithMany(g => g.SaleItems)
             .HasForeignKey(i => i.GemParcelId)
             .OnDelete(DeleteBehavior.SetNull);
+    }
+}
+
+public class GemCuttingSessionConfiguration : IEntityTypeConfiguration<GemCuttingSession>
+{
+    public void Configure(EntityTypeBuilder<GemCuttingSession> builder)
+    {
+        builder.HasQueryFilter(s => !s.IsDeleted);
+        builder.Property(s => s.Stage).HasConversion<string>().HasMaxLength(50);
+        builder.Property(s => s.HoursSpent).HasPrecision(6, 2);
+        builder.Property(s => s.Notes).HasMaxLength(2000);
+
+        builder.HasOne(s => s.Gem)
+            .WithMany(g => g.CuttingSessions)
+            .HasForeignKey(s => s.GemId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasIndex(s => s.GemId);
     }
 }
 
