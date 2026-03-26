@@ -39,6 +39,22 @@ public class CuttingSessionsController(IMediator mediator) : ControllerBase
         return Ok(result);
     }
 
+    /// <summary>Update a cutting session.</summary>
+    [HttpPut("cutting-sessions/{id:guid}")]
+    public async Task<IActionResult> UpdateSession(
+        Guid id,
+        [FromBody] UpdateCuttingSessionBody body,
+        CancellationToken ct)
+    {
+        await mediator.Send(new UpdateCuttingSessionCommand(
+            id,
+            body.SessionDate,
+            body.Stage,
+            body.HoursSpent,
+            body.Notes), ct);
+        return NoContent();
+    }
+
     /// <summary>Delete a cutting session.</summary>
     [HttpDelete("cutting-sessions/{id:guid}")]
     public async Task<IActionResult> DeleteSession(Guid id, CancellationToken ct)
@@ -49,6 +65,12 @@ public class CuttingSessionsController(IMediator mediator) : ControllerBase
 }
 
 public record AddCuttingSessionBody(
+    DateTime SessionDate,
+    CuttingStage Stage,
+    decimal? HoursSpent,
+    string? Notes);
+
+public record UpdateCuttingSessionBody(
     DateTime SessionDate,
     CuttingStage Stage,
     decimal? HoursSpent,

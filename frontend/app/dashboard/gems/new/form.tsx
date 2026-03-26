@@ -212,28 +212,10 @@ export function GemCreateForm({ vocabulary, origins }: Props) {
                 />
               </div>
 
-              {/* Faceting specs */}
+              {/* Cutting design reference */}
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="cuttingDesign">Faceting design</Label>
-                <Input id="cuttingDesign" name="cuttingDesign" placeholder="e.g. Portuguese 64, Custom Oval Barion" />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="pavilionAngle">Pavilion angle (°)</Label>
-                  <Input id="pavilionAngle" name="pavilionAngle" type="number" min="0" max="90" step="0.1" placeholder="e.g. 43.5" />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="crownAngle">Crown angle (°)</Label>
-                  <Input id="crownAngle" name="crownAngle" type="number" min="0" max="90" step="0.1" placeholder="e.g. 35.0" />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="tablePct">Table (%)</Label>
-                  <Input id="tablePct" name="tablePct" type="number" min="0" max="100" step="0.5" placeholder="e.g. 55" />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="plannedFacets">Planned facets</Label>
-                  <Input id="plannedFacets" name="plannedFacets" type="number" min="1" step="1" placeholder="e.g. 64" />
-                </div>
+                <Label htmlFor="cuttingDesign">Design name</Label>
+                <Input id="cuttingDesign" name="cuttingDesign" placeholder="e.g. Portuguese 64" />
               </div>
             </CardContent>
           </Card>
@@ -297,6 +279,8 @@ export function GemCreateForm({ vocabulary, origins }: Props) {
                   defaultValue="Available"
                   className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/20 focus-visible:border-zinc-300"
                 >
+                  <option value="Rough">Rough (uncut)</option>
+                  <option value="Cutting">Cutting (in progress)</option>
                   <option value="Available">Available</option>
                   <option value="Reserved">Reserved</option>
                   <option value="OnConsignment">On Consignment</option>

@@ -43,6 +43,7 @@ export function GemEditForm({ gem, vocabulary, origins }: Props) {
   useEffect(() => {
     if (state.id) router.push(`/dashboard/gems/${state.id}`);
   }, [state.id, router]);
+  const [statusValue, setStatusValue] = useState(gem.status ?? "Available");
   const [species, setSpecies] = useState<string | null>(gem.species ?? null);
   const [variety, setVariety] = useState<string | null>(gem.variety ?? null);
   const [color, setColor] = useState<string | null>(gem.color ?? null);
@@ -283,68 +284,15 @@ export function GemEditForm({ gem, vocabulary, origins }: Props) {
                 />
               </div>
 
-              {/* Faceting specs */}
+              {/* Cutting design reference */}
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="cuttingDesign">Faceting design</Label>
+                <Label htmlFor="cuttingDesign">Design name</Label>
                 <Input
                   id="cuttingDesign"
                   name="cuttingDesign"
                   defaultValue={gem.cuttingDesign ?? ""}
-                  placeholder="e.g. Portuguese 64, Custom Oval Barion"
+                  placeholder="e.g. Portuguese 64"
                 />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="pavilionAngle">Pavilion angle (°)</Label>
-                  <Input
-                    id="pavilionAngle"
-                    name="pavilionAngle"
-                    type="number"
-                    min="0"
-                    max="90"
-                    step="0.1"
-                    defaultValue={gem.pavilionAngle ?? ""}
-                    placeholder="e.g. 43.5"
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="crownAngle">Crown angle (°)</Label>
-                  <Input
-                    id="crownAngle"
-                    name="crownAngle"
-                    type="number"
-                    min="0"
-                    max="90"
-                    step="0.1"
-                    defaultValue={gem.crownAngle ?? ""}
-                    placeholder="e.g. 35.0"
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="tablePct">Table (%)</Label>
-                  <Input
-                    id="tablePct"
-                    name="tablePct"
-                    type="number"
-                    min="0"
-                    max="100"
-                    step="0.5"
-                    defaultValue={gem.tablePct ?? ""}
-                    placeholder="e.g. 55"
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="plannedFacets">Planned facets</Label>
-                  <Input
-                    id="plannedFacets"
-                    name="plannedFacets"
-                    type="number"
-                    min="1"
-                    step="1"
-                    defaultValue={gem.plannedFacets ?? ""}
-                    placeholder="e.g. 64"
-                  />
-                </div>
               </div>
             </div>
 
@@ -366,9 +314,12 @@ export function GemEditForm({ gem, vocabulary, origins }: Props) {
               <select
                 id="status"
                 name="status"
-                defaultValue={gem.status ?? "Available"}
+                value={statusValue}
+                onChange={(e) => setStatusValue(e.target.value)}
                 className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/20 focus-visible:border-zinc-300"
               >
+                <option value="Rough">Rough (uncut)</option>
+                <option value="Cutting">Cutting (in progress)</option>
                 <option value="Available">Available</option>
                 <option value="Reserved">Reserved</option>
                 <option value="OnConsignment">On Consignment</option>
@@ -376,6 +327,70 @@ export function GemEditForm({ gem, vocabulary, origins }: Props) {
                 <option value="Lost">Lost</option>
               </select>
             </div>
+
+            {/* Consignment details — shown only when status = OnConsignment */}
+            {statusValue === "OnConsignment" && (
+              <div className="rounded-lg border border-orange-200 bg-orange-50/60 p-4 flex flex-col gap-3">
+                <p className="text-xs font-semibold text-orange-700 uppercase tracking-wide">Consignment details</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="consigneeName" className="text-xs text-orange-700/80">With (name)</Label>
+                    <Input
+                      id="consigneeName"
+                      name="consigneeName"
+                      placeholder="Shop or person"
+                      defaultValue={gem.consigneeName ?? ""}
+                      className="h-8 text-sm bg-white"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="consigneeContact" className="text-xs text-orange-700/80">Contact</Label>
+                    <Input
+                      id="consigneeContact"
+                      name="consigneeContact"
+                      placeholder="Phone or email"
+                      defaultValue={gem.consigneeContact ?? ""}
+                      className="h-8 text-sm bg-white"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="consignmentTargetPrice" className="text-xs text-orange-700/80">Target price (USD)</Label>
+                    <Input
+                      id="consignmentTargetPrice"
+                      name="consignmentTargetPrice"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      placeholder="e.g. 250.00"
+                      defaultValue={gem.consignmentTargetPrice ?? ""}
+                      className="h-8 text-sm bg-white"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="consignmentDate" className="text-xs text-orange-700/80">Date sent</Label>
+                    <Input
+                      id="consignmentDate"
+                      name="consignmentDate"
+                      type="date"
+                      defaultValue={gem.consignmentDate ?? ""}
+                      className="h-8 text-sm bg-white"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="consignmentReturnDate" className="text-xs text-orange-700/80">Due back</Label>
+                    <Input
+                      id="consignmentReturnDate"
+                      name="consignmentReturnDate"
+                      type="date"
+                      defaultValue={gem.consignmentReturnDate ?? ""}
+                      className="h-8 text-sm bg-white"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Is Public */}
             <div className="flex items-center gap-2">

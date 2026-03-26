@@ -6,4 +6,5 @@ public interface IStorageService
     Task DeleteAsync(string objectKey, CancellationToken ct = default);
     string GetPublicUrl(string objectKey);
     Task<bool> ExistsAsync(string objectKey, CancellationToken ct = default);
+    Task<byte[]?> DownloadAsync(string objectKey, CancellationToken ct = default);
 }

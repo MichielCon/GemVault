@@ -1,5 +1,6 @@
 using GemVault.Application.Certificates;
 using GemVault.Application.CuttingSessions;
+using GemVault.Application.DesignFiles;
 using GemVault.Domain.Entities;
 using GemVault.Domain.Interfaces;
 
@@ -68,14 +69,21 @@ internal static class GemMappingExtensions
             gem.RoughWeightCarats,
             gem.CutPlanNotes,
             gem.CuttingDesign,
-            gem.PavilionAngle,
-            gem.CrownAngle,
-            gem.TablePct,
             gem.PlannedFacets,
             gem.CuttingSessions
                 .Where(s => !s.IsDeleted)
                 .OrderByDescending(s => s.SessionDate)
                 .Select(s => new CuttingSessionDto(s.Id, s.SessionDate, s.Stage.ToString(), s.HoursSpent, s.Notes, s.CreatedAt))
-                .ToList());
+                .ToList(),
+            gem.DesignFiles
+                .Where(f => !f.IsDeleted)
+                .OrderBy(f => f.CreatedAt)
+                .Select(f => new DesignFileDto(f.Id, f.FileName, storage.GetPublicUrl(f.ObjectKey), f.ContentType, f.FileSize, f.CreatedAt))
+                .ToList(),
+            gem.ConsigneeName,
+            gem.ConsigneeContact,
+            gem.ConsignmentTargetPrice,
+            gem.ConsignmentDate,
+            gem.ConsignmentReturnDate);
     }
 }

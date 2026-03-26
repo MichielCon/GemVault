@@ -6,5 +6,7 @@ public enum GemStatus
     Reserved,
     OnConsignment,
     InRepair,
-    Lost
+    Lost,
+    Rough,
+    Cutting,
 }

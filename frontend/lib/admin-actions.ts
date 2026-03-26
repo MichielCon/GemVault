@@ -131,3 +131,16 @@ export async function adminDeleteCertificate(
     return { error: parseApiError(e) };
   }
 }
+
+export async function adminDeleteDesignFile(
+  _prev: { error: string | null },
+  formData: FormData
+): Promise<{ error: string | null }> {
+  const fileId = formData.get("fileId") as string;
+  try {
+    await adminApi.deleteDesignFile(fileId);
+    return { error: null };
+  } catch (e: unknown) {
+    return { error: parseApiError(e) };
+  }
+}

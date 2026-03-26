@@ -41,6 +41,24 @@ public class MinioStorageService(IMinioClient minioClient, IOptions<MinioOptions
         return $"{scheme}://{host}/{_opts.BucketName}/{objectKey}";
     }
 
+    public async Task<byte[]?> DownloadAsync(string objectKey, CancellationToken ct = default)
+    {
+        try
+        {
+            using var ms = new MemoryStream();
+            var args = new GetObjectArgs()
+                .WithBucket(_opts.BucketName)
+                .WithObject(objectKey)
+                .WithCallbackStream(stream => stream.CopyTo(ms));
+            await minioClient.GetObjectAsync(args, ct);
+            return ms.ToArray();
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
     public async Task<bool> ExistsAsync(string objectKey, CancellationToken ct = default)
     {
         try

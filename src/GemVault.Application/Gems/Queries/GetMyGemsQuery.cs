@@ -49,6 +49,7 @@ public class GetMyGemsQueryHandler(
             .AsNoTracking()
             .Include(g => g.Photos)
             .Include(g => g.SaleItems.Where(si => !si.IsDeleted))
+            .Include(g => g.CuttingSessions)
             .Where(g => g.OwnerId == currentUser.UserId && !g.IsDeleted);
 
         if (request.OriginId.HasValue)
@@ -107,10 +108,16 @@ public class GetMyGemsQueryHandler(
         {
             var cover = g.Photos.FirstOrDefault(p => p.IsCover) ?? g.Photos.FirstOrDefault();
             var isSold = g.SaleItems.Any();
+            var latestStage = g.CuttingSessions.Count > 0
+                ? g.CuttingSessions.OrderByDescending(s => s.SessionDate).First().Stage.ToString()
+                : null;
+            var totalHours = g.CuttingSessions.Count > 0
+                ? g.CuttingSessions.Sum(s => s.HoursSpent ?? 0)
+                : (decimal?)null;
             return new GemSummaryDto(
-                g.Id, g.Name, g.Species, g.Variety, g.WeightCarats, g.Color, g.IsPublic,
+                g.Id, g.Name, g.Species, g.Variety, g.WeightCarats, g.RoughWeightCarats, g.Color, g.IsPublic,
                 cover != null ? storage.GetPublicUrl(cover.ObjectKey) : null,
-                g.CreatedAt, isSold, g.Status);
+                g.CreatedAt, isSold, g.Status, latestStage, totalHours);
         }).ToList();
 
         return new PagedResult<GemSummaryDto>(dtos, total, request.Page, pageSize);

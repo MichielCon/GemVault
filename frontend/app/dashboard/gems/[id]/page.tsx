@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ArrowLeft, Globe, Lock, Pencil, ShoppingCart, Tag, ExternalLink, Package } from "lucide-react";
+import { ArrowLeft, Globe, Lock, Pencil, ShoppingCart, Tag, ExternalLink, Package, FileText } from "lucide-react";
 import type { GemDto } from "@/lib/types";
 
 const GEM_STATUS_STYLES: Record<string, string> = {
@@ -19,6 +19,8 @@ const GEM_STATUS_STYLES: Record<string, string> = {
   OnConsignment: "bg-blue-100 text-blue-700",
   InRepair: "bg-orange-100 text-orange-700",
   Lost: "bg-red-100 text-red-700",
+  Rough: "bg-stone-100 text-stone-600",
+  Cutting: "bg-sky-100 text-sky-700",
 };
 
 const GEM_STATUS_LABELS: Record<string, string> = {
@@ -27,6 +29,8 @@ const GEM_STATUS_LABELS: Record<string, string> = {
   OnConsignment: "On Consignment",
   InRepair: "In Repair",
   Lost: "Lost",
+  Rough: "Rough",
+  Cutting: "Cutting",
 };
 import { PhotoGallery } from "@/components/gems/photo-gallery";
 import { DeleteGemButton } from "@/components/gems/delete-gem-button";
@@ -35,8 +39,9 @@ import { ScanLinkCard } from "@/components/gems/scan-link-card";
 import { CertificateManager } from "@/components/gems/certificate-manager";
 import { MiniOriginMapWrapper } from "@/components/map/mini-origin-map-wrapper";
 import { CutPlanCard } from "@/components/gems/cut-plan-card";
-import { FacetingSpecsCard } from "@/components/gems/faceting-specs-card";
+import { CuttingDesignCard } from "@/components/gems/cutting-design-card";
 import { CuttingJournalCard } from "@/components/gems/cutting-journal-card";
+import { ConsignmentInfoCard } from "@/components/gems/consignment-info-card";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -104,6 +109,12 @@ export default async function GemDetailPage({ params }: Props) {
             </Link>
           </Button>
           {gem.publicToken && <QrCodeButton token={gem.publicToken} name={gem.name} />}
+          <Button asChild variant="outline" size="sm">
+            <a href={`/api/gems/${gem.id}/report.pdf`} download>
+              <FileText size={14} />
+              Report
+            </a>
+          </Button>
           <DeleteGemButton id={gem.id} />
           <Badge variant={gem.isPublic ? "violet" : "outline"}>
             {gem.isPublic ? (
@@ -208,6 +219,10 @@ export default async function GemDetailPage({ params }: Props) {
             </CardContent>
           </Card>
 
+          {gem.status === "OnConsignment" && (
+            <ConsignmentInfoCard gem={gem} />
+          )}
+
           {gem.soldInfo && (
             <Card className="border-amber-200/80 bg-amber-50/60">
               <CardHeader className="pb-3">
@@ -245,9 +260,19 @@ export default async function GemDetailPage({ params }: Props) {
             </Card>
           )}
 
-          <FacetingSpecsCard gem={gem} />
-          <CutPlanCard gem={gem} />
-          <CuttingJournalCard gem={gem} />
+          {(gem.status === "Rough" ||
+            gem.status === "Cutting" ||
+            gem.roughWeightCarats != null ||
+            gem.cutPlanNotes != null ||
+            gem.cuttingDesign != null ||
+            (gem.cuttingSessions?.length ?? 0) > 0 ||
+            (gem.designFiles?.length ?? 0) > 0) && (
+            <>
+              <CuttingDesignCard gem={gem} />
+              <CutPlanCard gem={gem} />
+              <CuttingJournalCard gem={gem} />
+            </>
+          )}
           <CertificateManager gemId={gem.id} certificates={gem.certificates} />
         </div>
       </div>

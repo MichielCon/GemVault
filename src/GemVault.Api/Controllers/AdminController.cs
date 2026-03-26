@@ -1,5 +1,6 @@
 using GemVault.Application.Admin.Commands;
 using GemVault.Application.Admin.Queries;
+using GemVault.Application.DesignFiles;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -130,6 +131,24 @@ public class AdminController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> DeleteCertificate(Guid id, CancellationToken ct)
     {
         await mediator.Send(new AdminDeleteCertificateCommand(id), ct);
+        return NoContent();
+    }
+
+    [HttpGet("design-files")]
+    public async Task<IActionResult> GetDesignFiles(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] string? search = null,
+        CancellationToken ct = default)
+    {
+        var result = await mediator.Send(new GetAdminDesignFilesQuery(page, pageSize, search), ct);
+        return Ok(result);
+    }
+
+    [HttpDelete("design-files/{id:guid}")]
+    public async Task<IActionResult> DeleteDesignFile(Guid id, CancellationToken ct)
+    {
+        await mediator.Send(new DeleteDesignFileCommand(id), ct);
         return NoContent();
     }
 }

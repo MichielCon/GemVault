@@ -24,6 +24,7 @@ import type {
   AdminPublicTokenDto,
   AdminPhotoDto,
   AdminCertificateDto,
+  AdminDesignFileDto,
   ProfileDto,
   ProfileSessionDto,
 } from "./types";
@@ -390,4 +391,10 @@ export const adminApi = {
     return get<PagedResult<AdminCertificateDto>>(`/api/v1/admin/certificates?${q}`);
   },
   deleteCertificate: (certId: string) => del(`/api/v1/admin/certificates/${certId}`),
+  getDesignFiles: (page = 1, pageSize = 20, search?: string) => {
+    const q = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
+    if (search) q.set("search", search);
+    return get<PagedResult<AdminDesignFileDto>>(`/api/v1/admin/design-files?${q}`);
+  },
+  deleteDesignFile: (fileId: string) => del(`/api/v1/admin/design-files/${fileId}`),
 };

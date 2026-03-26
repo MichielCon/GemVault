@@ -46,15 +46,6 @@ export async function createGem(
       : null,
     cutPlanNotes: (formData.get("cutPlanNotes") as string) || null,
     cuttingDesign: (formData.get("cuttingDesign") as string) || null,
-    pavilionAngle: formData.get("pavilionAngle")
-      ? Number(formData.get("pavilionAngle"))
-      : null,
-    crownAngle: formData.get("crownAngle")
-      ? Number(formData.get("crownAngle"))
-      : null,
-    tablePct: formData.get("tablePct")
-      ? Number(formData.get("tablePct"))
-      : null,
     plannedFacets: formData.get("plannedFacets")
       ? Number(formData.get("plannedFacets"))
       : null,
@@ -175,18 +166,16 @@ export async function updateGem(
       : null,
     cutPlanNotes: (formData.get("cutPlanNotes") as string) || null,
     cuttingDesign: (formData.get("cuttingDesign") as string) || null,
-    pavilionAngle: formData.get("pavilionAngle")
-      ? Number(formData.get("pavilionAngle"))
-      : null,
-    crownAngle: formData.get("crownAngle")
-      ? Number(formData.get("crownAngle"))
-      : null,
-    tablePct: formData.get("tablePct")
-      ? Number(formData.get("tablePct"))
-      : null,
     plannedFacets: formData.get("plannedFacets")
       ? Number(formData.get("plannedFacets"))
       : null,
+    consigneeName: (formData.get("consigneeName") as string) || null,
+    consigneeContact: (formData.get("consigneeContact") as string) || null,
+    consignmentTargetPrice: formData.get("consignmentTargetPrice")
+      ? Number(formData.get("consignmentTargetPrice"))
+      : null,
+    consignmentDate: (formData.get("consignmentDate") as string) || null,
+    consignmentReturnDate: (formData.get("consignmentReturnDate") as string) || null,
   };
 
   try {
@@ -332,9 +321,6 @@ export async function updateGemCutPlan(
         roughWeightCarats,
         cutPlanNotes,
         cuttingDesign: gem.cuttingDesign ?? null,
-        pavilionAngle: gem.pavilionAngle ?? null,
-        crownAngle: gem.crownAngle ?? null,
-        tablePct: gem.tablePct ?? null,
         plannedFacets: gem.plannedFacets ?? null,
       }),
       cache: "no-store",
@@ -349,14 +335,10 @@ export async function updateGemCutPlan(
   }
 }
 
-export async function updateGemFacetingSpecs(
+export async function updateGemCuttingDesign(
   gemId: string,
   specs: {
     cuttingDesign: string | null;
-    pavilionAngle: number | null;
-    crownAngle: number | null;
-    tablePct: number | null;
-    plannedFacets: number | null;
   }
 ): Promise<{ error: string | null }> {
   try {
@@ -394,6 +376,66 @@ export async function updateGemFacetingSpecs(
         roughWeightCarats: gem.roughWeightCarats ?? null,
         cutPlanNotes: gem.cutPlanNotes ?? null,
         ...specs,
+      }),
+      cache: "no-store",
+    });
+    if (!putRes.ok) {
+      const text = await putRes.text().catch(() => "");
+      throw new ApiError(putRes.status, text);
+    }
+    return { error: null };
+  } catch (e) {
+    return { error: parseApiError(e) };
+  }
+}
+
+export async function updateConsignmentInfo(
+  gemId: string,
+  data: {
+    consigneeName: string | null;
+    consigneeContact: string | null;
+    consignmentTargetPrice: number | null;
+    consignmentDate: string | null;
+    consignmentReturnDate: string | null;
+  }
+): Promise<{ error: string | null }> {
+  try {
+    const hdr: Record<string, string> = { ...(await authHeader()) };
+    const getRes = await fetch(`${baseUrl()}/api/v1/gems/${gemId}`, {
+      headers: hdr,
+      cache: "no-store",
+    });
+    if (!getRes.ok) return { error: "Could not load gem data." };
+    const gem = await getRes.json() as Record<string, unknown>;
+
+    const putRes = await fetch(`${baseUrl()}/api/v1/gems/${gemId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", ...hdr },
+      body: JSON.stringify({
+        name: gem.name,
+        species: gem.species ?? null,
+        variety: gem.variety ?? null,
+        weightCarats: gem.weightCarats ?? null,
+        color: gem.color ?? null,
+        clarity: gem.clarity ?? null,
+        cut: gem.cut ?? null,
+        treatment: gem.treatment ?? null,
+        shape: gem.shape ?? null,
+        lengthMm: gem.lengthMm ?? null,
+        widthMm: gem.widthMm ?? null,
+        heightMm: gem.heightMm ?? null,
+        purchasePrice: gem.purchasePrice ?? null,
+        acquiredAt: gem.acquiredAt ?? null,
+        notes: gem.notes ?? null,
+        isPublic: gem.isPublic ?? false,
+        originId: gem.originId ?? null,
+        attributes: gem.attributes ?? null,
+        status: gem.status ?? "Available",
+        roughWeightCarats: gem.roughWeightCarats ?? null,
+        cutPlanNotes: gem.cutPlanNotes ?? null,
+        cuttingDesign: gem.cuttingDesign ?? null,
+        plannedFacets: gem.plannedFacets ?? null,
+        ...data,
       }),
       cache: "no-store",
     });

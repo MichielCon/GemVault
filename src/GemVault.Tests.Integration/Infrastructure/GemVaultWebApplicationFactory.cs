@@ -94,6 +94,9 @@ public class GemVaultWebApplicationFactory : WebApplicationFactory<Program>
             storageMock
                 .Setup(s => s.ExistsAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
+            storageMock
+                .Setup(s => s.DownloadAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((byte[]?)null);
 
             services.AddScoped<IStorageService>(_ => storageMock.Object);
         });

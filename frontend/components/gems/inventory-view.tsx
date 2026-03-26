@@ -19,12 +19,34 @@ type Status = (typeof STATUS_OPTIONS)[number];
 
 const GEM_STATUS_OPTIONS = [
   { value: "All", label: "All" },
+  { value: "Rough", label: "Rough" },
+  { value: "Cutting", label: "Cutting" },
   { value: "Available", label: "Available" },
   { value: "Reserved", label: "Reserved" },
   { value: "OnConsignment", label: "Consignment" },
   { value: "InRepair", label: "In Repair" },
   { value: "Lost", label: "Lost" },
 ] as const;
+
+const GEM_STATUS_STYLES: Record<string, string> = {
+  Available: "bg-green-100 text-green-700",
+  Reserved: "bg-yellow-100 text-yellow-700",
+  OnConsignment: "bg-blue-100 text-blue-700",
+  InRepair: "bg-orange-100 text-orange-700",
+  Lost: "bg-red-100 text-red-700",
+  Rough: "bg-stone-100 text-stone-600",
+  Cutting: "bg-sky-100 text-sky-700",
+};
+
+const GEM_STATUS_LABELS: Record<string, string> = {
+  Available: "Available",
+  Reserved: "Reserved",
+  OnConsignment: "On Consignment",
+  InRepair: "In Repair",
+  Lost: "Lost",
+  Rough: "Rough",
+  Cutting: "Cutting",
+};
 
 interface Props {
   result: PagedResult<GemSummaryDto>;
@@ -516,7 +538,7 @@ export function GemInventoryView({
       )}
 
       {/* Content */}
-      <div className="flex-1 min-h-0 overflow-hidden">
+      <div className="flex-1 min-h-0 overflow-y-auto">
         {result.items.length === 0 ? (
           <EmptyState search={search} />
         ) : view === "grid" ? (
@@ -616,6 +638,11 @@ function GemCard({ gem, isSelected, onToggle }: { gem: GemSummaryDto; isSelected
             {gem.isSold && (
               <Badge className="text-[10px] px-1.5 py-0 bg-amber-500 text-white border-0 shadow-sm">Sold</Badge>
             )}
+            {!gem.isSold && GEM_STATUS_LABELS[gem.status] && gem.status !== "Available" && (
+              <Badge className={`text-[10px] px-1.5 py-0 border-0 shadow-sm ${GEM_STATUS_STYLES[gem.status] ?? "bg-zinc-100 text-zinc-600"}`}>
+                {GEM_STATUS_LABELS[gem.status]}
+              </Badge>
+            )}
             {gem.isPublic && (
               <Badge className="text-[10px] px-1.5 py-0 bg-white/90 text-zinc-700 border-0 shadow-sm">Public</Badge>
             )}
@@ -624,9 +651,18 @@ function GemCard({ gem, isSelected, onToggle }: { gem: GemSummaryDto; isSelected
         <div className="flex flex-col gap-0.5 p-2.5">
           <p className="truncate text-sm font-medium leading-snug">{gem.name}</p>
           <p className="truncate text-[11px] text-muted-foreground">{subtitle}</p>
-          {gem.weightCarats && (
-            <p className="text-[11px] font-medium text-muted-foreground">{gem.weightCarats} ct</p>
-          )}
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {gem.weightCarats != null ? (
+              <p className="text-[11px] font-medium text-muted-foreground">{gem.weightCarats} ct</p>
+            ) : gem.roughWeightCarats != null ? (
+              <p className="text-[11px] font-medium text-stone-500">{gem.roughWeightCarats} ct <span className="text-stone-400">(rough)</span></p>
+            ) : null}
+            {gem.currentCuttingStage && (
+              <span className="text-[10px] font-medium text-sky-600 bg-sky-50 px-1.5 py-0.5 rounded-full leading-none">
+                {gem.currentCuttingStage}
+              </span>
+            )}
+          </div>
         </div>
       </MagicCard>
     </Link>
@@ -697,17 +733,30 @@ function GemRow({ gem, isSelected, onToggle }: { gem: GemSummaryDto; isSelected:
       <td className="px-4 py-2.5 text-muted-foreground hidden sm:table-cell">{speciesLabel}</td>
       <td className="px-4 py-2.5 text-muted-foreground hidden md:table-cell">{gem.color ?? "—"}</td>
       <td className="px-4 py-2.5 text-muted-foreground">
-        {gem.weightCarats ? `${gem.weightCarats} ct` : "—"}
+        {gem.weightCarats != null ? (
+          `${gem.weightCarats} ct`
+        ) : gem.roughWeightCarats != null ? (
+          <span className="text-stone-500">{gem.roughWeightCarats} ct <span className="text-stone-400 text-[10px]">(rough)</span></span>
+        ) : "—"}
       </td>
       <td className="px-4 py-2.5 text-muted-foreground hidden lg:table-cell">
         {new Date(gem.createdAt).toLocaleDateString()}
       </td>
       <td className="px-4 py-2.5">
-        {gem.isSold ? (
-          <Badge className="text-[10px] px-1.5 py-0 bg-amber-500 text-white border-0">Sold</Badge>
-        ) : gem.isPublic ? (
-          <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Public</Badge>
-        ) : null}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {gem.isSold ? (
+            <Badge className="text-[10px] px-1.5 py-0 bg-amber-500 text-white border-0">Sold</Badge>
+          ) : (
+            <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium ${GEM_STATUS_STYLES[gem.status] ?? "bg-zinc-100 text-zinc-600"}`}>
+              {GEM_STATUS_LABELS[gem.status] ?? gem.status}
+            </span>
+          )}
+          {gem.currentCuttingStage && (
+            <span className="text-[10px] font-medium text-sky-600 bg-sky-50 px-1.5 py-0.5 rounded-full leading-none">
+              {gem.currentCuttingStage}
+            </span>
+          )}
+        </div>
       </td>
     </tr>
   );

@@ -24,6 +24,8 @@ public class GetPublicRecordQueryHandler(
                 .ThenInclude(g => g!.Origin)
             .Include(t => t.Gem)
                 .ThenInclude(g => g!.Photos)
+            .Include(t => t.Gem)
+                .ThenInclude(g => g!.Certificates)
             .Include(t => t.GemParcel)
                 .ThenInclude(p => p!.Origin)
             .Include(t => t.GemParcel)
@@ -75,10 +77,17 @@ public class GetPublicRecordQueryHandler(
         gem.Notes,
         gem.Origin?.Country,
         gem.Origin?.Locality,
+        gem.LengthMm,
+        gem.WidthMm,
+        gem.HeightMm,
         gem.CreatedAt,
         gem.Photos
             .Where(p => !p.IsDeleted)
             .Select(p => new PublicPhotoDto(p.Id, storage.GetPublicUrl(p.ObjectKey), p.IsCover))
+            .ToList(),
+        gem.Certificates
+            .Where(c => !c.IsDeleted)
+            .Select(c => new PublicCertificateDto(c.CertNumber, c.Lab, c.Grade, c.IssueDate.HasValue ? DateOnly.FromDateTime(c.IssueDate.Value) : null))
             .ToList(),
         scanCount);
 
@@ -99,10 +108,14 @@ public class GetPublicRecordQueryHandler(
         parcel.Notes,
         parcel.Origin?.Country,
         parcel.Origin?.Locality,
+        null,
+        null,
+        null,
         parcel.CreatedAt,
         parcel.Photos
             .Where(p => !p.IsDeleted)
             .Select(p => new PublicPhotoDto(p.Id, storage.GetPublicUrl(p.ObjectKey), p.IsCover))
             .ToList(),
+        [],
         scanCount);
 }

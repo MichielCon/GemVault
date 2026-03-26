@@ -3,8 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import type { PagedResult, AdminPhotoDto, AdminCertificateDto } from "@/lib/types";
-import { adminDeletePhoto, adminDeleteCertificate } from "@/lib/admin-actions";
+import type { PagedResult, AdminPhotoDto, AdminCertificateDto, AdminDesignFileDto } from "@/lib/types";
+import { adminDeletePhoto, adminDeleteCertificate, adminDeleteDesignFile } from "@/lib/admin-actions";
 import { proxyPhotoUrl } from "@/lib/utils";
 
 interface Props {
@@ -13,6 +13,7 @@ interface Props {
   search: string;
   photos: PagedResult<AdminPhotoDto> | null;
   certificates: PagedResult<AdminCertificateDto> | null;
+  designFiles: PagedResult<AdminDesignFileDto> | null;
 }
 
 function formatBytes(bytes: number): string {
@@ -158,7 +159,82 @@ function CertRow({ cert }: { cert: AdminCertificateDto }) {
   );
 }
 
-export default function ContentTable({ tab, page, search, photos, certificates }: Props) {
+const FILE_TYPE_LABELS: Record<string, string> = {
+  ".jpg": "Image", ".jpeg": "Image", ".png": "Image", ".webp": "Image", ".gif": "Image",
+  ".pdf": "PDF",
+  ".gem": "GemCutStudio", ".gcs": "GemCutStudio",
+  ".asc": "GemCAD",
+};
+
+function fileExt(name: string) {
+  return name.slice(name.lastIndexOf(".")).toLowerCase();
+}
+
+function DesignFileRow({ file }: { file: AdminDesignFileDto }) {
+  const router = useRouter();
+  const [state, action] = useActionState(adminDeleteDesignFile, { error: null });
+  const prevRef = useRef(state);
+  const [confirming, setConfirming] = useState(false);
+
+  useEffect(() => {
+    if (prevRef.current !== state && state.error === null) router.refresh();
+    prevRef.current = state;
+  }, [state, router]);
+
+  const ext = fileExt(file.fileName);
+  const typeLabel = FILE_TYPE_LABELS[ext] ?? ext.replace(".", "").toUpperCase();
+
+  return (
+    <tr className="border-b border-slate-50 last:border-0 hover:bg-slate-50">
+      <td className="px-4 py-3 text-sm font-medium text-slate-700">
+        <div className="truncate max-w-[200px]" title={file.fileName}>{file.fileName}</div>
+        <div className="text-xs text-slate-400">{formatBytes(file.fileSize)}</div>
+      </td>
+      <td className="px-4 py-3">
+        <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">
+          {typeLabel}
+        </span>
+      </td>
+      <td className="px-4 py-3 text-sm text-slate-600">{file.gemName}</td>
+      <td className="px-4 py-3 text-sm text-slate-500">{file.ownerEmail}</td>
+      <td className="px-4 py-3 text-sm text-slate-400">{new Date(file.createdAt).toLocaleDateString()}</td>
+      <td className="px-4 py-3">
+        <div className="flex items-center gap-2">
+          {file.fileUrl && (
+            <a
+              href={file.fileUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-200"
+            >
+              View
+            </a>
+          )}
+          {confirming ? (
+            <div className="flex items-center gap-1">
+              <form action={action} onSubmit={() => setConfirming(false)}>
+                <input type="hidden" name="fileId" value={file.id} />
+                <button type="submit" className="rounded bg-red-600 px-2 py-1 text-xs font-medium text-white hover:bg-red-700">
+                  Confirm
+                </button>
+              </form>
+              <button onClick={() => setConfirming(false)} className="rounded bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-200">
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button onClick={() => setConfirming(true)} className="rounded bg-red-100 px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-200">
+              Delete
+            </button>
+          )}
+        </div>
+        {state.error && <p className="mt-1 text-xs text-red-500">{state.error}</p>}
+      </td>
+    </tr>
+  );
+}
+
+export default function ContentTable({ tab, page, search, photos, certificates, designFiles }: Props) {
   const router = useRouter();
 
   function setTab(t: string) {
@@ -174,13 +250,13 @@ export default function ContentTable({ tab, page, search, photos, certificates }
     router.push(`/dashboard/admin/content?${params.toString()}`);
   }
 
-  const result = tab === "photos" ? photos : certificates;
+  const result = tab === "photos" ? photos : tab === "certificates" ? certificates : designFiles;
 
   return (
     <div className="space-y-4">
       {/* Tabs */}
       <div className="flex gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1 w-fit">
-        {(["photos", "certificates"] as const).map((t) => (
+        {(["photos", "certificates", "design-files"] as const).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -192,7 +268,9 @@ export default function ContentTable({ tab, page, search, photos, certificates }
           >
             {t === "photos"
               ? `Photos${photos ? ` (${photos.totalCount})` : ""}`
-              : `Certificates${certificates ? ` (${certificates.totalCount})` : ""}`}
+              : t === "certificates"
+              ? `Certificates${certificates ? ` (${certificates.totalCount})` : ""}`
+              : `Design Files${designFiles ? ` (${designFiles.totalCount})` : ""}`}
           </button>
         ))}
       </div>
@@ -272,6 +350,36 @@ export default function ContentTable({ tab, page, search, photos, certificates }
                 <tr>
                   <td colSpan={7} className="px-4 py-8 text-center text-slate-400">
                     {search ? `No certificates found for "${search}".` : "No certificates found."}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Design Files table */}
+      {tab === "design-files" && designFiles && (
+        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-slate-100 text-left text-xs font-medium uppercase tracking-wide text-slate-400">
+                <th className="px-4 py-3">File</th>
+                <th className="px-4 py-3">Type</th>
+                <th className="px-4 py-3">Gem</th>
+                <th className="px-4 py-3">Owner</th>
+                <th className="px-4 py-3">Uploaded</th>
+                <th className="px-4 py-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {designFiles.items.map((f) => (
+                <DesignFileRow key={f.id} file={f} />
+              ))}
+              {designFiles.items.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-4 py-8 text-center text-slate-400">
+                    {search ? `No design files found for "${search}".` : "No design files found."}
                   </td>
                 </tr>
               )}

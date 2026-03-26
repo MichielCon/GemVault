@@ -2,12 +2,12 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Scissors, Plus, Trash2, ChevronDown, ChevronUp } from "lucide-react";
+import { Scissors, Plus, Trash2, ChevronDown, ChevronUp, Pencil, X, Check } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { addCuttingSession, deleteCuttingSession } from "@/lib/cutting-session-actions";
+import { addCuttingSession, updateCuttingSession, deleteCuttingSession } from "@/lib/cutting-session-actions";
 import type { GemDto, CuttingSessionDto } from "@/lib/types";
 
 const STAGES = ["Rough", "Preforming", "Pavilion", "Crown", "Polishing", "Complete"] as const;
@@ -42,11 +42,11 @@ export function CuttingJournalCard({ gem }: Props) {
   const [formError, setFormError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const totalHours = sessions.reduce((sum, s) => sum + (s.hoursSpent ?? 0), 0);
   const latestStage = sessions.length > 0 ? (sessions[0].stage as Stage) : null;
 
-  // Derive which stages are "done" — completed if there's any session at or beyond that stage
   const stageOrder = STAGES.indexOf.bind(STAGES);
   const latestIdx = latestStage ? stageOrder(latestStage) : -1;
 
@@ -227,14 +227,33 @@ export function CuttingJournalCard({ gem }: Props) {
             <p className="text-sm text-zinc-400">No sessions logged yet.</p>
           ) : (
             <div className="flex flex-col divide-y divide-zinc-100">
-              {sessions.map((s) => (
-                <SessionRow
-                  key={s.id}
-                  session={s}
-                  deleting={deletingId === s.id}
-                  onDelete={() => handleDelete(s.id)}
-                />
-              ))}
+              {sessions.map((s) =>
+                editingId === s.id ? (
+                  <EditSessionRow
+                    key={s.id}
+                    session={s}
+                    onSave={(date, stage, hours, notes) => {
+                      startTransition(async () => {
+                        const result = await updateCuttingSession(s.id, date, stage, hours, notes);
+                        if (!result.error) {
+                          setEditingId(null);
+                          router.refresh();
+                        }
+                      });
+                    }}
+                    onCancel={() => setEditingId(null)}
+                    saving={isPending}
+                  />
+                ) : (
+                  <SessionRow
+                    key={s.id}
+                    session={s}
+                    deleting={deletingId === s.id}
+                    onDelete={() => handleDelete(s.id)}
+                    onEdit={() => setEditingId(s.id)}
+                  />
+                )
+              )}
             </div>
           )}
         </CardContent>
@@ -247,10 +266,12 @@ function SessionRow({
   session,
   deleting,
   onDelete,
+  onEdit,
 }: {
   session: CuttingSessionDto;
   deleting: boolean;
   onDelete: () => void;
+  onEdit: () => void;
 }) {
   const stageName = session.stage as Stage;
   const stageColor = STAGE_COLORS[stageName] ?? "bg-zinc-100 text-zinc-600";
@@ -273,14 +294,97 @@ function SessionRow({
           <p className="mt-1 text-xs text-zinc-500 leading-relaxed line-clamp-2">{session.notes}</p>
         )}
       </div>
-      <button
-        onClick={onDelete}
-        disabled={deleting}
-        className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded text-zinc-300 hover:text-red-500 hover:bg-red-50 disabled:opacity-50"
-        title="Delete session"
-      >
-        <Trash2 size={13} />
-      </button>
+      <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+        <button
+          onClick={onEdit}
+          className="p-1 rounded text-zinc-300 hover:text-violet-500 hover:bg-violet-50"
+          title="Edit session"
+        >
+          <Pencil size={13} />
+        </button>
+        <button
+          onClick={onDelete}
+          disabled={deleting}
+          className="p-1 rounded text-zinc-300 hover:text-red-500 hover:bg-red-50 disabled:opacity-50"
+          title="Delete session"
+        >
+          <Trash2 size={13} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function EditSessionRow({
+  session,
+  onSave,
+  onCancel,
+  saving,
+}: {
+  session: CuttingSessionDto;
+  onSave: (date: string, stage: string, hours: number | null, notes: string | null) => void;
+  onCancel: () => void;
+  saving: boolean;
+}) {
+  const [date, setDate] = useState(new Date(session.sessionDate).toISOString().split("T")[0]);
+  const [stage, setStage] = useState<Stage>((session.stage as Stage) ?? "Preforming");
+  const [hours, setHours] = useState(session.hoursSpent != null ? String(session.hoursSpent) : "");
+  const [notes, setNotes] = useState(session.notes ?? "");
+
+  return (
+    <div className="py-2.5 flex flex-col gap-2">
+      <div className="grid grid-cols-2 gap-2">
+        <Input
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          className="h-7 text-xs"
+        />
+        <select
+          value={stage}
+          onChange={(e) => setStage(e.target.value as Stage)}
+          className="flex h-7 w-full rounded-md border border-input bg-transparent px-2 py-0.5 text-xs shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/20"
+        >
+          {STAGES.map((s) => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
+      </div>
+      <Input
+        type="number"
+        min="0.25"
+        step="0.25"
+        placeholder="Hours"
+        value={hours}
+        onChange={(e) => setHours(e.target.value)}
+        className="h-7 text-xs max-w-[120px]"
+      />
+      <textarea
+        rows={2}
+        placeholder="Notes…"
+        value={notes}
+        onChange={(e) => setNotes(e.target.value)}
+        maxLength={2000}
+        className="flex w-full rounded-md border border-input bg-white px-2 py-1.5 text-xs shadow-sm placeholder:text-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/30 resize-none"
+      />
+      <div className="flex gap-1.5">
+        <button
+          onClick={() => onSave(date, stage, hours ? Number(hours) : null, notes || null)}
+          disabled={saving || !date}
+          className="flex items-center gap-1 rounded px-2 py-1 text-xs font-medium bg-violet-600 text-white hover:bg-violet-700 disabled:opacity-50"
+        >
+          <Check size={11} />
+          Save
+        </button>
+        <button
+          onClick={onCancel}
+          disabled={saving}
+          className="flex items-center gap-1 rounded px-2 py-1 text-xs font-medium border border-zinc-200 text-zinc-600 hover:bg-zinc-50"
+        >
+          <X size={11} />
+          Cancel
+        </button>
+      </div>
     </div>
   );
 }

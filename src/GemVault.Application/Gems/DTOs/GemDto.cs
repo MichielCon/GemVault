@@ -1,5 +1,6 @@
 using GemVault.Application.Certificates;
 using GemVault.Application.CuttingSessions;
+using GemVault.Application.DesignFiles;
 using GemVault.Domain.Enums;
 
 namespace GemVault.Application.Gems.DTOs;
@@ -49,11 +50,14 @@ public record GemDto(
     decimal? RoughWeightCarats,
     string? CutPlanNotes,
     string? CuttingDesign,
-    decimal? PavilionAngle,
-    decimal? CrownAngle,
-    decimal? TablePct,
     int? PlannedFacets,
-    IReadOnlyList<CuttingSessionDto> CuttingSessions);
+    IReadOnlyList<CuttingSessionDto> CuttingSessions,
+    IReadOnlyList<DesignFileDto> DesignFiles,
+    string? ConsigneeName,
+    string? ConsigneeContact,
+    decimal? ConsignmentTargetPrice,
+    DateOnly? ConsignmentDate,
+    DateOnly? ConsignmentReturnDate);
 
 public record GemSummaryDto(
     Guid Id,
@@ -61,9 +65,12 @@ public record GemSummaryDto(
     string? Species,
     string? Variety,
     decimal? WeightCarats,
+    decimal? RoughWeightCarats,
     string? Color,
     bool IsPublic,
     string? CoverPhotoUrl,
     DateTime CreatedAt,
     bool IsSold,
-    GemStatus Status);
+    GemStatus Status,
+    string? CurrentCuttingStage,
+    decimal? TotalCuttingHours);

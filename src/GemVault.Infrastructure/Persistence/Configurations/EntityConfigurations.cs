@@ -21,9 +21,6 @@ public class GemConfiguration : IEntityTypeConfiguration<Gem>
         builder.Property(g => g.Shape).HasMaxLength(100);
         builder.Property(g => g.WeightCarats).HasPrecision(10, 4);
         builder.Property(g => g.PurchasePrice).HasPrecision(18, 2);
-        builder.Property(g => g.PavilionAngle).HasPrecision(5, 2);
-        builder.Property(g => g.CrownAngle).HasPrecision(5, 2);
-        builder.Property(g => g.TablePct).HasPrecision(5, 2);
         builder.Property(g => g.CuttingDesign).HasMaxLength(200);
         builder.Property(g => g.AcquiredAt);
         builder.Property(g => g.LengthMm).HasPrecision(8, 2);
@@ -235,6 +232,24 @@ public class SaleItemConfiguration : IEntityTypeConfiguration<SaleItem>
             .WithMany(g => g.SaleItems)
             .HasForeignKey(i => i.GemParcelId)
             .OnDelete(DeleteBehavior.SetNull);
+    }
+}
+
+public class GemDesignFileConfiguration : IEntityTypeConfiguration<GemDesignFile>
+{
+    public void Configure(EntityTypeBuilder<GemDesignFile> builder)
+    {
+        builder.HasQueryFilter(f => !f.IsDeleted);
+        builder.Property(f => f.FileName).IsRequired().HasMaxLength(500);
+        builder.Property(f => f.ObjectKey).IsRequired().HasMaxLength(500);
+        builder.Property(f => f.ContentType).HasMaxLength(200);
+
+        builder.HasOne(f => f.Gem)
+            .WithMany(g => g.DesignFiles)
+            .HasForeignKey(f => f.GemId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasIndex(f => f.GemId);
     }
 }
 

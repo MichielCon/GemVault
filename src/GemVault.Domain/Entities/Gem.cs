@@ -31,11 +31,15 @@ public class Gem : BaseEntity, IGemRecord
     public decimal? RoughWeightCarats { get; set; }
     public string? CutPlanNotes { get; set; }
 
-    // Faceting specifications
+    // Consignment tracking — populated when Status = OnConsignment
+    public string? ConsigneeName { get; set; }
+    public string? ConsigneeContact { get; set; }
+    public decimal? ConsignmentTargetPrice { get; set; }
+    public DateOnly? ConsignmentDate { get; set; }
+    public DateOnly? ConsignmentReturnDate { get; set; }
+
+    // Cutting design reference
     public string? CuttingDesign { get; set; }
-    public decimal? PavilionAngle { get; set; }
-    public decimal? CrownAngle { get; set; }
-    public decimal? TablePct { get; set; }
     public int? PlannedFacets { get; set; }
 
     public Origin? Origin { get; set; }
@@ -43,6 +47,7 @@ public class Gem : BaseEntity, IGemRecord
     public ICollection<GemPhoto> Photos { get; set; } = new List<GemPhoto>();
     public PublicToken? PublicToken { get; set; }
     public ICollection<Certificate> Certificates { get; set; } = new List<Certificate>();
+    public ICollection<GemDesignFile> DesignFiles { get; set; } = new List<GemDesignFile>();
     public ICollection<GemCuttingSession> CuttingSessions { get; set; } = new List<GemCuttingSession>();
     public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     public ICollection<SaleItem> SaleItems { get; set; } = new List<SaleItem>();

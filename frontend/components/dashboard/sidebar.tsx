@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { logout, getSessionRole } from "@/lib/auth";
-import { Gem, Package, MapPin, Map, LogOut, Building2, ShoppingCart, TrendingUp, LayoutDashboard, BookOpen, Users, KeyRound, Link2, Image as ImageIcon, UserCircle } from "lucide-react";
+import { Gem, Package, MapPin, Map, LogOut, Building2, ShoppingCart, TrendingUp, LayoutDashboard, BookOpen, Users, KeyRound, Link2, Image as ImageIcon, UserCircle, Scissors } from "lucide-react";
 import { NavLink } from "@/components/dashboard/nav-link";
 
 export default async function Sidebar() {
@@ -30,6 +30,9 @@ export default async function Sidebar() {
         </NavLink>
         <NavLink href="/dashboard/parcels" icon={<Package size={15} />}>
           Parcels
+        </NavLink>
+        <NavLink href="/dashboard/cutting" icon={<Scissors size={15} />}>
+          Workbench
         </NavLink>
         <NavLink href="/dashboard/origins" icon={<MapPin size={15} />}>
           Origins

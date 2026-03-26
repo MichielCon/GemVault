@@ -34,10 +34,12 @@ public record UpdateGemCommand(
     decimal? RoughWeightCarats = null,
     string? CutPlanNotes = null,
     string? CuttingDesign = null,
-    decimal? PavilionAngle = null,
-    decimal? CrownAngle = null,
-    decimal? TablePct = null,
-    int? PlannedFacets = null) : IRequest<GemDto>;
+    int? PlannedFacets = null,
+    string? ConsigneeName = null,
+    string? ConsigneeContact = null,
+    decimal? ConsignmentTargetPrice = null,
+    DateOnly? ConsignmentDate = null,
+    DateOnly? ConsignmentReturnDate = null) : IRequest<GemDto>;
 
 public class UpdateGemCommandValidator : AbstractValidator<UpdateGemCommand>
 {
@@ -53,9 +55,6 @@ public class UpdateGemCommandValidator : AbstractValidator<UpdateGemCommand>
             .When(x => x.Attributes is not null);
         RuleFor(x => x.RoughWeightCarats).GreaterThan(0).When(x => x.RoughWeightCarats.HasValue);
         RuleFor(x => x.CutPlanNotes).MaximumLength(2000).When(x => x.CutPlanNotes != null);
-        RuleFor(x => x.PavilionAngle).InclusiveBetween(0, 90).When(x => x.PavilionAngle.HasValue);
-        RuleFor(x => x.CrownAngle).InclusiveBetween(0, 90).When(x => x.CrownAngle.HasValue);
-        RuleFor(x => x.TablePct).InclusiveBetween(0, 100).When(x => x.TablePct.HasValue);
         RuleFor(x => x.PlannedFacets).GreaterThan(0).When(x => x.PlannedFacets.HasValue);
         RuleFor(x => x.CuttingDesign).MaximumLength(200).When(x => x.CuttingDesign != null);
     }
@@ -109,10 +108,12 @@ public class UpdateGemCommandHandler(
         gem.RoughWeightCarats = request.RoughWeightCarats;
         gem.CutPlanNotes = request.CutPlanNotes;
         gem.CuttingDesign = request.CuttingDesign;
-        gem.PavilionAngle = request.PavilionAngle;
-        gem.CrownAngle = request.CrownAngle;
-        gem.TablePct = request.TablePct;
         gem.PlannedFacets = request.PlannedFacets;
+        gem.ConsigneeName = request.ConsigneeName;
+        gem.ConsigneeContact = request.ConsigneeContact;
+        gem.ConsignmentTargetPrice = request.ConsignmentTargetPrice;
+        gem.ConsignmentDate = request.ConsignmentDate;
+        gem.ConsignmentReturnDate = request.ConsignmentReturnDate;
 
         // Manage public token
         if (request.IsPublic)

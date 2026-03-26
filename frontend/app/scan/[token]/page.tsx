@@ -1,7 +1,10 @@
-import Image from "next/image";
 import { publicApi, ApiError } from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
-import { Lock, Gem, ImageOff, MapPin, Weight, Palette, Sparkles } from "lucide-react";
+import {
+  Lock, Gem, MapPin, Weight, Palette, Sparkles,
+  Award, AlertTriangle,
+} from "lucide-react";
+import { ScanPhotoGallery } from "@/components/scan/scan-photo-gallery";
 import type { PublicGemDto } from "@/lib/types";
 
 interface Props {
@@ -23,9 +26,6 @@ export default async function PublicScanPage({ params }: Props) {
     throw e;
   }
 
-  const coverPhoto = gem.photos.find((p) => p.isCover) ?? gem.photos[0];
-  const otherPhotos = gem.photos.filter((p) => p !== coverPhoto);
-
   const origin = [gem.originLocality, gem.originCountry].filter(Boolean).join(", ");
 
   const weight =
@@ -39,116 +39,147 @@ export default async function PublicScanPage({ params }: Props) {
 
   const speciesLine = [gem.species, gem.variety].filter(Boolean).join(" — ");
 
+  const dimensions =
+    gem.lengthMm && gem.widthMm
+      ? `${gem.lengthMm} × ${gem.widthMm}${gem.heightMm ? ` × ${gem.heightMm}` : ""} mm`
+      : null;
+
+  const hasTreatment = gem.treatment && gem.treatment !== "None";
+
   return (
     <div className="min-h-screen bg-zinc-50">
-      {/* Hero photo — full-width, no padding */}
-      <div className="relative w-full aspect-[4/3] bg-zinc-900 max-h-[60vw] sm:max-h-80">
-        {coverPhoto ? (
-          <Image
-            src={coverPhoto.url}
-            alt={gem.name}
-            fill
-            unoptimized
-            className="object-cover"
-            priority
-            sizes="100vw"
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center gap-2 text-zinc-600">
-            <ImageOff size={32} />
-            <span className="text-sm">No photo</span>
-          </div>
-        )}
+      {/* Header bar */}
+      <div className="flex items-center justify-between px-4 py-3 bg-white border-b border-zinc-100">
+        <div className="flex items-center gap-1.5">
+          <Gem size={16} className="text-violet-600" />
+          <span className="text-sm font-bold tracking-tight text-zinc-900">GemVault</span>
+        </div>
+        <span className="text-xs text-zinc-400 font-medium uppercase tracking-wider">Gem Authenticity Record</span>
+      </div>
 
-        {/* Badge overlay */}
-        <div className="absolute top-3 right-3">
+      {/* Photo gallery */}
+      <div className="relative">
+        <ScanPhotoGallery photos={gem.photos} gemName={gem.name} />
+        <div className="absolute top-3 right-3 z-10">
           <Badge
             variant="secondary"
-            className="bg-black/60 text-white border-0 backdrop-blur-sm text-xs px-2 py-0.5"
+            className="bg-black/50 text-white border-0 backdrop-blur-sm text-xs px-2 py-0.5"
           >
             {gem.recordType}
           </Badge>
         </div>
       </div>
 
-      {/* Thumbnail strip */}
-      {otherPhotos.length > 0 && (
-        <div className="flex gap-1.5 overflow-x-auto px-4 py-2 bg-white border-b border-zinc-100">
-          {otherPhotos.slice(0, 6).map((p) => (
-            <div key={p.id} className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-zinc-100">
-              <Image
-                src={p.url}
-                alt=""
-                fill
-                unoptimized
-                className="object-cover"
-                sizes="56px"
-              />
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Content — constrained and centred */}
-      <div className="mx-auto max-w-lg px-4 pb-10 pt-5">
+      {/* Content */}
+      <div className="mx-auto max-w-lg px-4 pb-12 pt-5 flex flex-col gap-4">
         {/* Name + species */}
-        <h1 className="text-2xl font-bold tracking-tight text-zinc-900 leading-tight">{gem.name}</h1>
-        {speciesLine && (
-          <p className="mt-0.5 text-base text-zinc-500">{speciesLine}</p>
-        )}
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 leading-tight">{gem.name}</h1>
+          {speciesLine && (
+            <p className="mt-0.5 text-base text-zinc-500">{speciesLine}</p>
+          )}
+        </div>
 
         {/* Key stat pills */}
-        <div className="mt-4 grid grid-cols-2 gap-2">
-          {origin && (
-            <StatCard icon={<MapPin size={14} />} label="Origin" value={origin} />
-          )}
-          {weight && (
-            <StatCard icon={<Weight size={14} />} label="Weight" value={weight} />
-          )}
-          {gem.color && (
-            <StatCard icon={<Palette size={14} />} label="Color" value={gem.color} />
-          )}
-          {gem.clarity && (
-            <StatCard icon={<Sparkles size={14} />} label="Clarity" value={gem.clarity} />
-          )}
+        <div className="grid grid-cols-2 gap-2">
+          {origin && <StatCard icon={<MapPin size={14} />} label="Origin" value={origin} />}
+          {weight && <StatCard icon={<Weight size={14} />} label="Weight" value={weight} />}
+          {gem.color && <StatCard icon={<Palette size={14} />} label="Color" value={gem.color} />}
+          {gem.clarity && <StatCard icon={<Sparkles size={14} />} label="Clarity" value={gem.clarity} />}
         </div>
 
-        {/* Properties detail */}
-        {(gem.cut || gem.shape || gem.treatment) && (
-          <div className="mt-4 rounded-xl border border-zinc-200 bg-white p-4">
-            <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-zinc-400">Details</h2>
-            <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
+        {/* Full properties */}
+        {(gem.cut || gem.shape || gem.treatment || dimensions) && (
+          <Section title="Properties">
+            <dl className="grid grid-cols-2 gap-x-6 gap-y-2.5 text-sm">
               <Prop label="Cut" value={gem.cut} />
               <Prop label="Shape" value={gem.shape} />
+              <Prop label="Dimensions" value={dimensions} />
               <Prop label="Treatment" value={gem.treatment} />
             </dl>
+          </Section>
+        )}
+
+        {/* Treatment disclosure */}
+        {hasTreatment && (
+          <div className="flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+            <AlertTriangle size={14} className="text-amber-600 shrink-0 mt-0.5" />
+            <p className="text-xs text-amber-700 leading-relaxed">
+              <span className="font-semibold">Treatment disclosure: </span>
+              This stone has been treated ({gem.treatment}). Treatment is standard practice for many gem types
+              and has been disclosed in accordance with trade standards.
+            </p>
           </div>
+        )}
+
+        {/* Certificates */}
+        {gem.certificates.length > 0 && (
+          <Section title="Laboratory Certificates" icon={<Award size={13} className="text-zinc-400" />}>
+            <div className="flex flex-col gap-2">
+              {gem.certificates.map((cert, i) => (
+                <div key={i} className="flex items-start gap-3 rounded-lg bg-zinc-50 border border-zinc-100 px-3 py-2.5">
+                  <Award size={14} className="text-violet-500 shrink-0 mt-0.5" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-zinc-900">
+                      {cert.lab ?? "Laboratory Certificate"}
+                      {cert.certNumber && (
+                        <span className="ml-1.5 text-xs font-normal text-zinc-500">#{cert.certNumber}</span>
+                      )}
+                    </p>
+                    <p className="text-xs text-zinc-500 mt-0.5">
+                      {[cert.grade, cert.issueDate ? new Date(cert.issueDate).toLocaleDateString() : null]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Section>
         )}
 
         {/* Notes */}
         {gem.notes && (
-          <div className="mt-4 rounded-xl border border-zinc-200 bg-white p-4">
-            <h2 className="mb-2 text-xs font-semibold uppercase tracking-widest text-zinc-400">Notes</h2>
+          <Section title="Notes">
             <p className="text-sm text-zinc-600 leading-relaxed">{gem.notes}</p>
-          </div>
+          </Section>
         )}
 
         {/* Footer */}
-        <div className="mt-8 flex flex-col items-center gap-1 text-center">
-          <div className="flex items-center gap-1.5 text-xs text-zinc-400">
-            <Gem size={12} />
-            <span className="font-semibold">GemVault</span>
+        <div className="mt-4 flex flex-col items-center gap-1.5 text-center border-t border-zinc-200 pt-6">
+          <div className="flex items-center gap-1.5">
+            <Gem size={14} className="text-violet-600" />
+            <span className="text-sm font-bold text-zinc-800">GemVault</span>
           </div>
-          <p className="text-[11px] text-zinc-400">
-            Authenticated gem record · {new Date(gem.createdAt).toLocaleDateString()}
+          <p className="text-xs text-zinc-500 max-w-xs leading-relaxed">
+            This record is maintained by the collection owner and authenticated via GemVault.
           </p>
-          {gem.scanCount > 0 && (
-            <p className="text-[11px] text-zinc-400/60">
-              Viewed {gem.scanCount} {gem.scanCount === 1 ? "time" : "times"}
-            </p>
-          )}
+          <p className="text-[11px] text-zinc-400 mt-1">
+            Added {new Date(gem.createdAt).toLocaleDateString()}
+            {gem.scanCount > 0 && ` · Scanned ${gem.scanCount} ${gem.scanCount === 1 ? "time" : "times"}`}
+          </p>
         </div>
       </div>
+    </div>
+  );
+}
+
+function Section({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-xl border border-zinc-200 bg-white p-4">
+      <h2 className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-zinc-400">
+        {icon}
+        {title}
+      </h2>
+      {children}
     </div>
   );
 }
@@ -159,7 +190,7 @@ function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string
       <div className="mt-0.5 shrink-0 text-zinc-400">{icon}</div>
       <div className="min-w-0">
         <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-400">{label}</p>
-        <p className="mt-0.5 text-sm font-semibold text-zinc-800 leading-snug truncate">{value}</p>
+        <p className="mt-0.5 text-sm font-semibold text-zinc-800 leading-snug break-words">{value}</p>
       </div>
     </div>
   );

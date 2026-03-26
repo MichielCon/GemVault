@@ -2,6 +2,9 @@ namespace GemVault.Application.Public.DTOs;
 
 public record PublicPhotoDto(Guid Id, string Url, bool IsCover);
 
+/// <summary>Public-safe certificate info — no file URLs, only issued details.</summary>
+public record PublicCertificateDto(string? CertNumber, string? Lab, string? Grade, DateOnly? IssueDate);
+
 /// <summary>
 /// Public-safe view of a gem or parcel. Never exposes PurchasePrice, OwnerId,
 /// supplier data, or any financial information.
@@ -23,6 +26,10 @@ public record PublicGemDto(
     string? Notes,
     string? OriginCountry,
     string? OriginLocality,
+    decimal? LengthMm,
+    decimal? WidthMm,
+    decimal? HeightMm,
     DateTime CreatedAt,
     List<PublicPhotoDto> Photos,
+    List<PublicCertificateDto> Certificates,
     int ScanCount);

@@ -22,6 +22,17 @@ export interface PagedResult<T> {
   hasPreviousPage: boolean;
 }
 
+// ─── Design Files ─────────────────────────────────────────────────────────────
+
+export interface DesignFileDto {
+  id: string;
+  fileName: string;
+  fileUrl: string;
+  contentType: string | null;
+  fileSize: number;
+  createdAt: string;
+}
+
 // ─── Cutting Sessions ─────────────────────────────────────────────────────────
 
 export interface CuttingSessionDto {
@@ -96,12 +107,15 @@ export interface GemDto {
   roughWeightCarats: number | null;
   cutPlanNotes: string | null;
   cuttingDesign: string | null;
-  pavilionAngle: number | null;
-  crownAngle: number | null;
-  tablePct: number | null;
   plannedFacets: number | null;
   cuttingSessions: CuttingSessionDto[];
+  designFiles: DesignFileDto[];
   originLocality: string | null;
+  consigneeName: string | null;
+  consigneeContact: string | null;
+  consignmentTargetPrice: number | null;
+  consignmentDate: string | null;
+  consignmentReturnDate: string | null;
 }
 
 export interface GemSummaryDto {
@@ -110,12 +124,15 @@ export interface GemSummaryDto {
   species: string | null;
   variety: string | null;
   weightCarats: number | null;
+  roughWeightCarats: number | null;
   color: string | null;
   status: string;
   isPublic: boolean;
   coverPhotoUrl: string | null;
   createdAt: string;
   isSold: boolean;
+  currentCuttingStage: string | null;
+  totalCuttingHours: number | null;
 }
 
 // ─── GemParcels ───────────────────────────────────────────────────────────────
@@ -439,6 +456,19 @@ export interface AdminCertificateDto {
   createdAt: string;
 }
 
+export interface AdminDesignFileDto {
+  id: string;
+  fileName: string;
+  fileUrl: string | null;
+  contentType: string | null;
+  fileSize: number;
+  gemId: string;
+  gemName: string;
+  ownerId: string;
+  ownerEmail: string;
+  createdAt: string;
+}
+
 // ─── Profile ──────────────────────────────────────────────────────────────────
 
 export interface ProfileDto {
@@ -466,6 +496,13 @@ export interface PublicPhotoDto {
   isCover: boolean;
 }
 
+export interface PublicCertificateDto {
+  certNumber: string | null;
+  lab: string | null;
+  grade: string | null;
+  issueDate: string | null;
+}
+
 export interface PublicGemDto {
   id: string;
   recordType: "Gem" | "Parcel";
@@ -483,7 +520,11 @@ export interface PublicGemDto {
   notes: string | null;
   originCountry: string | null;
   originLocality: string | null;
+  lengthMm: number | null;
+  widthMm: number | null;
+  heightMm: number | null;
   createdAt: string;
   scanCount: number;
   photos: PublicPhotoDto[];
+  certificates: PublicCertificateDto[];
 }

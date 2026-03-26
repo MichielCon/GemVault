@@ -28,6 +28,7 @@ public class GetGemByIdQueryHandler(
             .Include(g => g.SourceParcel)
             .Include(g => g.OrderItems)
             .Include(g => g.CuttingSessions)
+            .Include(g => g.DesignFiles)
             .FirstOrDefaultAsync(g => g.Id == request.GemId && !g.IsDeleted, ct)
             ?? throw new NotFoundException("Gem", request.GemId);
 
